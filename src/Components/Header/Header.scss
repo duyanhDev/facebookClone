@@ -1,0 +1,119 @@
+.Header {
+  .fb_logo {
+    color: var(--fb-logo);
+  }
+  .Input {
+    background-color: var(--web-site);
+    border-radius: 30px;
+
+    input {
+      width: 100%;
+      padding: 10px;
+      background: none;
+    }
+  }
+  .Tag {
+    height: 56px;
+    margin-top: -9px;
+    li {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding: 24px;
+      .text {
+        position: absolute;
+        top: 62px;
+        padding: 3px;
+        background: #333334;
+        border-radius: 5px;
+        display: none;
+        cursor: pointer;
+
+        span {
+          color: #fff;
+          font-size: 12px;
+        }
+      }
+      &:hover .text {
+        display: block;
+      }
+      &::after {
+        content: "";
+        position: absolute;
+        width: 90px;
+        height: 25px;
+        top: 39px;
+      }
+    }
+    .border-bt {
+      border-bottom: 5px solid var(--fb-logo);
+    }
+  }
+  .mess {
+    margin-top: -5px;
+    .border-icon {
+      border-radius: 50%;
+      padding: 10px;
+      background-color: var(--web-site);
+      .text {
+        position: absolute;
+        top: 62px;
+        padding: 5px;
+        background: #333334;
+        border-radius: 5px;
+        display: none;
+        cursor: pointer;
+        white-space: nowrap;
+        span {
+          color: #fff;
+          font-size: 12px;
+        }
+      }
+      &:hover .text {
+        display: block;
+      }
+      &::after {
+        content: "";
+        position: absolute;
+        width: 90px;
+        height: 25px;
+        top: 39px;
+      }
+    }
+  }
+
+  // respoinsive
+  @media (max-width: 800px) {
+    display: contents;
+
+    .Tag {
+      display: none;
+
+      justify-content: center;
+    }
+    .mess {
+      position: absolute;
+      right: 0;
+    }
+  }
+  @media only screen and (min-width: 801px) and (max-width: 1024px) {
+    /* Code cho màn hình vừa (Tablet) viết ở đây */
+    display: flex;
+    .Input {
+      width: 50px;
+      height: 50px;
+      background-color: var(--web-site);
+      border-radius: 30px;
+    }
+    .Input input {
+      display: none;
+    }
+    .Tag {
+      ul {
+        gap: 0;
+      }
+    }
+  }
+}

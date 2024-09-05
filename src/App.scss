@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --web-site: #f0f2f5;
+  --fb-logo: #0866ff;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  overflow-y: visible !important;
+  background-color: var(--web-site);
+  height: auto;
+  .App {
+    .Header-content {
+      background-color: #fff;
+      position: fixed;
+      right: 0;
+      left: 0;
+      z-index: 2;
+      position: fixed;
+      z-index: 99999;
+      width: 100%;
+      height: 56px;
+      top: 0px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .left {
+      width: 360px;
+      height: 100vh;
+    }
+    .right {
+      width: 360px;
+      height: 100vh;
+    }
+
+    .content {
+      width: 100%;
+      /* padding: 0; */
+      /* margin: 0; */
+      position: absolute;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 67px;
+    }
+  }
+  @media (max-width: 800px) {
+    .left {
+      display: none;
+    }
+    .right {
+      display: none;
+    }
+  }
+  @media only screen and (min-width: 801px) and (max-width: 1024px) {
+    .left {
+      display: none;
+    }
+    .right {
+      display: none;
+    }
+  }
+}

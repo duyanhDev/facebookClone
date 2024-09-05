@@ -1,0 +1,53 @@
+/* Main.scss */
+.slider-container {
+  position: absolute; /* Để đặt các nút mũi tên bên trong */
+  width: 700px;
+  margin: 0 auto; /* Để căn giữa container */
+  top: 0;
+
+  .w_slider {
+    width: 100%; /* Đảm bảo slider chiếm hết chiều rộng của container */
+
+    .slider-image {
+      width: 200px;
+      height: 200px;
+      display: block;
+      object-fit: cover;
+      padding: 0 5px;
+      border-radius: 13px;
+    }
+  }
+
+  /* Các mũi tên tùy chỉnh */
+  .custom-prev,
+  .custom-next {
+    position: absolute;
+    top: 50%;
+    width: 30px;
+    height: 30px;
+    background-color: #ddd;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transform: translateY(-50%);
+    z-index: 1;
+    font-size: 18px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .custom-prev {
+    left: 10px;
+  }
+
+  .custom-next {
+    right: 10px;
+  }
+
+  .custom-prev:hover,
+  .custom-next:hover {
+    background-color: #bbb;
+  }
+}

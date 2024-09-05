@@ -1,0 +1,85 @@
+.main-right {
+  width: 360px;
+  height: calc(100vh - 50px);
+  position: fixed;
+  right: 0;
+  top: 50px;
+  z-index: 9;
+  overflow-y: auto; /* Hiển thị thanh cuộn khi cần */
+  -ms-overflow-style: none; /* Ẩn thanh cuộn trên IE và Edge */
+
+  /* Giữ thanh cuộn với độ rộng nhất định nhưng ẩn bằng opacity */
+  &::-webkit-scrollbar {
+    width: 5px; /* Giữ nguyên kích thước thanh cuộn nhỏ */
+  }
+
+  /* Ban đầu thanh cuộn sẽ trong suốt (ẩn) */
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent; /* Ban đầu ẩn thanh cuộn */
+    border-radius: 10px;
+  }
+
+  /* Khi hover vào .main-right, thanh cuộn sẽ hiện lên */
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: #888; /* Hiển thị thanh cuộn khi hover */
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Thay đổi màu khi hover vào thanh cuộn */
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Màu nền của track thanh cuộn */
+    border-radius: 10px;
+  }
+  .marketing {
+    .image {
+      border-radius: 5px;
+    }
+  }
+  .model {
+    position: fixed;
+    z-index: 1;
+    width: 100%;
+    margin: auto;
+    background-color: aliceblue;
+    display: none;
+    border-radius: 5px;
+  }
+  .none {
+    display: block;
+  }
+  .active_model {
+    display: none;
+  }
+  .active {
+    display: block;
+  }
+  .fanpage {
+    border-bottom: 1px solid #65686c;
+    .fanpage_top {
+      img {
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+      }
+    }
+  }
+  .add_friend {
+    border-bottom: 1px solid #65686c;
+    .img_avtart {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 50%;
+      image-rendering: auto; /* Hoặc crisp-edges để nét hơn */
+    }
+    .img_friends {
+      width: 20px;
+      height: 20px;
+      object-fit: cover;
+      border-radius: 50%;
+      image-rendering: auto;
+    }
+  }
+}
