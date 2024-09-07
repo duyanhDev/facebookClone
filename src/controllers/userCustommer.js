@@ -1,10 +1,15 @@
 const { uploadSingleFile } = require("./../services/fileSerive");
-const { getReadUser, postCreateUser } = require("./../services/CRUDUser");
+const {
+  getReadUser,
+  postCreateUser,
+  postLoginJWT,
+} = require("./../services/CRUDUser");
 const {
   sendFriendRequest,
   acceptFriendRequest,
   listFriends,
   listFriendsFiter,
+  getLisdFriendUserOne,
 } = require("./../services/Friend");
 const mongoose = require("mongoose");
 
@@ -96,6 +101,8 @@ const postAddFriends = async (req, res) => {
 
 const putAddFriends = async (req, res) => {
   let { userId, friendId } = req.body;
+  console.log(userId, friendId);
+
   let result = await acceptFriendRequest(userId, friendId);
 
   return res.status(200).json({
@@ -126,6 +133,53 @@ const getListFriendSAdd = async (req, res) => {
   }
 };
 
+const getListFriendUser = async (req, res) => {
+  try {
+    const { id } = req.params; // Lấy userId từ URL params
+    console.log("UserId from params:", id);
+
+    if (!id) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    const result = await listFriends(id);
+    console.log("Friends list:", result);
+
+    if (!result) {
+      return res.status(404).json({ message: "User not found or no friends" });
+    }
+
+    return res.json(result);
+  } catch (error) {
+    console.error("Error listing friends:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+//  đăng nhập
+const postLogin = async (req, res) => {
+  let { email, password } = req.body;
+
+  // Gọi hàm xử lý đăng nhập
+  let result = await postLoginJWT(email, password);
+
+  // Kiểm tra kết quả và phản hồi lại cho client
+  if (!result.success) {
+    return res.status(400).json({
+      EC: 1, // Error code
+      message: result.message, // Thông báo lỗi
+    });
+  }
+
+  // Nếu thành công, trả về token và refresh token
+  return res.status(200).json({
+    EC: 0, // Success code
+    message: "Đăng nhập thành công",
+    token: result.token, // Token JWT
+    refreshToken: result.refreshToken, // Refresh token
+  });
+};
+
 module.exports = {
   getReadUserFB,
   postUpdateUserFB,
@@ -133,4 +187,6 @@ module.exports = {
   postAddFriends,
   putAddFriends,
   getListFriendSAdd,
+  getListFriendUser,
+  postLogin,
 };

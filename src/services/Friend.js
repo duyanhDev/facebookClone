@@ -116,10 +116,16 @@ const listFriendsFiter = async (userId) => {
     throw error;
   }
 };
+
+const getLisdFriendUserOne = async (_id) => {
+  let data = await Users.findOne(_id);
+  return data;
+};
 module.exports = {
   sendFriendRequest,
   acceptFriendRequest,
   rejectFriendRequest,
   listFriends,
   listFriendsFiter,
+  getLisdFriendUserOne,
 };

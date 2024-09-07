@@ -19,6 +19,10 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 app.use("/v1/api/", routerAPI);
+app.use(
+  "/images",
+  express.static(path.join(__dirname, "public/images/upload"))
+);
 (async () => {
   try {
     await connection();
