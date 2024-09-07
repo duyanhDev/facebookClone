@@ -1,0 +1,29 @@
+.btn_title {
+  background-color: #f0f2f5;
+  border-radius: 15px;
+}
+
+.my-circle {
+  border-radius: 100%;
+}
+
+/* Media Queries */
+
+/* For screens up to 399px width */
+@media (max-width: 399px) {
+  /* Apply specific styles for small screens here */
+  .content_status {
+    margin-right: 54px;
+  }
+}
+
+/* For screens 788px width and above */
+@media (min-width: 788px) {
+  .content_status {
+    /* You can uncomment and adjust these as needed */
+    /* max-width: 90%; */
+    margin: auto;
+    /* margin: 0 10px; */
+    position: relative;
+  }
+}

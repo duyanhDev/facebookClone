@@ -5,26 +5,40 @@ import SiderRight from "./Components/BannerRight/SiderRight";
 import "./App.scss";
 import SliderLeft from "./Components/Content/SiderLeft";
 import { useEffect, useState } from "react";
-import { getAddUser } from "./service/apiAxios";
+import { getAddUser, getSeenUser } from "./service/apiAxios";
 function App() {
   const [add, setAdd] = useState("");
-
+  const [status, setStatus] = useState("");
   const FeachAPI = async () => {
-    let data = await getAddUser("66d5cbd21c9b67c69cdd9c13");
+    let data = await getAddUser("66dc0fb26c16f18c8eee0e0b");
+    console.log(data);
+
     if (data.data && data.status === 200) {
       let result = data.data.map((item) => item.friendId.username);
       setAdd(result);
     }
   };
+
   console.log(add);
+
+  const FeachSeenAPI = async () => {
+    let data = await getSeenUser("66dc0fb26c16f18c8eee0e0b");
+    if (data && data.data && data.data.data) {
+      console.log(data.data.data);
+
+      setStatus(data.data.data);
+    }
+  };
 
   useEffect(() => {
     FeachAPI();
+    FeachSeenAPI();
   }, []);
+
   return (
     <div className="App">
-      <div className="Header-content flex justify-between">
-        <Header />
+      <div className="Header-content flex justify-between ">
+        <Header status={status} />
       </div>
 
       <div className="content flex justify-between">

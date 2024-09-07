@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import App from "./App";
 import SliderLeft from "./Components/Content/SiderLeft";
-import Main from "./../src/Components/Main/Main";
+import Main from "./../src/Components/Main/Main.js";
 import Login from "./Components/Login/Login";
 const Layout = () => {
   return (

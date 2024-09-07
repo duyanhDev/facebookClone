@@ -6,7 +6,7 @@ import icon1 from "./../../asset/images/1.png";
 import lin from "./../../asset/images/linjpg.jpg";
 import { CiGift } from "react-icons/ci";
 import { useEffect, useState, useRef } from "react";
-
+import { FaSearch } from "react-icons/fa";
 import {
   IoEllipsisHorizontal,
   IoReloadCircleSharp,
@@ -15,6 +15,8 @@ import {
 import { TbSpeakerphone } from "react-icons/tb";
 
 const SiderRight = ({ add }) => {
+  console.log(add);
+
   const [imageIndex, setImageIndex] = useState(0); // Lưu chỉ mục của ảnh hiện tại
   const [active, setActive] = useState(false);
   const [model, SetModel] = useState(false);
@@ -36,11 +38,11 @@ const SiderRight = ({ add }) => {
   ];
 
   useEffect(() => {
-    let timer = setInterval(() => {
-      setImageIndex((prevIndex) => (prevIndex + 1) % avatar.length); // Cập nhật chỉ mục theo vòng tròn
-    }, 3000);
+    const timer = setInterval(() => {
+      setImageIndex((prevIndex) => (prevIndex + 1) % avatar.length); // Cập nhật chỉ mục ảnh
+    }, 1000);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(timer); // Dọn dẹp interval khi component bị hủy
   }, [avatar.length]);
 
   const currentImage = avatar[imageIndex]; // Lấy ảnh hiện tại dựa trên chỉ mục
@@ -175,14 +177,41 @@ const SiderRight = ({ add }) => {
           <h3>Hôm nay là sinh của Duy Anh và 2 người khác.</h3>
         </div>
       </div>
+
       <div className="add_friend mt-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-[#65686c] font-bold ">Lời mời kết bạn</h3>
-          <span className="cursor-pointer">Xem tất cả</span>
+          <h3 className="text-[#65686c] font-bold ">Người liên hệ</h3>
+          <div className="flex items-center gap-4 mr-3">
+            <FaSearch />
+            <IoEllipsisHorizontal />
+          </div>
         </div>
         <div className="flex items-center gap-2 mt-2 cursor-pointer">
-          <CiGift className="size-9 text-[#0866ff]" />
-          <h3>Hôm nay là sinh của Duy Anh và 2 người khác.</h3>
+          <div className="flex items-center gap-3">
+            <span className="span_green">
+              {" "}
+              <img className="best_friend" src={icon1} alt="lỗi" />
+            </span>
+            <span>Đặng Trịnh Duy Anh</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 mt-2 cursor-pointer">
+          <div className="flex items-center gap-3">
+            <span className="span_green">
+              {" "}
+              <img className="best_friend" src={icon1} alt="lỗi" />
+            </span>
+            <span>Duy Anh</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 mt-2 cursor-pointer">
+          <div className="flex items-center gap-3">
+            <span className="span_green">
+              {" "}
+              <img className="best_friend" src={icon1} alt="lỗi" />
+            </span>
+            <span>Duy Anh</span>
+          </div>
         </div>
       </div>
     </div>
