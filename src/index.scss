@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* styles.css */
+.custom-toast-container {
+  z-index: 9999; /* Thay đổi giá trị z-index theo nhu cầu của bạn */
+}

@@ -5,7 +5,7 @@ import { PiMonitorPlayLight } from "react-icons/pi";
 import { FaBookmark, FaRegClock } from "react-icons/fa6";
 import { MdGroupWork } from "react-icons/md";
 import { Link } from "react-router-dom";
-const SliderLeft = () => {
+const SliderLeft = ({ username }) => {
   return (
     <div className="nav_left">
       <div className="top w-full -mt-7 ">
@@ -15,7 +15,7 @@ const SliderLeft = () => {
               <div className="flex justify-center items-center gap-2">
                 {" "}
                 <IoMdContact className="size-6 " />
-                Duy Anh
+                {username ? username : ""}
               </div>
             </Link>
           </li>

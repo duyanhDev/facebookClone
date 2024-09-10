@@ -24,9 +24,9 @@ body {
       position: fixed;
       right: 0;
       left: 0;
-      z-index: 2;
+      // z-index: 2;
       position: fixed;
-      z-index: 99999;
+      z-index: 99;
       width: 100%;
       height: 56px;
       top: 0px;
@@ -58,7 +58,6 @@ body {
       display: none;
     }
     .right {
-      display: none;
     }
   }
   @media only screen and (min-width: 801px) and (max-width: 1024px) {
@@ -66,7 +65,7 @@ body {
       display: none;
     }
     .right {
-      display: none;
+      // display: none;
     }
   }
 }

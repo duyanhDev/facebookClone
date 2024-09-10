@@ -6,36 +6,20 @@ import { MdGroupWork } from "react-icons/md";
 import { RiPlayListAddFill } from "react-icons/ri";
 import { BsShop } from "react-icons/bs";
 import { IoMdMenu, IoIosNotifications, IoMdContact } from "react-icons/io";
-import { Link } from "react-router-dom";
-import Mess from "../Mess/Mess";
-import { getMessagesBetweenUsers } from "../../service/apiAxios";
-import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-const Header = ({ status }) => {
-  const [mess, setMessage] = useState("");
-  const currentUserId = "66dc0fb26c16f18c8eee0e0b";
-  useEffect(() => {
-    fetchAndSetMessages();
-  }, []);
+const Header = ({ status, username }) => {
+  let navigate = useNavigate();
+  const handleLogOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("name");
+    localStorage.removeItem("id");
+    localStorage.removeItem("refreshToken");
 
-  const fetchAndSetMessages = async () => {
-    try {
-      let response = await getMessagesBetweenUsers(
-        "66dc0fb26c16f18c8eee0e0b",
-        "66dc0fd76c16f18c8eee0e0e"
-      );
-      if (response && response.data && response.data.data) {
-        console.log("hh", response.data.data);
-
-        setMessage(response.data.data);
-      } else {
-        console.error("No data received or data structure is incorrect");
-      }
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    }
+    toast.success("Đăng xuất thành công");
+    navigate("/login");
   };
-
   return (
     <div className="Header flex w-full items-center">
       <div className="w-80 flex items-center gap-5 -mt-2">
@@ -131,13 +115,19 @@ const Header = ({ status }) => {
             <span className="">Tài khoản</span>
           </div>
         </div>
-      </div>
-      <div className="message">
-        <Mess
-          mess={mess}
-          currentUserId={currentUserId}
-          fetchAndSetMessages={fetchAndSetMessages}
-        />
+        <div className="dropdown-content ">
+          <ul className="p-8">
+            <li>
+              <a href="/profile">Thông tin cá nhân</a>
+            </li>
+            <li>
+              <a href="/settings">Cài đặt</a>
+            </li>
+            <li>
+              <span onClick={() => handleLogOut()}>Đăng xuất</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );

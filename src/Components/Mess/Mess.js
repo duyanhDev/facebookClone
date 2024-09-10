@@ -1,30 +1,61 @@
 import { GoDotFill } from "react-icons/go";
 import "./Mess.scss";
-import { useState } from "react";
-import { postMessages } from "../../service/apiAxios";
-const Mess = ({ mess, currentUserId, fetchAndSetMessages }) => {
-  console.log(mess);
-  console.log(currentUserId);
+import { useEffect, useState } from "react";
+import { postMessages, pustSeenUser } from "../../service/apiAxios";
+const Mess = ({
+  mess,
+  currentUserId,
+  fetchAndSetMessages,
+  check,
+  setCheck,
+  receiverId,
+}) => {
+  const [text, setText] = useState("");
 
-  const recipientUsername = mess.length > 0 && mess[0].senderId.username;
-  const receiverId = mess.length > 0 && mess[0].senderId._id;
-  console.log(receiverId);
-
-  let [text, setText] = useState("");
-
-  const handlePostMess = async () => {
-    let data = await postMessages(currentUserId, receiverId, text);
-    setText("");
-    fetchAndSetMessages();
+  const handlePostMess = async (e) => {
+    try {
+      let data = await postMessages(currentUserId, receiverId, text);
+      if (data) {
+        setText("");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
-  const [check, setCheck] = useState(true);
+  const handleEnter = (e) => {
+    if (e.key === "Enter") {
+      handlePostMess();
+    }
+  };
+  // Hàm ẩn chat
   const handleCheckHiden = () => {
     setCheck(false);
   };
+
+  // Lấy tên để hiển thị trong tiêu đề chat
+  const chatHeaderName =
+    mess.length > 0
+      ? mess[0].senderId._id === currentUserId
+        ? mess[0]?.receiverId.profile.name
+        : mess[0]?.senderId.profile.name
+      : "";
+
+  useEffect(() => {
+    fetchAndSetMessages();
+  }, [handlePostMess]);
+
+  const handleInputClick = async () => {
+    try {
+      await pustSeenUser(currentUserId);
+    } catch (error) {
+      console.error("Error updating seen user data:", error);
+    }
+  };
+
   return (
     <>
       {check && (
-        <div className="chat_mess ">
+        <div className="chat_mess">
           <div>
             <button
               aria-expanded="false"
@@ -52,7 +83,7 @@ const Mess = ({ mess, currentUserId, fetchAndSetMessages }) => {
               </svg>
             </button>
             <div
-              className="fixed -bottom-0 right-20  bg-white p-4 rounded-lg border border-[#e5e7eb] w-[320px] h-[400px] flex flex-col"
+              className="fixed -bottom-0 right-20 bg-white p-4 rounded-lg border border-[#e5e7eb] w-[320px] h-[400px] flex flex-col"
               style={{
                 boxShadow:
                   "0 0 #0000, 0 0 #0000, 0 1px 2px 0 rgb(0 0 0 / 0.05)",
@@ -63,18 +94,15 @@ const Mess = ({ mess, currentUserId, fetchAndSetMessages }) => {
                 className="flex flex-col space-y-1.5 pb-4"
               >
                 <div className="flex justify-between items-center">
-                  {recipientUsername && (
-                    <h2 className="font-semibold text-lg tracking-tight">
-                      {recipientUsername}
-                    </h2>
-                  )}
-
+                  <h2 className="font-semibold text-lg tracking-tight">
+                    {chatHeaderName}
+                  </h2>
                   <span className="text-blue-700 cursor-pointer">X</span>
                 </div>
 
                 <div className="flex items-center">
                   <GoDotFill className="text-green-500" />
-                  <p className="text-sm text-[#6b7280] leading-3 ">
+                  <p className="text-sm text-[#6b7280] leading-3">
                     Đang hoạt động
                   </p>
                 </div>
@@ -124,8 +152,10 @@ const Mess = ({ mess, currentUserId, fetchAndSetMessages }) => {
                     className="flex-1 h-10 rounded-md border border-[#e5e7eb] px-3 py-2 text-sm placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 text-[#030712] focus-visible:ring-offset-2"
                     placeholder="Type your message"
                     type="text"
-                    value={text} // This should be the state variable holding the input value
+                    value={text}
                     onChange={(e) => setText(e.target.value)}
+                    onClick={() => handleInputClick()}
+                    onKeyDown={handleEnter}
                   />
                   <button
                     onClick={() => handlePostMess()}

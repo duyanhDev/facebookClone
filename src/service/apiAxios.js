@@ -41,9 +41,45 @@ const getSeenUser = async (receiverId) => {
   return await axios.get(`http://localhost:8001/v1/api/message/${receiverId}`);
 };
 
+// status seen
+
+const pustSeenUser = async (senderId) => {
+  return await axios.put(`http://localhost:8001/v1/api/message/${senderId}`);
+};
+
 const getBestfriend = async (id) => {
   return await axios.get(`http://localhost:8001/v1/api/users/${id}`);
 };
+
+// đăng nhập
+
+const postLoginUser = async (email, password) => {
+  try {
+    const response = await axios.post("http://localhost:8001/v1/api/login", {
+      email,
+      password,
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      // Lỗi từ phía server
+      return { error: error.response.data.message || "Something went wrong" };
+    } else if (error.request) {
+      // Không nhận được phản hồi từ server
+      return { error: "No response from server" };
+    } else {
+      // Lỗi khi cấu hình yêu cầu
+      return { error: error.message };
+    }
+  }
+};
+
+const postLogOut = async (refresh_token) => {
+  return await axios.post("http://localhost:8001/v1/api/refresh-token", {
+    refresh_token,
+  });
+};
+
 export {
   getUser,
   getAddUser,
@@ -51,4 +87,7 @@ export {
   postMessages,
   getSeenUser,
   getBestfriend,
+  postLoginUser,
+  postLogOut,
+  pustSeenUser,
 };
