@@ -2,6 +2,7 @@ const {
   postMessAPi,
   getMessagesBetweenUsers,
   getSeenMessagesCount,
+  putMessage,
 } = require("./../services/messCRUD");
 
 const postMessages = async (req, res) => {
@@ -57,14 +58,54 @@ const getMessagesAPI = async (req, res) => {
   }
 };
 const getSeenMessagesAPI = async (req, res) => {
-  let { receiverId } = req.params;
-  let data = await getSeenMessagesCount(receiverId);
-  console.log("id data", data);
-
-  return res.status(200).json({
-    EC: 1,
-    data: data,
-  });
+  try {
+    const { receiverId } = req.params;
+    const count = await getSeenMessagesCount(receiverId);
+    res.status(200).json({
+      EC: 1, // Mã trạng thái thành công
+      data: count, // Dữ liệu trả về
+    });
+  } catch (error) {
+    console.error("Error getting seen messages count:", error);
+    res.status(500).json({
+      EC: 0, // Mã trạng thái lỗi
+      message: "Internal server error",
+    });
+  }
 };
 
-module.exports = { postMessages, getMessagesAPI, getSeenMessagesAPI };
+const putMessageAPI = async (req, res) => {
+  let { receiverId } = req.params;
+
+  try {
+    // Gọi hàm putMessage để cập nhật tin nhắn
+    const result = await putMessage(receiverId);
+
+    // Kiểm tra kết quả từ hàm putMessage
+    if (result.modifiedCount > 0) {
+      return res.status(200).json({
+        EC: 0,
+        data: result,
+      });
+    } else {
+      return res.status(200).json({
+        EC: 1,
+        message: "No messages were updated",
+        data: result,
+      });
+    }
+  } catch (error) {
+    console.error("Error updating seen messages:", error);
+    return res.status(500).json({
+      EC: -1,
+      message: "Failed to update seen messages",
+    });
+  }
+};
+
+module.exports = {
+  postMessages,
+  getMessagesAPI,
+  getSeenMessagesAPI,
+  putMessageAPI,
+};

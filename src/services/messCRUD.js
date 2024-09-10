@@ -59,5 +59,46 @@ const postMessAPi = async (senderId, receiverId, content) => {
     throw error; // Ném lỗi để controller xử lý
   }
 };
+const putMessage = async (receiverId) => {
+  try {
+    // Kiểm tra trạng thái trước khi cập nhật
+    const pendingMessagesBefore = await Messages.findOne({
+      receiverId: receiverId,
+      seen: false,
+    });
+    console.log("Pending messages before update:", pendingMessagesBefore);
 
-module.exports = { getSeenMessagesCount, postMessAPi, getMessagesBetweenUsers };
+    // Cập nhật trạng thái tin nhắn
+    const result = await Messages.updateOne(
+      { receiverId: receiverId, seen: false },
+      { $set: { seen: true } }
+    );
+
+    // Kiểm tra trạng thái sau khi cập nhật
+    const pendingMessagesAfter = await Messages.find({
+      receiverId: receiverId,
+      seen: false,
+    });
+    console.log("Pending messages after update:", pendingMessagesAfter);
+
+    return {
+      success: true,
+      result: result,
+      pendingMessagesBefore: pendingMessagesBefore,
+      pendingMessagesAfter: pendingMessagesAfter,
+    };
+  } catch (error) {
+    console.error("Error updating messages:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+};
+
+module.exports = {
+  getSeenMessagesCount,
+  postMessAPi,
+  getMessagesBetweenUsers,
+  putMessage,
+};

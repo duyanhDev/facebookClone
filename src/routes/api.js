@@ -3,32 +3,53 @@ const routerAPI = express.Router();
 const {
   getReadUserFB,
   postUpdateUserFB,
+
   postAddFriends,
   putAddFriends,
   getListFriendSAdd,
   getListFriendUser,
   postLogin,
+  putProfileUser,
 } = require("./../controllers/userCustommer");
 const {
   postMessages,
   getMessagesAPI,
   getSeenMessagesAPI,
+  putMessageAPI,
 } = require("./../controllers/messageCustomer");
 
 const { refreshAccessToken } = require("./../services/CRUDUser");
 const authenticateJWT = require("./../middleware/authenticateJWT");
-// bạn bè
+
+// crud users
 routerAPI.get("/users", getReadUserFB);
 routerAPI.post("/users", postUpdateUserFB);
+routerAPI.put("/users/:id", putProfileUser);
+
+// tính năng thêm bạn bè
 routerAPI.post("/addfriend", postAddFriends);
 routerAPI.put("/addfriend", putAddFriends);
 routerAPI.get("/addfriend/:id", getListFriendSAdd);
+
+// accepted
 routerAPI.get("/users/:id", getListFriendUser);
 
-// tin nhắn
+// xem tin nhắn
 routerAPI.get("/message/:senderId/:receiverId", getMessagesAPI);
+
+// gưi tin nhắn
 routerAPI.post("/message", postMessages);
+// count seen
 routerAPI.get("/message/:receiverId", getSeenMessagesAPI);
+
+routerAPI.put("/message/:receiverId", putMessageAPI);
+
+// login
+routerAPI.post("/login", postLogin);
+routerAPI.get("/protected", authenticateJWT, (req, res) => {
+  res.send("This is a protected route");
+});
+// token
 routerAPI.post("/refresh-token", async (req, res) => {
   const { refreshToken } = req.body;
 
@@ -36,20 +57,21 @@ routerAPI.post("/refresh-token", async (req, res) => {
     return res.status(401).json({ message: "Không có refresh token" });
   }
 
-  const result = await refreshAccessToken(refreshToken);
+  // Giả sử bạn lưu refreshToken trong database
+  const tokenInDb = await TokenModel.findOne({ token: refreshToken });
 
-  if (!result.success) {
-    return res.status(403).json({ message: result.message });
+  if (!tokenInDb) {
+    return res
+      .status(403)
+      .json({ message: "Refresh token không hợp lệ hoặc đã bị thu hồi" });
   }
 
-  res.status(200).json({
-    token: result.token,
-  });
+  // Xóa refreshToken khỏi database (hoặc đánh dấu là hết hạn nếu muốn)
+  await TokenModel.findOneAndDelete({ token: refreshToken });
+
+  return res
+    .status(200)
+    .json({ success: true, message: "Refresh token đã bị hủy" });
 });
 
-// login
-routerAPI.post("/login", postLogin);
-routerAPI.get("/protected", authenticateJWT, (req, res) => {
-  res.send("This is a protected route");
-});
 module.exports = routerAPI;

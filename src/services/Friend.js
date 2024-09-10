@@ -116,10 +116,15 @@ const listFriendsFiter = async (userId) => {
     throw error;
   }
 };
-
+//danh sách thông tin  id
 const getLisdFriendUserOne = async (_id) => {
   let data = await Users.findOne(_id);
-  return data;
+  try {
+    return data;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
 };
 module.exports = {
   sendFriendRequest,

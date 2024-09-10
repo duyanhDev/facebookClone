@@ -19,6 +19,7 @@ const postCreateUser = async (data) => {
   try {
     // Hash mật khẩu trước khi lưu
     const hashedPassword = await bcrypt.hash(data.password, 10);
+    console.log("Mật khẩu đã băm:", hashedPassword); // In ra để kiểm tra
     data.password = hashedPassword;
 
     return await Users.create(data);
@@ -28,6 +29,42 @@ const postCreateUser = async (data) => {
   }
 };
 
+// cập nhật profile
+const putUserAPI = async (id, username, password, role, avatar) => {
+  try {
+    let updateFields = {
+      username: username,
+      role: role,
+      "profile.avatar": avatar,
+    };
+
+    // Chỉ băm mật khẩu nếu nó tồn tại và không rỗng
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateFields.password = hashedPassword;
+    }
+
+    // Cập nhật thông tin người dùng
+    let data = await Users.updateOne(
+      { _id: id }, // Query theo _id
+      {
+        $set: updateFields,
+      }
+    );
+
+    if (data.nModified === 0) {
+      return { success: false, message: "No changes made" };
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return { success: false, message: "Error updating user" };
+  }
+};
+
+// Đăng nhập
+
 const postLoginJWT = async (email, password) => {
   try {
     const user = await Users.findOne({ email });
@@ -36,23 +73,30 @@ const postLoginJWT = async (email, password) => {
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log(password, user.password);
+
     if (!isMatch) {
       return { success: false, message: "Sai mật khẩu" };
     }
 
-    const token = jwt.sign({ id: user._id }, jwtSecret, {
-      expiresIn: "1h",
-    });
-
-    // Tạo refresh token
+    const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: "1h" });
     const refreshToken = jwt.sign({ id: user._id }, refreshSecret, {
       expiresIn: "7d",
     });
 
-    return { success: true, token, refreshToken };
+    return {
+      success: true,
+      token,
+      refreshToken,
+      user: {
+        name: user.profile.name,
+        avatar: user.profile.avatar,
+        id: user._id,
+      },
+    };
   } catch (error) {
     console.error("Error during login:", error);
-    return { success: false, message: "Có lỗi xảy ra" };
+    return null;
   }
 };
 
@@ -96,4 +140,5 @@ module.exports = {
   postCreateUser,
   postLoginJWT,
   refreshAccessToken,
+  putUserAPI,
 };

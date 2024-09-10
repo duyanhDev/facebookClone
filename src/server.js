@@ -6,8 +6,18 @@ const port = process.env.PORT || 8002;
 const fileUpload = require("express-fileupload");
 const routerAPI = require("./routes/api");
 const path = require("path");
-
 const cors = require("cors");
+const http = require("http"); // Thêm dòng này để nhập mô-đun http
+
+const server = http.createServer(app);
+const WebSocketServer = require("./websocketServer");
+
+server.on("upgrade", (request, socket, head) => {
+  WebSocketServer.handleUpgrade(request, socket, head, (ws) => {
+    WebSocketServer.emit("connection", ws, request);
+  });
+});
+
 app.use(express.static(path.join("./src", "public")));
 
 app.use(cors());

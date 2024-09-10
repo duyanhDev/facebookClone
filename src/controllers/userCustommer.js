@@ -3,6 +3,7 @@ const {
   getReadUser,
   postCreateUser,
   postLoginJWT,
+  putUserAPI,
 } = require("./../services/CRUDUser");
 const {
   sendFriendRequest,
@@ -36,6 +37,7 @@ const getReadUserFB = async (req, res) => {
   } catch (error) {}
 };
 
+// thêm users
 const postUpdateUserFB = async (req, res) => {
   try {
     let {
@@ -44,6 +46,7 @@ const postUpdateUserFB = async (req, res) => {
       password,
       profile: { name, gender, birthday, bio, avatar, coverPhoto },
       friends = [],
+      role,
     } = req.body;
 
     if (!username) {
@@ -76,6 +79,7 @@ const postUpdateUserFB = async (req, res) => {
         coverPhoto,
       },
       friends: friendsData,
+      role,
     };
 
     let result = await postCreateUser(newUser);
@@ -83,10 +87,27 @@ const postUpdateUserFB = async (req, res) => {
     return res.send("Create thành công");
   } catch (error) {
     console.error("Error creating user:", error);
-    res.status(500).json({ error: "Internal server error" });
   }
 };
 
+const putProfileUser = async (req, res) => {
+  let { id } = req.params;
+  let { username, password, role } = req.body;
+
+  let imageUrl = "";
+  if (req.files && req.files.avatar) {
+    const result = await uploadSingleFile(req.files.avatar);
+    imageUrl = result.path;
+    console.log("Image URL:", imageUrl);
+  }
+  let result = await putUserAPI(id, username, password, role, imageUrl);
+  return res.status(200).json({
+    EC: 1,
+    data: result,
+  });
+};
+
+// gửi lời mời kb
 const postAddFriends = async (req, res) => {
   let { senderId, receiverId } = req.body;
   console.log(senderId, receiverId);
@@ -99,6 +120,7 @@ const postAddFriends = async (req, res) => {
   });
 };
 
+// // chấp nhận kết bạn
 const putAddFriends = async (req, res) => {
   let { userId, friendId } = req.body;
   console.log(userId, friendId);
@@ -132,7 +154,7 @@ const getListFriendSAdd = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-
+// lấy danh sách bạn bè
 const getListFriendUser = async (req, res) => {
   try {
     const { id } = req.params; // Lấy userId từ URL params
@@ -176,7 +198,10 @@ const postLogin = async (req, res) => {
     EC: 0, // Success code
     message: "Đăng nhập thành công",
     token: result.token, // Token JWT
-    refreshToken: result.refreshToken, // Refresh token
+    refreshToken: result.refreshToken,
+    data: result.user,
+
+    // Refresh token
   });
 };
 
@@ -189,4 +214,5 @@ module.exports = {
   getListFriendSAdd,
   getListFriendUser,
   postLogin,
+  putProfileUser,
 };
