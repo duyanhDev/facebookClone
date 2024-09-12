@@ -12,6 +12,8 @@ const {
   listFriendsFiter,
   getLisdFriendUserOne,
 } = require("./../services/Friend");
+const { uploadFileToCloudinary } = require("./../services/Cloudinary");
+
 const mongoose = require("mongoose");
 
 const postUpdateFile = async (req, res) => {
@@ -55,7 +57,7 @@ const postUpdateUserFB = async (req, res) => {
 
     let imageUrl = "";
     if (req.files && req.files.avatar) {
-      const result = await uploadSingleFile(req.files.avatar);
+      const result = await uploadFileToCloudinary(req.files.avatar);
       imageUrl = result.path;
       console.log("Image URL:", imageUrl);
     }
@@ -96,15 +98,32 @@ const putProfileUser = async (req, res) => {
 
   let imageUrl = "";
   if (req.files && req.files.avatar) {
-    const result = await uploadSingleFile(req.files.avatar);
-    imageUrl = result.path;
-    console.log("Image URL:", imageUrl);
+    try {
+      const result = await uploadFileToCloudinary(req.files.avatar);
+      imageUrl = result.secure_url; // Sử dụng secure_url để lấy URL của ảnh đã tải lên
+      console.log("Image URL:", imageUrl);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      return res.status(500).json({
+        EC: 0,
+        message: "Failed to upload image.",
+      });
+    }
   }
-  let result = await putUserAPI(id, username, password, role, imageUrl);
-  return res.status(200).json({
-    EC: 1,
-    data: result,
-  });
+
+  try {
+    let result = await putUserAPI(id, username, password, role, imageUrl);
+    return res.status(200).json({
+      EC: 1,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return res.status(500).json({
+      EC: 0,
+      message: "Failed to update user.",
+    });
+  }
 };
 
 // gửi lời mời kb

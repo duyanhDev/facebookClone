@@ -8,11 +8,31 @@ const PostSchema = new Schema(
       ref: "Users",
       required: true,
     },
+    authorName: { type: String },
+    avatar: { type: String }, // Add this field to store the author's name
     content: { type: String, required: true },
-    image: { type: String }, // Nếu bài viết có hình ảnh
-    // Lưu thông tin người dùng đã "like" bài viết ở đây
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Users" }],
+    image: { type: String },
+    video: { type: String },
+    likes: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
+        reaction: {
+          type: String,
+          enum: [
+            "like",
+            "love",
+            "thương thương",
+            "haha",
+            "wow",
+            "sad",
+            "angry",
+          ],
+          default: "like",
+        },
+      },
+    ],
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comments" }],
+    taggedFriends: [{ type: mongoose.Schema.Types.ObjectId, ref: "Users" }],
   },
   { timestamps: true }
 );

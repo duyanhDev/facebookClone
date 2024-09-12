@@ -21,6 +21,13 @@ const {
 const { refreshAccessToken } = require("./../services/CRUDUser");
 const authenticateJWT = require("./../middleware/authenticateJWT");
 
+const {
+  createNewPostUser,
+  getNewPostUsers,
+  postLikeUser,
+  getLikesForPost,
+} = require("./../controllers/Post");
+
 // crud users
 routerAPI.get("/users", getReadUserFB);
 routerAPI.post("/users", postUpdateUserFB);
@@ -42,7 +49,7 @@ routerAPI.post("/message", postMessages);
 // count seen
 routerAPI.get("/message/:receiverId", getSeenMessagesAPI);
 
-routerAPI.put("/message/:receiverId", putMessageAPI);
+routerAPI.put("/message/:senderId/:receiverId", putMessageAPI);
 
 // login
 routerAPI.post("/login", postLogin);
@@ -73,5 +80,12 @@ routerAPI.post("/refresh-token", async (req, res) => {
     .status(200)
     .json({ success: true, message: "Refresh token đã bị hủy" });
 });
+
+routerAPI.post("/post", createNewPostUser);
+routerAPI.get("/post", getNewPostUsers);
+
+// like
+routerAPI.post("/like", postLikeUser);
+routerAPI.get("/like/:postIds", getLikesForPost);
 
 module.exports = routerAPI;

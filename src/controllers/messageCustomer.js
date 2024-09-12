@@ -75,11 +75,11 @@ const getSeenMessagesAPI = async (req, res) => {
 };
 
 const putMessageAPI = async (req, res) => {
-  let { receiverId } = req.params;
+  let { senderId, receiverId } = req.params;
 
   try {
     // Gọi hàm putMessage để cập nhật tin nhắn
-    const result = await putMessage(receiverId);
+    const result = await putMessage(senderId, receiverId);
 
     // Kiểm tra kết quả từ hàm putMessage
     if (result.modifiedCount > 0) {
