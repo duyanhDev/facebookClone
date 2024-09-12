@@ -12,7 +12,7 @@ const Mess = ({
 }) => {
   const [text, setText] = useState("");
 
-  const handlePostMess = async (e) => {
+  const handlePostMess = async () => {
     try {
       let data = await postMessages(currentUserId, receiverId, text);
       if (data) {
@@ -46,7 +46,7 @@ const Mess = ({
 
   const handleInputClick = async () => {
     try {
-      await pustSeenUser(currentUserId);
+      await pustSeenUser(receiverId, currentUserId);
     } catch (error) {
       console.error("Error updating seen user data:", error);
     }
@@ -129,7 +129,7 @@ const Mess = ({
                       >
                         <div className="message-avatar">
                           <img
-                            src={`http://localhost:8001/images/${item.senderId.profile.avatar}`}
+                            src={item.senderId.profile.avatar}
                             alt={`${item.senderId.profile.name}'s avatar`}
                           />
                         </div>

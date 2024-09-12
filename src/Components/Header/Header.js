@@ -115,7 +115,7 @@ const Header = ({ status, username }) => {
             <span className="">Tài khoản</span>
           </div>
         </div>
-        <div className="dropdown-content ">
+        <div className="dropdown-content  ">
           <ul className="p-8">
             <li>
               <a href="/profile">Thông tin cá nhân</a>

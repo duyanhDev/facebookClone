@@ -22,15 +22,13 @@ const SiderRight = ({ add, friend, fetchSeenUserData }) => {
   const [mess, setMessage] = useState("");
   const currentUserId = localStorage.getItem("id");
   const [check, setCheck] = useState(false);
+
   const handleClickChat = async (id) => {
-    setReceverid(id);
+    setReceverid(id); // Still update the state for receiverId
     setCheck(true);
     try {
-      await pustSeenUser(currentUserId);
-      console.log("Updated seen user", currentUserId, id);
-
-      const updatedStatus = await fetchSeenUserData();
-      console.log("Fetched updated status:", updatedStatus);
+      await pustSeenUser(id, currentUserId); // Use 'id' directly here
+      await fetchSeenUserData();
     } catch (error) {
       console.error("Failed to update seen user:", error);
     }

@@ -48,12 +48,10 @@ function App() {
         setStatus(unreadCount); // Update the state
         return unreadCount; // Return the value so it can be logged or used elsewhere
       } else {
-        console.log("No data received");
         setStatus(0); // Reset status to 0 if no data
         return 0; // Return 0 if there's no data
       }
     } catch (error) {
-      console.error("Failed to fetch seen user data:", error);
       setStatus(0); // Handle error by resetting the status
       return 0; // Return 0 in case of an error
     }

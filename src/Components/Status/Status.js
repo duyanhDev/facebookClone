@@ -1,6 +1,43 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./Status.scss";
-export default function Status({ showModal, setShowModal }) {
+import { PostCreateNew } from "../../service/apiAxios";
+import { toast } from "react-toastify";
+export default function Status({ showModal, setShowModal, getPostAPI }) {
+  const authorId = localStorage.getItem("id");
+
+  let [content, setContent] = useState("");
+  let [image, setImage] = useState(null);
+
+  const [previewImage, setPreviewImage] = useState("");
+
+  const handelChanFile = (e) => {
+    if (e.target && e.target.files && e.target.files[0]) {
+      setImage(e.target.files[0]);
+      setPreviewImage(URL.createObjectURL(e.target.files[0]));
+    }
+  };
+
+  const APICreatePost = async () => {
+    let res = await PostCreateNew(authorId, content, image);
+    if (res && res.status === 201) {
+      toast.success("Đăng bài thành công");
+    } else {
+      toast.error("Lỗi đăng bài");
+    }
+    setContent("");
+    setImage("");
+    setPreviewImage();
+  };
+
+  const handleHidenModel = () => {
+    setShowModal(false);
+    setContent("");
+    setImage("");
+    setPreviewImage();
+  };
+  useEffect(() => {
+    getPostAPI();
+  }, [APICreatePost]);
   return (
     <>
       <button
@@ -12,47 +49,96 @@ export default function Status({ showModal, setShowModal }) {
       </button>
       {showModal ? (
         <>
-          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
-            <div className="relative w-auto my-6 mx-auto max-w-md">
+          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none ">
+            <div className="relative  my-6 mx-auto max-w-md w-4/5">
               {/*content*/}
-              <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+              <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none w">
                 {/*header*/}
                 <div className="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t ">
                   <h3 className="text-3xl font-semibold text-center">
                     Tạo Bài Viết
                   </h3>
                   <button
-                    className="my-circle p-2 ml-auto border-0 text-white bg-black float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                    onClick={() => setShowModal(false)}
+                    className="my-circle p-2 ml-auto border-0 text-gray-700 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
+                    onClick={() => handleHidenModel()}
                   >
                     X
                   </button>
                 </div>
                 {/*body*/}
-                <div className="relative p-6 flex-auto">
-                  <p className="my-4 text-blueGray-500 text-lg leading-relaxed">
-                    I always felt like I could do anything. That’s the main
-                    thing people are controlled by! Thoughts- their perception
-                    of themselves! They're slowed down by their perception of
-                    themselves. If you're taught you can’t do anything, you
-                    won’t do anything. I was taught I could do everything.
-                  </p>
+                <div className="p-2 flex-auto w-full h-2/3 m-auto">
+                  <textarea
+                    className="w-2/4 h-auto resize-none text-center placeholder:text-center placeholder-align"
+                    rows="4"
+                    placeholder="Anh ơi, bạn đang nghĩ gì thế?"
+                    onChange={(e) => setContent(e.target.value)}
+                    value={content}
+                  ></textarea>
+
+                  <div className="flex items-center justify-center w-full">
+                    <label
+                      htmlFor="dropzone-file"
+                      className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer   "
+                    >
+                      {previewImage ? (
+                        <img
+                          src={previewImage}
+                          className="w-full h-full object-cover"
+                          alt="anh loi"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <svg
+                            className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 16"
+                          >
+                            <path
+                              stroke="currentColor"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                            />
+                          </svg>
+                          <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                            <span className="font-semibold">
+                              Thêm ảnh hoặc kéo thẻ
+                            </span>{" "}
+                            or drag and drop
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            SVG, PNG, JPG or GIF (MAX. 800x400px)
+                          </p>
+                        </div>
+                      )}
+                      <input
+                        id="dropzone-file"
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => handelChanFile(e)}
+                      />
+                    </label>
+                  </div>
                 </div>
                 {/*footer*/}
-                <div className="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
-                  <button
+                <div className="flex items-center  p-6 border-t border-solid border-blueGray-200 rounded-b">
+                  {/* <button
                     className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     type="button"
                     onClick={() => setShowModal(false)}
                   >
                     Close
-                  </button>
+                  </button> */}
                   <button
-                    className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                    className=" w-full bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     type="button"
-                    onClick={() => setShowModal(false)}
+                    // onClick={() => setShowModal(false)}
+                    onClick={() => APICreatePost()}
                   >
-                    Save Changes
+                    Đăng bài viết
                   </button>
                 </div>
               </div>

@@ -6,12 +6,14 @@ import Main from "./../src/Components/Main/Main.js";
 import Login from "./Components/Login/Login";
 import PrivateRoute from "./PrivateRoute.js";
 import { AuthContext } from "./AuthContext .js";
+import Regsiter from "./Components/Regsiter/Regsiter.js";
 
 const Layout = () => {
   const { isAuthenticated } = useContext(AuthContext);
 
   return (
     <Routes>
+      <Route path="/register" element={<Regsiter />} />
       <Route path="/login" element={<Login />} />
       <Route
         path="/"

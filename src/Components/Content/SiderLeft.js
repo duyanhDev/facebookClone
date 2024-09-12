@@ -6,6 +6,9 @@ import { FaBookmark, FaRegClock } from "react-icons/fa6";
 import { MdGroupWork } from "react-icons/md";
 import { Link } from "react-router-dom";
 const SliderLeft = ({ username }) => {
+  const avatar = localStorage.getItem("avatar");
+  console.log(avatar);
+
   return (
     <div className="nav_left">
       <div className="top w-full -mt-7 ">
@@ -14,7 +17,15 @@ const SliderLeft = ({ username }) => {
             <Link>
               <div className="flex justify-center items-center gap-2">
                 {" "}
-                <IoMdContact className="size-6 " />
+                {avatar ? (
+                  <img
+                    className="w-12 h-12 object-cover"
+                    src={avatar}
+                    alt="ảnh lỗi"
+                  />
+                ) : (
+                  <IoMdContact className="size-6 " />
+                )}
                 {username ? username : ""}
               </div>
             </Link>

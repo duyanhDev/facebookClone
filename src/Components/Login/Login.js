@@ -13,14 +13,22 @@ const Login = () => {
   const handleLogin = async () => {
     try {
       let res = await postLoginUser(email, password);
+      let InVaild =
+        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      if (!InVaild.test(email)) {
+        toast.error("Vui lòng nhập đúng email");
+        return;
+      }
 
       if (res && res.EC === 0) {
-        const { name, id } = res.data;
+        const { name, id, avatar } = res.data;
         const { token, refreshToken } = res;
+        console.log(res.data);
 
         // Save token to localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("name", name);
+        localStorage.setItem("avatar", avatar);
         localStorage.setItem("id", id);
         localStorage.setItem("refreshToken", refreshToken);
 
@@ -58,7 +66,7 @@ const Login = () => {
                         alt="logo"
                       />
                       <h4 className="mb-12 mt-1 pb-1 text-xl font-semibold">
-                        We are The Lotus Team
+                        Duy Anh Media
                       </h4>
                     </div>
 
@@ -127,10 +135,11 @@ const Login = () => {
                       We are more than just a company
                     </h4>
                     <p className="text-sm">
-                      Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                      sed do eiusmod tempor incididunt ut labore et dolore magna
-                      aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                      ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                      Duy Anh Media là một công ty truyền thông chuyên cung cấp
+                      các dịch vụ sản xuất nội dung sáng tạo, từ quay phim, chụp
+                      ảnh đến quản lý chiến lược truyền thông số, giúp khách
+                      hàng xây dựng thương hiệu và tiếp cận hiệu quả đối tượng
+                      mục tiêu.
                     </p>
                   </div>
                 </div>

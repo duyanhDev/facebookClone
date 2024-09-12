@@ -10,6 +10,21 @@ const getUser = async () => {
   }
 };
 
+// đăng kí user
+
+const postRegisterUser = async (email, username, password, name, avatar) => {
+  let data = {
+    email: email,
+    username: username,
+    password: password,
+    profile: {
+      name: name,
+      avatar: avatar,
+    },
+  };
+  return await axios.post(`http://localhost:8001/v1/api/users`, data);
+};
+
 // lấy danh sách kết bạn
 const getAddUser = async (id) => {
   return axios.get(`http://localhost:8001/v1/api/addfriend/${id}`);
@@ -43,8 +58,10 @@ const getSeenUser = async (receiverId) => {
 
 // status seen
 
-const pustSeenUser = async (senderId) => {
-  return await axios.put(`http://localhost:8001/v1/api/message/${senderId}`);
+const pustSeenUser = async (senderId, receiverId) => {
+  return await axios.put(
+    `http://localhost:8001/v1/api/message/${senderId}/${receiverId}`
+  );
 };
 
 const getBestfriend = async (id) => {
@@ -80,6 +97,54 @@ const postLogOut = async (refresh_token) => {
   });
 };
 
+//POST
+
+const PostCreateNew = async (
+  authorId,
+  content,
+  image,
+  video,
+  taggedFriends
+) => {
+  const data = new FormData();
+  data.append("authorId", authorId);
+  data.append("content", content);
+  data.append("image", image);
+  data.append("video", video || null);
+  data.append("taggedFriend", taggedFriends || JSON.stringify([]));
+
+  return await axios.post("http://localhost:8001/v1/api/post", data);
+};
+
+const getPostNewUsers = async () => {
+  return await axios.get("http://localhost:8001/v1/api/post");
+};
+
+// like
+const fetchLikesFromApi = async (postId) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8001/v1/api/like/${postId}`
+    );
+    return response.data; // This should be an array of likes
+  } catch (error) {
+    throw error;
+  }
+};
+
+// thêm like
+const postLikeFromAPI = async (_id, authorId, userId, reaction) => {
+  const data = {
+    _id,
+    authorId,
+    like: {
+      userId: userId,
+      reaction: reaction,
+    },
+  };
+  return await axios.post("http://localhost:8001/v1/api/like", data);
+};
+
 export {
   getUser,
   getAddUser,
@@ -90,4 +155,9 @@ export {
   postLoginUser,
   postLogOut,
   pustSeenUser,
+  PostCreateNew,
+  getPostNewUsers,
+  fetchLikesFromApi,
+  postLikeFromAPI,
+  postRegisterUser,
 };

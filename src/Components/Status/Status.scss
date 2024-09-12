@@ -6,7 +6,14 @@
 .my-circle {
   border-radius: 100%;
 }
+.placeholder-align {
+  outline: none;
+  padding-top: 20px; /* Adjust padding as needed to vertically center */
+}
 
+::placeholder {
+  text-align: center; /* Center the placeholder text horizontally */
+}
 /* Media Queries */
 
 /* For screens up to 399px width */

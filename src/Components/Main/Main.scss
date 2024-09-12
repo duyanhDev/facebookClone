@@ -25,7 +25,7 @@
   .custom-prev,
   .custom-next {
     position: absolute;
-    top: 34%;
+    top: 5%;
     width: 30px;
     height: 30px;
     background-color: #ddd;
@@ -110,12 +110,99 @@
       object-fit: cover;
       border-radius: 50%;
     }
+    .post {
+      .post_image {
+        border-radius: 50%;
+      }
+    }
+    .hover_icon {
+      .laugh-icon {
+        background: #fff;
+        z-index: 10;
+        margin-top: -59px;
+        padding: 10px;
+        border-radius: 10px;
+        visibility: hidden;
+      }
+      &:hover .laugh-icon {
+        visibility: visible;
+      }
+      .icon-animation {
+        opacity: 0;
+        transform: translateY(20px); /* Di chuyển icon ban đầu */
+        animation: iconAnimation 0.6s forwards;
+      }
+
+      .icon-animation:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+
+      .icon-animation:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .icon-animation:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      .icon-animation:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+
+      .icon-animation:nth-child(5) {
+        animation-delay: 0.5s;
+      }
+
+      .icon-animation:nth-child(6) {
+        animation-delay: 0.6s;
+      }
+
+      .icon-animation:nth-child(7) {
+        animation-delay: 0.7s;
+      }
+
+      @keyframes iconAnimation {
+        0% {
+          opacity: 0;
+          transform: translateY(20px) scale(0.9);
+        }
+        50% {
+          opacity: 0.7;
+          transform: translateY(-10px) scale(1.1);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    }
   }
+  // @media (min-width: 200px) and (max-width: 460px) {
+  //   .content_status {
+  //     width: 50%;
+  //     //  max-width: none;
+  //     margin-right: -70px;
+  //   }
+  // }
 
   @media (max-width: 575px) {
+    .slick-list {
+      position: relative;
+      right: -10%;
+    }
     .content_status {
-      margin-left: 160px;
-      max-width: none;
+      width: 70%;
+      //  max-width: none;
+      margin-right: -90px;
     }
   }
   @media (min-width: 576px) and (max-width: 767px) {
