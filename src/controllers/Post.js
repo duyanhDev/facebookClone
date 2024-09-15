@@ -6,6 +6,7 @@ const {
 } = require("./../services/PostSchema");
 
 const Posts = require("./../model/post");
+const Users = require("../model/users");
 
 const createNewPostUser = async (req, res) => {
   const { authorId, content, video, taggedFriends } = req.body;
@@ -101,17 +102,17 @@ const postLikeUser = async (req, res) => {
 const getLikesForPost = async (req, res) => {
   try {
     const { postIds } = req.params;
-
-    // Retrieve the post IDs from URL parameters
-    const idsArray = postIds.split(","); // Convert the comma-separated IDs into an array
+    const idsArray = postIds.split(",");
 
     if (idsArray.length === 0) {
       return res.status(400).json({ message: "No post IDs provided" });
     }
 
-    const posts = await Posts.find({ _id: { $in: idsArray } });
+    const posts = await Posts.find({ _id: { $in: idsArray } }).populate({
+      path: "likes.userId",
+      select: "profile.name", // Ensure profile.name is included
+    });
 
-    // Ensure posts are found
     if (!posts.length) {
       return res.status(404).json({ message: "Posts not found" });
     }
@@ -119,6 +120,11 @@ const getLikesForPost = async (req, res) => {
     const results = posts.map((post) => ({
       _id: post._id,
       totalLikes: post.likes.length,
+      likes: post.likes.map((like) => ({
+        userId: like.userId ? like.userId._id : null,
+        name: like.userId ? like.userId.profile.name : "Unknown",
+        reaction: like.reaction,
+      })),
     }));
 
     return res.status(200).json(results);
@@ -127,6 +133,7 @@ const getLikesForPost = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 module.exports = {
   createNewPostUser,
   getNewPostUsers,

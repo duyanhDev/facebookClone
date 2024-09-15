@@ -1,9 +1,25 @@
 // src/services/PostSchema.js
 const Posts = require("./../model/post");
-
+const Users = require("./../model/users");
+// const GetNewPost = async () => {
+//   try {
+//     let res = await Posts.find({}).sort({ createdAt: -1 });
+//     return res;
+//   } catch (error) {
+//     console.log("error", error);
+//     return null;
+//   }
+// };
 const GetNewPost = async () => {
   try {
-    let res = await Posts.find({}).sort({ createdAt: -1 });
+    let res = await Posts.find({})
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "likes.userId", // Path to the field to populate
+        select: "profile.name", // Select the name field in the profile subdocument
+      })
+      .exec();
+    // Ensure that the populated data includes necessary details for rendering icons
     return res;
   } catch (error) {
     console.log("error", error);
@@ -54,56 +70,126 @@ const CreateNewPost = async (postData) => {
     throw error; // Re-throw the error to be handled by the calling function or middleware
   }
 };
+// const postLike = async (_id, authorId, userId, reaction) => {
+//   try {
+//     // Validate inputs
+//     if (!_id || !authorId || !userId || !reaction) {
+//       throw new Error("Invalid input parameters");
+//     }
+
+//     // Check if the post exists and if the user has already liked it
+//     const post = await Posts.findOne({ _id, authorId, "likes.userId": userId });
+
+//     let res;
+
+//     if (post) {
+//       if (reaction === "like") {
+//         // If reaction is 'like', remove the like
+//         res = await Posts.findOneAndUpdate(
+//           { _id, authorId },
+//           {
+//             $pull: { likes: { userId: userId } }, // Remove the like
+//           },
+//           { new: true } // Return the updated document
+//         );
+//       } else {
+//         // If the user has already liked, update the existing like's reaction
+//         res = await Posts.findOneAndUpdate(
+//           { _id, authorId, "likes.userId": userId },
+//           {
+//             $set: {
+//               "likes.$.reaction": reaction, // Update the reaction
+//             },
+//           },
+//           { new: true } // Return the updated document
+//         );
+//       }
+//     } else {
+//       // If the user has not liked the post, add their like
+//       res = await Posts.findOneAndUpdate(
+//         { _id, authorId },
+//         {
+//           $push: {
+//             likes: {
+//               userId: userId,
+//               reaction: reaction, // Add the reaction
+//             },
+//           },
+//         },
+//         { new: true } // Return the updated document
+//       );
+//     }
+
+//     return res;
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error("Error toggling like: " + error.message);
+//   }
+// };
+
 const postLike = async (_id, authorId, userId, reaction) => {
   try {
-    // Find the post to check if the user has already liked it
+    if (!_id || !authorId || !userId || !reaction) {
+      throw new Error("Invalid input parameters");
+    }
+
+    // Lấy thông tin người dùng
+    const user = await Users.findById(userId).select("name"); // Chỉ chọn tên
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const userName = user.name;
+
+    // Kiểm tra nếu bài viết tồn tại và người dùng đã thích
     const post = await Posts.findOne({ _id, authorId, "likes.userId": userId });
 
     let res;
 
     if (post) {
-      // If the user already liked the post
       if (reaction === "like") {
-        // If reaction is null, it means the user wants to unlike
+        // Nếu reaction là 'like', gỡ bỏ like
         res = await Posts.findOneAndUpdate(
           { _id, authorId },
           {
-            $pull: { likes: { userId: userId } }, // Remove the like
+            $pull: { likes: { userId: userId } }, // Gỡ bỏ like
           },
-          { new: true } // Return the updated document
+          { new: true } // Trả về tài liệu đã cập nhật
         );
       } else {
-        // If user has already liked, update the existing like's reaction
+        // Nếu người dùng đã thích, cập nhật reaction của like hiện tại
         res = await Posts.findOneAndUpdate(
           { _id, authorId, "likes.userId": userId },
           {
             $set: {
-              "likes.$.reaction": reaction || "like", // Update the reaction
+              "likes.$.reaction": reaction, // Cập nhật reaction
             },
           },
-          { new: true } // Return the updated document
+          { new: true } // Trả về tài liệu đã cập nhật
         );
       }
     } else {
-      // If the user has not liked the post, add their like
+      // Nếu người dùng chưa thích bài viết, thêm like mới
       res = await Posts.findOneAndUpdate(
         { _id, authorId },
         {
           $push: {
             likes: {
               userId: userId,
-              reaction: reaction || "like", // Add the reaction
+              reaction: reaction, // Thêm reaction
+              userName: userName, // Thêm tên người dùng
             },
           },
         },
-        { new: true } // Return the updated document
+        { new: true } // Trả về tài liệu đã cập nhật
       );
     }
 
     return res;
   } catch (error) {
     console.error(error);
-    throw new Error("Error toggling like");
+    throw new Error("Error toggling like: " + error.message);
   }
 };
 
