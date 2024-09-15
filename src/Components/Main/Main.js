@@ -1,5 +1,5 @@
 import "./Main.scss";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Slider from "react-slick";
 import lin from "./../../asset/images/9k30do0bqc18mwiah22809g28a5n.png";
 import avtart from "./../../asset/images/2.png";
@@ -9,7 +9,11 @@ import { AiFillPlusCircle } from "react-icons/ai";
 import { MdVideoCameraFront, MdInsertEmoticon } from "react-icons/md";
 import { BsFillFileImageFill } from "react-icons/bs";
 import Status from "../Status/Status";
-import { getPostNewUsers, postLikeFromAPI } from "../../service/apiAxios";
+import {
+  fetchLikesFromApi,
+  getPostNewUsers,
+  postLikeFromAPI,
+} from "../../service/apiAxios";
 import { IoEllipsisHorizontal, IoEarth } from "react-icons/io5";
 import { AiOutlineLike } from "react-icons/ai";
 import { FaRegComment, FaRegLaughSquint, FaHeart } from "react-icons/fa";
@@ -52,12 +56,12 @@ const Main = () => {
       sliderRef.current.slickNext();
     }
   };
-  const getPostAPI = async () => {
+  const getPostAPI = useCallback(async () => {
     let res = await getPostNewUsers();
     if (res && res.data && res.data.data && res.status === 200) {
       setData(res.data.data);
     }
-  };
+  });
 
   useEffect(() => {
     getPostAPI();
@@ -69,21 +73,22 @@ const Main = () => {
 
     const diffInMilliseconds = now - postDate;
     const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60)); // Convert milliseconds to minutes
+
     if (diffInMinutes === 0) {
       return `vừa xong`;
     } else if (diffInMinutes < 60) {
-      // If less than 60 minutes, return minutes
-      return `${diffInMinutes} phút`;
+      return `${diffInMinutes} phút trước`;
+    } else if (diffInMinutes < 1440) {
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      return `${diffInHours} giờ trước`;
     } else {
-      const diffInHours = Math.floor(diffInMinutes / 60); // Convert minutes to hours
-      return `${diffInHours} giờ`;
+      const diffInDays = Math.floor(diffInMinutes / 1440);
+      return `${diffInDays} ngày trước`;
     }
   };
 
   const dispatch = useDispatch();
   const totalLikes = useSelector((state) => state.likes.totalLikes);
-  // const status = useSelector((state) => state.likes.status);
-  // const error = useSelector((state) => state.likes.error);
 
   useEffect(() => {
     const postIds = data.map((item) => item._id).join(",");
@@ -101,11 +106,14 @@ const Main = () => {
   }, {});
   const [selectedReaction, setSelectedReaction] = useState("like");
   const handleClickLike = async (_id, authorId, reaction) => {
+    console.log(reaction);
+
     let res = await postLikeFromAPI(_id, authorId, userId, reaction);
     setSelectedReaction(reaction);
     if (res) {
     }
   };
+
   const getReactionIcon = (reaction) => {
     switch (reaction) {
       case "like":
@@ -125,6 +133,48 @@ const Main = () => {
       default:
         return <AiOutlineLike className="text-gray-600" />;
     }
+  };
+  const renderUsersByReaction = (likes) => {
+    const reactionsGrouped = groupUsersByReaction(likes);
+
+    return Object.keys(reactionsGrouped).map((reaction) => (
+      <div key={reaction} className="reaction-group">
+        <div className="reaction-container">
+          <span className="reaction-icon">{getReactionIcon(reaction)}</span>
+          <div className="user-list">
+            <span className="reaction-label text-[#fff] whitespace-nowrap">
+              {reaction}
+            </span>
+            {(reactionsGrouped[reaction] || []).map((user, index) => (
+              <div key={index} className="user-name">
+                <span>{user.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    ));
+  };
+
+  const groupUsersByReaction = (likes) => {
+    const grouped = likes.reduce((acc, like) => {
+      if (like.userId && like.userId.profile) {
+        const userName = like.userId.profile.name;
+        const reaction = like.reaction || "Unknown";
+
+        if (!acc[reaction]) {
+          acc[reaction] = [];
+        }
+
+        if (!acc[reaction].some((user) => user.name === userName)) {
+          acc[reaction].push({ name: userName });
+        }
+      }
+      return acc;
+    }, {});
+
+    console.log("Grouped reactions:", grouped); // For debugging
+    return grouped;
   };
 
   return (
@@ -214,8 +264,10 @@ const Main = () => {
         data.length > 0 &&
         data.map((item) => {
           const userReaction = item.likes.find(
-            (like) => like.userId === userId
+            (like) =>
+              like.userId && like.userId._id.toString() === userId.toString()
           )?.reaction;
+
           return (
             <div
               className="content_status m-auto mt-8 min-h-max p-5"
@@ -255,10 +307,28 @@ const Main = () => {
                   </Zoom>
                 </div>
               </div>
+              <div className="relative t-2 p-3 flex items-center">
+                <div className="flex items-center  cursor-pointer ">
+                  <span className="flex items-center g-5">
+                    {" "}
+                    {renderUsersByReaction(item.likes)}
+                  </span>
+                  <div className="-mt-4 ml-2">
+                    {likesMap[item._id] ? `${likesMap[item._id]} ` : null}
+                  </div>
+                </div>
+                <div className="w-full flex justify-end ">
+                  <span className="pr-10">
+                    {" "}
+                    <FaRegComment size={20} color="gray" />
+                  </span>
+                  <span>
+                    {" "}
+                    <PiShareFatThin size={20} color="gray" />
+                  </span>
+                </div>
+              </div>
               <div className="w-4/5 m-auto pr-2 pl-2 flex justify-between items-center  mt-3 cursor-pointer">
-                <span>
-                  {likesMap[item._id] ? `${likesMap[item._id]} thích ` : ""}
-                </span>
                 <div className=" hover_icon ">
                   <span
                     className="flex gap-1 items-center cursor-pointer"
@@ -266,7 +336,6 @@ const Main = () => {
                       handleClickLike(item._id, item.authorId, "like")
                     }
                   >
-                    {/* Display the appropriate reaction icon based on userReaction */}
                     {userReaction ? (
                       getReactionIcon(userReaction)
                     ) : (
@@ -279,7 +348,7 @@ const Main = () => {
                   <div className="laugh-icon flex items-center gap-5 absolute ">
                     <span className="icon-animation">
                       <AiOutlineLike
-                        size={20}
+                        size={30}
                         color="blue"
                         onClick={() =>
                           handleClickLike(item._id, item.authorId, "like")
@@ -292,12 +361,12 @@ const Main = () => {
                         handleClickLike(item._id, item.authorId, "love")
                       }
                     >
-                      <FaHeart size={20} color="red" />
+                      <FaHeart size={30} color="red" />
                     </span>
 
                     <span className="icon-animation">
                       <FaRegFaceGrinHearts
-                        size={20}
+                        size={30}
                         color="orange"
                         onClick={() =>
                           handleClickLike(
@@ -310,7 +379,7 @@ const Main = () => {
                     </span>
                     <span className="icon-animation">
                       <FaRegLaughSquint
-                        size={20}
+                        size={30}
                         color="orange"
                         onClick={() =>
                           handleClickLike(item._id, item.authorId, "haha")
@@ -319,7 +388,7 @@ const Main = () => {
                     </span>
                     <span className="icon-animation">
                       <FaRegFaceSurprise
-                        size={20}
+                        size={30}
                         color="orange"
                         onClick={() =>
                           handleClickLike(item._id, item.authorId, "wow")
@@ -328,7 +397,7 @@ const Main = () => {
                     </span>
                     <span className="icon-animation">
                       <FaRegFaceSadTear
-                        size={20}
+                        size={30}
                         color="orange"
                         onClick={() =>
                           handleClickLike(item._id, item.authorId, "sad")
@@ -337,7 +406,7 @@ const Main = () => {
                     </span>
                     <span className="icon-animation">
                       <FaRegFaceTired
-                        size={20}
+                        size={30}
                         color="orange"
                         onClick={() =>
                           handleClickLike(item._id, item.authorId, "angry")

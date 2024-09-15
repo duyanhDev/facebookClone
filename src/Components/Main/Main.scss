@@ -25,7 +25,7 @@
   .custom-prev,
   .custom-next {
     position: absolute;
-    top: 5%;
+    top: 3%;
     width: 30px;
     height: 30px;
     background-color: #ddd;
@@ -216,5 +216,41 @@
       width: 100% !important;
       max-width: none;
     }
+  }
+  .reaction-group {
+    margin-bottom: 10px;
+  }
+
+  .reaction-container {
+    position: relative;
+    display: inline-block;
+  }
+
+  .reaction-icon {
+    display: inline-block;
+  }
+
+  .user-list {
+    display: none; /* Hide the user list by default */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 1px solid #ddd;
+    padding: 5px;
+    z-index: 1;
+    border-radius: 5px;
+  }
+
+  .reaction-container:hover .user-list {
+    display: block; /* Show the user list on hover */
+  }
+
+  .user-name {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #fff;
+    white-space: nowrap;
   }
 }
