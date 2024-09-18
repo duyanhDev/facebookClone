@@ -1,10 +1,54 @@
 const Users = require("./../model/users");
+const mongoose = require("mongoose");
 const sendFriendRequest = async (senderId, receiverId) => {
   try {
-    console.log(senderId);
+    // Kiểm tra nếu senderId và receiverId trùng nhau
+    if (senderId.toString() === receiverId.toString()) {
+      throw new Error("Cannot send friend request to yourself.");
+    }
 
-    // Update sender's friends list
-    let res = await Users.findByIdAndUpdate(senderId, {
+    // Tìm người dùng gửi và nhận lời mời kết bạn
+    const sender = await Users.findById(senderId);
+    const receiver = await Users.findById(receiverId);
+
+    if (!sender || !receiver) {
+      throw new Error("User not found");
+    }
+
+    // Kiểm tra nếu người dùng đã là bạn
+    const senderIsFriend = sender.friends.some(
+      (friend) =>
+        friend.friendId.toString() === receiverId.toString() &&
+        friend.status === "accepted"
+    );
+    const receiverIsFriend = receiver.friends.some(
+      (friend) =>
+        friend.friendId.toString() === senderId.toString() &&
+        friend.status === "accepted"
+    );
+
+    if (senderIsFriend || receiverIsFriend) {
+      throw new Error("You are already friends with this user.");
+    }
+
+    // Kiểm tra nếu lời mời kết bạn đã tồn tại
+    const requestAlreadySentBySender = sender.friends.some(
+      (friend) =>
+        friend.friendId.toString() === receiverId.toString() &&
+        friend.status === "pending"
+    );
+    const requestAlreadySentByReceiver = receiver.friends.some(
+      (friend) =>
+        friend.friendId.toString() === senderId.toString() &&
+        friend.status === "pending"
+    );
+
+    if (requestAlreadySentBySender || requestAlreadySentByReceiver) {
+      throw new Error("Friend request already sent.");
+    }
+
+    // Cập nhật danh sách bạn bè của người gửi
+    await Users.findByIdAndUpdate(senderId, {
       $push: {
         friends: {
           friendId: receiverId,
@@ -14,7 +58,7 @@ const sendFriendRequest = async (senderId, receiverId) => {
       },
     });
 
-    // Update receiver's friends list
+    // Cập nhật danh sách bạn bè của người nhận
     await Users.findByIdAndUpdate(receiverId, {
       $push: {
         friends: {
@@ -27,29 +71,42 @@ const sendFriendRequest = async (senderId, receiverId) => {
 
     console.log("Friend request sent successfully.");
   } catch (error) {
-    console.error("Error sending friend request:", error);
+    console.error("Error sending friend request:", error.message);
   }
 };
 
 // chấp nhận kết bạn
-const acceptFriendRequest = async (userId, friendId) => {
+const acceptFriendRequest = async (userId, friendIds) => {
   try {
-    // Update the friend status to accepted for both users
-    await Users.updateOne(
-      { _id: userId, "friends.friendId": friendId },
-      { $set: { "friends.$.status": "accepted" } }
-    );
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const friendIdArray = friendIds.split(",");
 
-    await Users.updateOne(
-      { _id: friendId, "friends.friendId": userId },
-      { $set: { "friends.$.status": "accepted" } }
-    );
+    for (const friendId of friendIdArray) {
+      const friendObjectId = new mongoose.Types.ObjectId(friendId.trim());
+
+      console.log("Processing friendId:", friendObjectId);
+
+      // Update the friend status to accepted for the user
+      await Users.updateOne(
+        { _id: userObjectId, "friends.friendId": friendObjectId },
+        { $set: { "friends.$.status": "accepted" } }
+      );
+
+      // Update the friend status to accepted for the friend
+      await Users.updateOne(
+        { _id: friendObjectId, "friends.friendId": userObjectId },
+        { $set: { "friends.$.status": "accepted" } }
+      );
+    }
 
     console.log("Friend request accepted successfully.");
+    return { success: true, message: "Friend request accepted successfully." }; // Return a success message
   } catch (error) {
     console.error("Error accepting friend request:", error);
+    return { success: false, message: "Error accepting friend request." }; // Return an error message
   }
 };
+
 const rejectFriendRequest = async (userId, friendId) => {
   try {
     // Remove the friend entry from both users
@@ -68,6 +125,8 @@ const rejectFriendRequest = async (userId, friendId) => {
     console.error("Error rejecting friend request:", error);
   }
 };
+
+// kết bạn rồi
 const listFriends = async (userId) => {
   try {
     const user = await Users.findById(userId)
@@ -92,6 +151,8 @@ const listFriends = async (userId) => {
     throw error;
   }
 };
+
+// chờ két bạn
 const listFriendsFiter = async (userId) => {
   try {
     const user = await Users.findById(userId)

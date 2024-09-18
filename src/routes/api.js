@@ -35,7 +35,7 @@ routerAPI.put("/users/:id", putProfileUser);
 
 // tính năng thêm bạn bè
 routerAPI.post("/addfriend", postAddFriends);
-routerAPI.put("/addfriend", putAddFriends);
+routerAPI.put("/addfriend/:userId/:friendId", putAddFriends);
 routerAPI.get("/addfriend/:id", getListFriendSAdd);
 
 // accepted
@@ -81,11 +81,9 @@ routerAPI.post("/refresh-token", async (req, res) => {
     .json({ success: true, message: "Refresh token đã bị hủy" });
 });
 
-routerAPI.post("/post", createNewPostUser);
-routerAPI.get("/post", getNewPostUsers);
-
 // like
 routerAPI.post("/like", postLikeUser);
 routerAPI.get("/like/:postIds", getLikesForPost);
-
+routerAPI.post("/post", createNewPostUser);
+routerAPI.get("/post", getNewPostUsers);
 module.exports = routerAPI;

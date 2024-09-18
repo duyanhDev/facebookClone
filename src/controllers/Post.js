@@ -1,4 +1,7 @@
-const { uploadFileToCloudinary } = require("./../services/Cloudinary");
+const {
+  uploadFileToCloudinary,
+  uploadVideoToCloudinary,
+} = require("./../services/Cloudinary");
 const {
   CreateNewPost,
   GetNewPost,
@@ -9,19 +12,38 @@ const Posts = require("./../model/post");
 const Users = require("../model/users");
 
 const createNewPostUser = async (req, res) => {
-  const { authorId, content, video, taggedFriends } = req.body;
+  const { authorId, content, taggedFriends } = req.body;
+  let videoUrl = "";
   let imageUrl = "";
 
   // Validate required fields
   if (!authorId || !content) {
     return res.status(400).json({ success: false, message: "Missing fields" });
   }
+  console.log("gg", req.files);
 
+  // Handle video upload if provided
+  console.log("Uploaded files:", req.files);
+
+  // Handle video upload if provided
+  if (req.files && req.files.video) {
+    const videoFile = req.files.video;
+    try {
+      videoUrl = await uploadVideoToCloudinary(videoFile); // Upload video and get the URL
+      console.log("Video URL:", videoUrl);
+    } catch (error) {
+      console.error("Error uploading video:", error.message);
+      return res
+        .status(500)
+        .json({ success: false, message: "Error uploading video" });
+    }
+  }
   // Handle image upload if provided
   if (req.files && req.files.image) {
     try {
-      const result = await uploadFileToCloudinary(req.files.image);
-      imageUrl = result.secure_url; // Use `secure_url` for HTTPS URL
+      const resultImage = await uploadFileToCloudinary(req.files.image); // Upload image và lấy URL
+      imageUrl = resultImage.secure_url; // Gán link image sau khi upload thành công
+      console.log("Image URL:", imageUrl);
     } catch (uploadError) {
       console.error("Error uploading image:", uploadError.message);
       return res
@@ -35,14 +57,14 @@ const createNewPostUser = async (req, res) => {
     const data = {
       authorId,
       content,
-      image: imageUrl || null, // Handle empty imageUrl
-      video: video || null, // Handle empty video
-      taggedFriends: taggedFriends || [], // Handle empty taggedFriends
+      image: imageUrl || null, // Lưu URL ảnh hoặc null nếu không có
+      video: videoUrl || null, // Lưu URL video hoặc null nếu không có
+      taggedFriends: taggedFriends || [], // Danh sách bạn bè tag
     };
 
     console.log("Data to create post:", data);
 
-    // Create new post and populate the authorId field
+    // Tạo bài viết mới
     const newPost = await CreateNewPost(data);
     return res.status(201).json({
       success: true,
@@ -55,6 +77,7 @@ const createNewPostUser = async (req, res) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
+
 const getNewPostUsers = async (req, res) => {
   try {
     let data = await GetNewPost();

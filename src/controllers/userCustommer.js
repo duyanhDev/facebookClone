@@ -42,11 +42,15 @@ const getReadUserFB = async (req, res) => {
 // thêm users
 const postUpdateUserFB = async (req, res) => {
   try {
-    let {
+    const {
       username,
       email,
       password,
-      profile: { name, gender, birthday, bio, avatar, coverPhoto },
+      name, // Extract directly from req.body
+      gender,
+      birthday,
+      bio,
+      coverPhoto, // No need to destructure from profile, as FormData flattens fields
       friends = [],
       role,
     } = req.body;
@@ -57,9 +61,21 @@ const postUpdateUserFB = async (req, res) => {
 
     let imageUrl = "";
     if (req.files && req.files.avatar) {
-      const result = await uploadFileToCloudinary(req.files.avatar);
-      imageUrl = result.path;
-      console.log("Image URL:", imageUrl);
+      console.log(req.files, "and", req.files.avatar);
+
+      try {
+        const result = await uploadFileToCloudinary(req.files.avatar);
+        console.log(result);
+
+        imageUrl = result.secure_url; // Use secure_url to get the uploaded image URL
+        console.log("Image URL:", imageUrl);
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        return res.status(500).json({
+          EC: 0,
+          message: "Failed to upload image.",
+        });
+      }
     }
 
     const friendsData = friends.map((friend) => ({
@@ -77,7 +93,7 @@ const postUpdateUserFB = async (req, res) => {
         gender,
         birthday,
         bio,
-        avatar: imageUrl || avatar,
+        avatar: imageUrl, // Ensure avatar is set to the uploaded image URL
         coverPhoto,
       },
       friends: friendsData,
@@ -89,6 +105,7 @@ const postUpdateUserFB = async (req, res) => {
     return res.send("Create thành công");
   } catch (error) {
     console.error("Error creating user:", error);
+    res.status(500).send("Internal server error");
   }
 };
 
@@ -141,10 +158,11 @@ const postAddFriends = async (req, res) => {
 
 // // chấp nhận kết bạn
 const putAddFriends = async (req, res) => {
-  let { userId, friendId } = req.body;
-  console.log(userId, friendId);
+  let { userId, friendId } = req.params;
+  console.log("check222", userId, friendId);
 
   let result = await acceptFriendRequest(userId, friendId);
+  console.log(result);
 
   return res.status(200).json({
     EC: 0,

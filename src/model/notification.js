@@ -19,7 +19,7 @@ const NotificationSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",
       required: function () {
-        return this.type === "like" || this.type === "comment";
+        return this.type === "Thích" || this.type === "comment";
       },
     },
     commentId: {
