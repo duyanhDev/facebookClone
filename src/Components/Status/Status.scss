@@ -10,7 +10,11 @@
   outline: none;
   padding-top: 20px; /* Adjust padding as needed to vertically center */
 }
-
+.check_video {
+  width: 600px;
+  height: 250px;
+  margin-top: 20px;
+}
 ::placeholder {
   text-align: center; /* Center the placeholder text horizontally */
 }

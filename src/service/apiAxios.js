@@ -1,5 +1,5 @@
 import axios from "./../untils/axios";
-
+// list Users
 const getUser = async () => {
   try {
     const response = await axios.get("/v1/api/users");
@@ -9,27 +9,25 @@ const getUser = async () => {
     throw error; // Re-throw the error to handle it in the calling function
   }
 };
-
-// đăng kí user
-
-const postRegisterUser = async (email, username, password, name, avatar) => {
-  let data = {
-    email: email,
-    username: username,
-    password: password,
-    profile: {
-      name: name,
-      avatar: avatar,
-    },
-  };
-  return await axios.post(`http://localhost:8001/v1/api/users`, data);
-};
-
 // lấy danh sách kết bạn
 const getAddUser = async (id) => {
   return axios.get(`http://localhost:8001/v1/api/addfriend/${id}`);
 };
 
+// xác nhận kết bạn (chấp nhận kb)
+
+const putAddFriend = async (userId, friendId) => {
+  try {
+    return await axios.put(
+      `http://localhost:8001/v1/api/addfriend/${userId}/${friendId}`
+    );
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};
+
+// xem tin nhắn
 const getMessagesBetweenUsers = async (senderId, receiverId) => {
   try {
     const response = await axios.get(
@@ -42,6 +40,7 @@ const getMessagesBetweenUsers = async (senderId, receiverId) => {
   }
 };
 
+// gửi tin nhắn
 const postMessages = async (senderId, receiverId, content) => {
   const data = new FormData();
   data.append("senderId", senderId);
@@ -66,6 +65,17 @@ const pustSeenUser = async (senderId, receiverId) => {
 
 const getBestfriend = async (id) => {
   return await axios.get(`http://localhost:8001/v1/api/users/${id}`);
+};
+
+// đăng kí user
+const postRegisterUser = async (email, username, password, name, avatar) => {
+  const formData = new FormData();
+  formData.append("email", email);
+  formData.append("username", username);
+  formData.append("password", password);
+  formData.append("name", name); // Append name directly, not as profile.name
+  formData.append("avatar", avatar);
+  return await axios.post(`http://localhost:8001/v1/api/users`, formData);
 };
 
 // đăng nhập
@@ -98,7 +108,7 @@ const postLogOut = async (refresh_token) => {
 };
 
 //POST
-
+// bài post
 const PostCreateNew = async (
   authorId,
   content,
@@ -113,7 +123,11 @@ const PostCreateNew = async (
   data.append("video", video || null);
   data.append("taggedFriend", taggedFriends || JSON.stringify([]));
 
-  return await axios.post("http://localhost:8001/v1/api/post", data);
+  return await axios.post("http://localhost:8001/v1/api/post", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 const getPostNewUsers = async () => {
@@ -148,6 +162,7 @@ const postLikeFromAPI = async (_id, authorId, userId, reaction) => {
 export {
   getUser,
   getAddUser,
+  putAddFriend,
   getMessagesBetweenUsers,
   postMessages,
   getSeenUser,

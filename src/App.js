@@ -10,7 +10,7 @@ function App() {
   const username = localStorage.getItem("name");
   const [add, setAdd] = useState([]);
   const [status, setStatus] = useState("");
-
+  const [idFriend, setIdFriend] = useState("");
   const [friend, setFriend] = useState("");
   const currentUserId = localStorage.getItem("id");
 
@@ -27,8 +27,16 @@ function App() {
   const fetchAddUserData = async () => {
     try {
       const data = await getAddUser(currentUserId);
+      console.log(data);
+
       if (data.data && data.status === 200) {
-        const result = data.data.map((item) => item.friendId.username);
+        const result = data.data.map((item) => item.friendId.profile.name);
+        console.log(data.data);
+
+        const idResult = data.data.map((item) => item.friendId._id);
+
+        setIdFriend(idResult[0]);
+
         setAdd(result);
       }
     } catch (error) {
@@ -38,7 +46,7 @@ function App() {
   };
   useEffect(() => {
     fetchAddUserData();
-  }, []);
+  }, [currentUserId]);
 
   const fetchSeenUserData = async () => {
     try {
@@ -88,6 +96,8 @@ function App() {
             friend={friend}
             fetchSeenUserData={fetchSeenUserData}
             status={status}
+            idFriend={idFriend}
+            fetchAddUserData={fetchAddUserData}
           />
         </div>
       </div>

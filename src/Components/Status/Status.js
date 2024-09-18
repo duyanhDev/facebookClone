@@ -7,18 +7,30 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
 
   let [content, setContent] = useState("");
   let [image, setImage] = useState(null);
-
+  let [video, setVideo] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
+  const [previewVideo, setPreviewVideo] = useState("");
 
-  const handelChanFile = (e) => {
+  const handleChanFile = (e) => {
     if (e.target && e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
-      setPreviewImage(URL.createObjectURL(e.target.files[0]));
+      const file = e.target.files[0];
+
+      if (file.type.startsWith("image/")) {
+        setImage(file);
+        setPreviewImage(URL.createObjectURL(file));
+        setVideo(null); // Reset video nếu trước đó đã chọn
+      } else if (file.type.startsWith("video/")) {
+        setVideo(file);
+        setImage(null); // Reset ảnh nếu trước đó đã chọn
+        setPreviewVideo(URL.createObjectURL(file)); // Hiển thị preview cho video
+      } else {
+        toast.error("Chỉ hỗ trợ định dạng ảnh hoặc video!");
+      }
     }
   };
 
   const APICreatePost = async () => {
-    let res = await PostCreateNew(authorId, content, image);
+    let res = await PostCreateNew(authorId, content, image, video);
     if (res && res.status === 201) {
       toast.success("Đăng bài thành công");
     } else {
@@ -34,6 +46,7 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
     setContent("");
     setImage("");
     setPreviewImage();
+    setPreviewVideo();
   };
   useEffect(() => {
     getPostAPI();
@@ -80,6 +93,16 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
                       htmlFor="dropzone-file"
                       className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer   "
                     >
+                      {previewVideo && (
+                        <video className="check_video" autoPlay muted loop>
+                          <source
+                            width="350x"
+                            height="350px"
+                            src={previewVideo}
+                            type="video/mp4"
+                          />
+                        </video>
+                      )}
                       {previewImage ? (
                         <img
                           src={previewImage}
@@ -118,7 +141,7 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
                         id="dropzone-file"
                         type="file"
                         className="hidden"
-                        onChange={(e) => handelChanFile(e)}
+                        onChange={(e) => handleChanFile(e)}
                       />
                     </label>
                   </div>

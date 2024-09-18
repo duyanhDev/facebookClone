@@ -27,7 +27,7 @@ const Register = () => {
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setAvatar(e.target.files[0].name);
+      setAvatar(e.target.files[0]);
     }
   };
   // Register handler

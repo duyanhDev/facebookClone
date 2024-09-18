@@ -12,9 +12,19 @@ import {
 } from "react-icons/io5";
 import { TbSpeakerphone } from "react-icons/tb";
 import Mess from "../Mess/Mess";
-import { getMessagesBetweenUsers, pustSeenUser } from "../../service/apiAxios";
+import {
+  getMessagesBetweenUsers,
+  pustSeenUser,
+  putAddFriend,
+} from "../../service/apiAxios";
 
-const SiderRight = ({ add, friend, fetchSeenUserData }) => {
+const SiderRight = ({
+  add,
+  friend,
+  fetchSeenUserData,
+  idFriend,
+  fetchAddUserData,
+}) => {
   const [active, setActive] = useState(false);
   const [model, SetModel] = useState(false);
   const modalRef = useRef(null);
@@ -65,6 +75,14 @@ const SiderRight = ({ add, friend, fetchSeenUserData }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const HadlePutFriend = async () => {
+    let res = await putAddFriend(currentUserId, idFriend);
+    console.log("check", res);
+    if (res && res.data) {
+      console.log("thanh cong ", res);
+    }
+  };
 
   return (
     <>
@@ -141,7 +159,7 @@ const SiderRight = ({ add, friend, fetchSeenUserData }) => {
                 alt="ảnh kết bạn bị lỗi "
               />
               <div className="pt-3 -mt-5 ml-5">
-                <span>{add}</span>
+                <span>{add[0]}</span>
                 <div className="pt-1 flex items-center ">
                   <img className="img_friends" src={lin} alt="lỗi" />
                   <span className="ml-2">2 bạn chung</span>
@@ -153,6 +171,7 @@ const SiderRight = ({ add, friend, fetchSeenUserData }) => {
             <button
               type="button"
               className="sm:w-40 min-w-0 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+              onClick={() => HadlePutFriend()}
             >
               Xác Nhận
             </button>

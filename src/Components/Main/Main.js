@@ -106,8 +106,6 @@ const Main = () => {
   }, {});
   const [selectedReaction, setSelectedReaction] = useState("like");
   const handleClickLike = async (_id, authorId, reaction) => {
-    console.log(reaction);
-
     let res = await postLikeFromAPI(_id, authorId, userId, reaction);
     setSelectedReaction(reaction);
     if (res) {
@@ -134,6 +132,26 @@ const Main = () => {
         return <AiOutlineLike className="text-gray-600" />;
     }
   };
+  const getReactionLabel = (reaction) => {
+    switch (reaction) {
+      case "like":
+        return "Thích";
+      case "love":
+        return "Yêu thích";
+      case "thương thương":
+        return "Thương thương";
+      case "haha":
+        return "HaHa";
+      case "wow":
+        return "Wow";
+      case "sad":
+        return "Buồn";
+      case "angry":
+        return "Giận dữ";
+      default:
+        return "Khác";
+    }
+  };
   const renderUsersByReaction = (likes) => {
     const reactionsGrouped = groupUsersByReaction(likes);
 
@@ -143,7 +161,7 @@ const Main = () => {
           <span className="reaction-icon">{getReactionIcon(reaction)}</span>
           <div className="user-list">
             <span className="reaction-label text-[#fff] whitespace-nowrap">
-              {reaction}
+              {getReactionLabel(reaction)}
             </span>
             {(reactionsGrouped[reaction] || []).map((user, index) => (
               <div key={index} className="user-name">
@@ -172,8 +190,7 @@ const Main = () => {
       }
       return acc;
     }, {});
-
-    console.log("Grouped reactions:", grouped); // For debugging
+    // For debugging
     return grouped;
   };
 
@@ -298,11 +315,27 @@ const Main = () => {
               <div className="-mt-5 ml-3">
                 <span className="p-3 block justify-text">{item.content}</span>
               </div>
-              <div className="w-4/5 flex items-center justify-center m-auto">
-                <div className="w-4/5 flex items-center justify-center m-auto">
+
+              <div className="hight_w flex items-center justify-center m-auto">
+                <div className="w-full flex items-center justify-center m-auto">
                   <Zoom>
-                    <picture>
-                      {item.image && <img src={item.image} alt="ảnh lỗi" />}
+                    <picture className="w-full h-full">
+                      {item.image ? (
+                        <img
+                          className="image_post"
+                          src={item.image}
+                          alt="ảnh lỗi"
+                        />
+                      ) : (
+                        <video className="image_post" controls autoPlay loop>
+                          <source
+                            src={item.video}
+                            type="video/mp4"
+                            width="500px"
+                            height="500px"
+                          />
+                        </video>
+                      )}
                     </picture>
                   </Zoom>
                 </div>

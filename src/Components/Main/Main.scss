@@ -4,7 +4,6 @@
   width: 700px;
   margin: 0 auto; /* Để căn giữa container */
   top: 0;
-
   .w_slider {
     width: 100%; /* Đảm bảo slider chiếm hết chiều rộng của container */
 
@@ -25,7 +24,7 @@
   .custom-prev,
   .custom-next {
     position: absolute;
-    top: 3%;
+    top: 2%;
     width: 30px;
     height: 30px;
     background-color: #ddd;
@@ -39,6 +38,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: -38px;
   }
 
   .custom-prev {
@@ -95,8 +95,8 @@
   }
   .content_status {
     background: #ffffff;
-    border-radius: 5px;
-    max-width: 500px;
+    border-radius: 10px;
+    max-width: 480px;
     margin: auto;
     margin-top: 20px;
     .bottom_text {
@@ -115,6 +115,20 @@
         border-radius: 50%;
       }
     }
+    .hight_w {
+      width: 480px;
+      margin-left: -20px;
+      img.image_post {
+        width: 480px;
+        height: 500px;
+        object-fit: cover;
+      }
+      video.image_post {
+        width: 500px;
+        height: 500px;
+      }
+    }
+
     .hover_icon {
       .laugh-icon {
         background: #fff;
