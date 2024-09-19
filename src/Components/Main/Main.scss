@@ -128,7 +128,14 @@
         height: 500px;
       }
     }
-
+    .like {
+      border-bottom: 1px solid rgba(220, 220, 220, 1); /* Màu đậm hơn so với 240, 240, 240 */
+    }
+    .comment_post {
+      margin-top: 7px;
+      border-top: 1px solid rgba(220, 220, 220, 1);
+      padding: 10px;
+    }
     .hover_icon {
       .laugh-icon {
         background: #fff;

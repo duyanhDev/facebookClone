@@ -5,7 +5,7 @@ import { PiMonitorPlayLight } from "react-icons/pi";
 import { FaBookmark, FaRegClock } from "react-icons/fa6";
 import { MdGroupWork } from "react-icons/md";
 import { Link } from "react-router-dom";
-const SliderLeft = ({ username }) => {
+const SliderLeft = ({ username, isDarkMode }) => {
   const avatar = localStorage.getItem("avatar");
   console.log(avatar);
 
@@ -15,11 +15,15 @@ const SliderLeft = ({ username }) => {
         <ul className="top-ul">
           <li>
             <Link>
-              <div className="flex justify-center items-center gap-2">
+              <div
+                className={`flex justify-center items-center gap-2 ${
+                  isDarkMode ? "text-[#fff]" : "text-[#333]"
+                }`}
+              >
                 {" "}
                 {avatar ? (
                   <img
-                    className="w-12 h-12 object-cover"
+                    className="w-8 h-8 object-cover rounded-full"
                     src={avatar}
                     alt="ảnh lỗi"
                   />
@@ -32,45 +36,69 @@ const SliderLeft = ({ username }) => {
           </li>
           <li>
             <Link>
-              <div className="flex justify-center items-center gap-2">
+              <div
+                className={`flex justify-center items-center gap-2 ${
+                  isDarkMode ? "text-[#fff]" : "text-[#333]"
+                }`}
+              >
                 {" "}
-                <FaUserFriends className="size-7 " />
+                <FaUserFriends
+                  className={`size-6 ${
+                    isDarkMode ? "text-blue-600" : "text-[#333]"
+                  }`}
+                />
                 Bạn bè
               </div>
             </Link>
           </li>
           <li>
             <Link>
-              <div className="flex justify-center items-center gap-2">
+              <div
+                className={`flex justify-center items-center gap-2 ${
+                  isDarkMode ? "text-[#fff]" : "text-[#333]"
+                }`}
+              >
                 {" "}
-                <PiMonitorPlayLight className="size-7 text-[#0866ff] " />
+                <PiMonitorPlayLight className="size-7 text-blue-600 " />
                 Video
               </div>
             </Link>
           </li>
           <li>
             <Link>
-              <div className="flex justify-center items-center gap-2 text-[#fa61ba]">
+              <div
+                className={`flex justify-center items-center gap-2 ${
+                  isDarkMode ? "text-[#fff]" : "text-[#333]"
+                }`}
+              >
                 {" "}
-                <FaBookmark className="size-7 " />
+                <FaBookmark className="size-7 text-[#fa61ba] " />
                 Đã lưu
               </div>
             </Link>
           </li>
           <li>
             <Link>
-              <div className="flex justify-center items-center gap-2">
+              <div
+                className={`flex justify-center items-center gap-2 ${
+                  isDarkMode ? "text-[#fff]" : "text-[#333]"
+                }`}
+              >
                 {" "}
-                <FaRegClock className="size-7 " />
+                <FaRegClock className="size-7  text-blue-600" />
                 Kỉ niệm
               </div>
             </Link>
           </li>
           <li>
             <Link>
-              <div className="flex justify-center items-center gap-2">
+              <div
+                className={`flex justify-center items-center gap-2 ${
+                  isDarkMode ? "text-[#fff]" : "text-[#333]"
+                }`}
+              >
                 {" "}
-                <MdGroupWork className="size-7 " />
+                <MdGroupWork className="size-7  text-blue-600 " />
                 Nhóm
               </div>
             </Link>
@@ -78,9 +106,13 @@ const SliderLeft = ({ username }) => {
 
           <li>
             <Link>
-              <div className="flex justify-center items-center gap-2">
+              <div
+                className={`flex justify-center items-center gap-2 ${
+                  isDarkMode ? "text-[#fff]" : "text-[#333]"
+                }`}
+              >
                 {" "}
-                <FaAngleDown className="size-7 " />
+                <FaAngleDown className="size-7  text-blue-600 " />
                 Xem thêm
               </div>
             </Link>
@@ -89,14 +121,35 @@ const SliderLeft = ({ username }) => {
       </div>
       <div className="bottom mt-2">
         <div className="flex justify-between items-center">
-          <h3 className="ml-1">Lỗi tắt của bạn</h3>
-          <span>Chỉnh sửa</span>
+          <h3 className={`ml-1 ${isDarkMode ? "text-[#fff]" : "text-[#333]"}`}>
+            Lỗi tắt của bạn
+          </h3>
+          <span className={` ${isDarkMode ? "text-[#fff]" : "text-[#333]"}`}>
+            Chỉnh sửa
+          </span>
         </div>
         <div className="fried">
           <ul>
             <li>
               <Link>
-                <div className="flex  gap-2">
+                <div
+                  className={`flex  gap-2 ${
+                    isDarkMode ? "text-[#fff]" : "text-[#333]"
+                  }`}
+                >
+                  {" "}
+                  <MdGroupWork className="size-7 text-blue-600" />
+                  Nhóm
+                </div>
+              </Link>
+            </li>
+            <li>
+              <Link>
+                <div
+                  className={`flex  gap-2 ${
+                    isDarkMode ? "text-[#fff]" : "text-[#333]"
+                  }`}
+                >
                   {" "}
                   <MdGroupWork className="size-7 " />
                   Nhóm
@@ -105,7 +158,11 @@ const SliderLeft = ({ username }) => {
             </li>
             <li>
               <Link>
-                <div className="flex  gap-2">
+                <div
+                  className={`flex  gap-2 ${
+                    isDarkMode ? "text-[#fff]" : "text-[#333]"
+                  }`}
+                >
                   {" "}
                   <MdGroupWork className="size-7 " />
                   Nhóm
@@ -114,7 +171,11 @@ const SliderLeft = ({ username }) => {
             </li>
             <li>
               <Link>
-                <div className="flex gap-2">
+                <div
+                  className={`flex  gap-2 ${
+                    isDarkMode ? "text-[#fff]" : "text-[#333]"
+                  }`}
+                >
                   {" "}
                   <MdGroupWork className="size-7 " />
                   Nhóm
@@ -123,7 +184,11 @@ const SliderLeft = ({ username }) => {
             </li>
             <li>
               <Link>
-                <div className="flex gap-2">
+                <div
+                  className={`flex  gap-2 ${
+                    isDarkMode ? "text-[#fff]" : "text-[#333]"
+                  }`}
+                >
                   {" "}
                   <MdGroupWork className="size-7 " />
                   Nhóm
@@ -132,16 +197,11 @@ const SliderLeft = ({ username }) => {
             </li>
             <li>
               <Link>
-                <div className="flex gap-2">
-                  {" "}
-                  <MdGroupWork className="size-7 " />
-                  Nhóm
-                </div>
-              </Link>
-            </li>
-            <li>
-              <Link>
-                <div className="flex  gap-2">
+                <div
+                  className={`flex  gap-2 ${
+                    isDarkMode ? "text-[#fff]" : "text-[#333]"
+                  }`}
+                >
                   {" "}
                   <FaAngleDown className="size-7 " />
                   Xem thêm

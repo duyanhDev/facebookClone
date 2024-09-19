@@ -4,7 +4,9 @@
 
 :root {
   --web-site: #f0f2f5;
-  --fb-logo: #0866ff;
+  --fb-logo: #3078ec;
+  --text-black: #000;
+  --text-white: #fff;
 }
 
 * {
@@ -12,15 +14,25 @@
   margin: 0;
   box-sizing: border-box;
 }
-
+.dark-mode {
+  background-color: var(--text-black);
+}
+.light-mode {
+  background-color: var(--web-site);
+}
 body {
   overflow-y: visible !important;
-  background-color: var(--web-site);
   height: auto;
+  font-family: "Helvetica Neue", Arial, sans-serif;
 
   .App {
-    .Header-content {
+    .dark-mode {
+      background-color: var(--text-black);
+    }
+    .light-mode {
       background-color: #fff;
+    }
+    .Header-content {
       position: fixed;
       right: 0;
       left: 0;

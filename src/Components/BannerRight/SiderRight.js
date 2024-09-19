@@ -24,6 +24,7 @@ const SiderRight = ({
   fetchSeenUserData,
   idFriend,
   fetchAddUserData,
+  isDarkMode,
 }) => {
   const [active, setActive] = useState(false);
   const [model, SetModel] = useState(false);
@@ -128,21 +129,37 @@ const SiderRight = ({
             </div>
             <div className="flex tems-center gap-3 p-6 cursor-pointer fanpage_top  -mt-9">
               <img className="" src={icon1} alt="icon lỗi" />
-              <h3>Duy Anh </h3>
+              <h3
+                className={`font-normal ${
+                  isDarkMode ? "text-[#fff]" : "text-[#333]"
+                }`}
+              >
+                Duy Anh{" "}
+              </h3>
             </div>
           </div>
           <div className={model ? "none active_model" : "none"}>
             <div className="mt-1 flex items-center gap-2 fanpage_top">
               <img className="" src={icon1} alt="icon lỗi" />
-              <h3>Duy Anh </h3>
+              <h3
+                className={`font-bold ${
+                  isDarkMode ? "text-[#fff]" : "text-[#333]"
+                }`}
+              >
+                Duy Anh{" "}
+              </h3>
             </div>
             <div className="mt-4 ml-4 flex items-center gap-2">
               <IoReloadCircleSharp className="size-5 text-[#65686c]" />
-              <span>Chuyển sang trang</span>
+              <span className={`${isDarkMode ? "text-[#fff]" : "text-[#333]"}`}>
+                Chuyển sang trang
+              </span>
             </div>
             <div className="mt-4 ml-4 flex items-center gap-2">
               <TbSpeakerphone className="size-5 text-[#65686c]" />
-              <span>Tạo bài viết quảng bá</span>
+              <span className={`${isDarkMode ? "text-[#fff]" : "text-[#333]"}`}>
+                Tạo bài viết quảng bá
+              </span>
             </div>
           </div>
         </div>
@@ -162,7 +179,13 @@ const SiderRight = ({
                 <span>{add[0]}</span>
                 <div className="pt-1 flex items-center ">
                   <img className="img_friends" src={lin} alt="lỗi" />
-                  <span className="ml-2">2 bạn chung</span>
+                  <span
+                    className={`ml-2 ${
+                      isDarkMode ? "text-[#fff]" : "text-[#333]"
+                    }`}
+                  >
+                    2 bạn chung
+                  </span>
                 </div>
               </div>
             </div>
@@ -190,7 +213,9 @@ const SiderRight = ({
           </div>
           <div className="flex items-center gap-2 mt-2 cursor-pointer">
             <CiGift className="size-9 text-[#0866ff]" />
-            <h3>Hôm nay là sinh của Duy Anh và 2 người khác.</h3>
+            <h3 className={`${isDarkMode ? "text-[#fff]" : "text-[#333]"}`}>
+              Hôm nay là sinh của Duy Anh và 2 người khác.
+            </h3>
           </div>
         </div>
 
@@ -219,7 +244,13 @@ const SiderRight = ({
                       {" "}
                       <img className="best_friend" src={icon1} alt="lỗi" />
                     </span>
-                    <span>{item.profile.name}</span>
+                    <span
+                      className={`${
+                        isDarkMode ? "text-[#fff]" : "text-[#333]"
+                      }`}
+                    >
+                      {item.profile.name}
+                    </span>
                   </div>
                 </div>
               );

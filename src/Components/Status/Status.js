@@ -10,7 +10,8 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
   let [video, setVideo] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
   const [previewVideo, setPreviewVideo] = useState("");
-
+  const [isCheckVideo, seIsCheckVideo] = useState(false);
+  const [isCheckImage, seIsCheckImage] = useState(false);
   const handleChanFile = (e) => {
     if (e.target && e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -18,11 +19,13 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
       if (file.type.startsWith("image/")) {
         setImage(file);
         setPreviewImage(URL.createObjectURL(file));
+        seIsCheckImage(true);
         setVideo(null); // Reset video nếu trước đó đã chọn
       } else if (file.type.startsWith("video/")) {
         setVideo(file);
+        setPreviewVideo(URL.createObjectURL(file));
         setImage(null); // Reset ảnh nếu trước đó đã chọn
-        setPreviewVideo(URL.createObjectURL(file)); // Hiển thị preview cho video
+        seIsCheckVideo(true); // Hiển thị preview cho video
       } else {
         toast.error("Chỉ hỗ trợ định dạng ảnh hoặc video!");
       }
@@ -47,6 +50,8 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
     setImage("");
     setPreviewImage();
     setPreviewVideo();
+    seIsCheckVideo(false);
+    seIsCheckImage(false);
   };
   useEffect(() => {
     getPostAPI();
@@ -93,7 +98,7 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
                       htmlFor="dropzone-file"
                       className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer   "
                     >
-                      {previewVideo && (
+                      {isCheckVideo && previewVideo && (
                         <video className="check_video" autoPlay muted loop>
                           <source
                             width="350x"
@@ -103,13 +108,20 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
                           />
                         </video>
                       )}
-                      {previewImage ? (
+                      {isCheckImage && previewImage && (
                         <img
                           src={previewImage}
                           className="w-full h-full object-cover"
                           alt="anh loi"
                         />
-                      ) : (
+                      )}
+                      <input
+                        id="dropzone-file"
+                        type="file"
+                        className="hidden"
+                        onChange={(e) => handleChanFile(e)}
+                      />
+                      {isCheckVideo === false && isCheckImage === false && (
                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                           <svg
                             className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
@@ -137,12 +149,6 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
                           </p>
                         </div>
                       )}
-                      <input
-                        id="dropzone-file"
-                        type="file"
-                        className="hidden"
-                        onChange={(e) => handleChanFile(e)}
-                      />
                     </label>
                   </div>
                 </div>

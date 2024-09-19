@@ -13,6 +13,7 @@ function App() {
   const [idFriend, setIdFriend] = useState("");
   const [friend, setFriend] = useState("");
   const currentUserId = localStorage.getItem("id");
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Memoize hàm feachBestFriend
   const feachBestFriend = useCallback(async () => {
@@ -77,15 +78,38 @@ function App() {
     feachBestFriend();
   }, [feachBestFriend]);
 
+  const HandleTogleBtn = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add("dark-mode");
+      document.body.classList.remove("light-mode");
+    } else {
+      document.body.classList.add("light-mode");
+      document.body.classList.remove("dark-mode");
+    }
+  }, [isDarkMode]);
   return (
     <div className="App">
-      <div className="Header-content flex justify-between">
-        <Header status={status} username={username} />
+      <div
+        className={`Header-content flex justify-between ${
+          isDarkMode ? "dark-mode" : "light-mode"
+        }`}
+      >
+        <Header
+          status={status}
+          username={username}
+          HandleTogleBtn={HandleTogleBtn}
+          isDarkMode={isDarkMode}
+          setIsDarkMode={setIsDarkMode}
+        />
       </div>
 
       <div className="content flex justify-between">
         <div className="left">
-          <SliderLeft username={username} />
+          <SliderLeft username={username} isDarkMode={isDarkMode} />
         </div>
         <div className="main w-auto m-auto flex justify-center items-center min-h-screen">
           <Outlet />
@@ -98,6 +122,7 @@ function App() {
             status={status}
             idFriend={idFriend}
             fetchAddUserData={fetchAddUserData}
+            isDarkMode={isDarkMode}
           />
         </div>
       </div>
