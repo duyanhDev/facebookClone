@@ -1,5 +1,14 @@
 const Comments = require("./../model/comment");
 
+const getComments = async () => {
+  try {
+    const result = await Comments.find({});
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const CreateComments = async (commentData) => {
   try {
     const newComment = await Comments.create(commentData);
@@ -37,5 +46,6 @@ const CreateComments = async (commentData) => {
 };
 
 module.exports = {
+  getComments,
   CreateComments,
 };

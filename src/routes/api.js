@@ -28,6 +28,11 @@ const {
   getLikesForPost,
 } = require("./../controllers/Post");
 
+const {
+  getCommentsAPI,
+  CreateCommentsAPI,
+} = require("./../controllers/comment");
+
 // crud users
 routerAPI.get("/users", getReadUserFB);
 routerAPI.post("/users", postUpdateUserFB);
@@ -86,4 +91,9 @@ routerAPI.post("/like", postLikeUser);
 routerAPI.get("/like/:postIds", getLikesForPost);
 routerAPI.post("/post", createNewPostUser);
 routerAPI.get("/post", getNewPostUsers);
+
+// comment
+routerAPI.get("/comment", getCommentsAPI);
+routerAPI.post("/comment", CreateCommentsAPI);
+
 module.exports = routerAPI;

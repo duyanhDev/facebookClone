@@ -13,7 +13,7 @@ const CommentSchema = new Schema(
       ref: "Users",
       required: true,
     },
-    authorName: { type: String, required: true },
+    authorName: { type: String },
     avatar: { type: String }, // Optionally store the author's avatar here as well
     content: { type: String, required: true },
     image: { type: String }, // The actual comment text
