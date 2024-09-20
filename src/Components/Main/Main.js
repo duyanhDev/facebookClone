@@ -10,9 +10,10 @@ import { MdVideoCameraFront, MdInsertEmoticon } from "react-icons/md";
 import { BsFillFileImageFill } from "react-icons/bs";
 import Status from "../Status/Status";
 import {
-  fetchLikesFromApi,
   getPostNewUsers,
   postLikeFromAPI,
+  getCommentsAPI,
+  CreateCommentsAPI,
 } from "../../service/apiAxios";
 import { IoEllipsisHorizontal, IoEarth } from "react-icons/io5";
 import { AiOutlineLike } from "react-icons/ai";
@@ -28,6 +29,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchLikesCount } from "../../reduxToolKit/like/likesSlice";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { toast } from "react-toastify";
 
 const Main = () => {
   const userId = localStorage.getItem("id");
@@ -35,6 +37,16 @@ const Main = () => {
   const sliderRef = useRef(null);
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [comments, setComments] = useState([]);
+
+  let [content, setContent] = useState("");
+  let [image, setImage] = useState(null);
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setImage(e.target.files[0]);
+    }
+  };
   let settings = {
     dots: false,
     infinite: true,
@@ -61,11 +73,11 @@ const Main = () => {
     if (res && res.data && res.data.data && res.status === 200) {
       setData(res.data.data);
     }
-  });
+  }, []);
 
   useEffect(() => {
     getPostAPI();
-  }, []);
+  }, [getPostAPI]);
 
   const getTimeAgoInMinutes = (postTime) => {
     const now = new Date(); // Current time
@@ -200,6 +212,38 @@ const Main = () => {
     // Kích hoạt sự kiện click cho thẻ input type="file"
     fileInputRef.current.click();
   };
+
+  const FetchGetComment = async () => {
+    try {
+      let res = await getCommentsAPI();
+      if (res && res.status === 200) {
+        setComments(res.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };
+
+  const handleComment = async (postId) => {
+    console.log("xx");
+    try {
+      let data = await CreateCommentsAPI(postId, userId, content, image);
+      if (data) {
+        toast.success("Bình luận thành công");
+        setContent("");
+        setImage(null);
+      } else {
+        toast.error("Bình luận bị lỗi");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    FetchGetComment();
+  }, [handleComment]);
 
   return (
     <div className="slider-container">
@@ -466,11 +510,39 @@ const Main = () => {
                   Chia Sẻ
                 </span>
               </div>
+
               <div className="comment_post">
+                {comments.length > 0 ? (
+                  comments.map((comment, index) => {
+                    if (comment.postId === item._id) {
+                      return (
+                        <div
+                          key={comment._id}
+                          className="flex items-center gap-1"
+                        >
+                          <img
+                            className="w-10 h-10 rounded-full"
+                            src={comment.avatar}
+                            alt="avart lỗi"
+                          />
+                          <div className="block ml-1 comment_bg">
+                            <span>{comment.authorName}</span>
+                            <p>{comment.content}</p>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return null;
+                    }
+                  })
+                ) : (
+                  <p>Không có bình luận</p>
+                )}
+
                 <label htmlFor="chat" className="sr-only">
                   Your message
                 </label>
-                <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100">
+                <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100 mt-3">
                   <button
                     onClick={handleClick}
                     type="button"
@@ -507,6 +579,7 @@ const Main = () => {
                   <input
                     type="file"
                     ref={fileInputRef}
+                    onChange={handleFileChange}
                     style={{ display: "none" }} // Ẩn input
                   />
                   <button
@@ -535,9 +608,13 @@ const Main = () => {
                     rows={1}
                     className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 dark:bg-white dark:placeholder-gray-400 dark:text-[#333] focus:bg-white outline-none"
                     placeholder={`Bình luận dưới tên là ${username}`}
-                    defaultValue={""}
+                    onChange={(e) => setContent(e.target.value)}
+                    value={content}
                   />
-                  <button className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600">
+                  <button
+                    onClick={() => handleComment(item._id)}
+                    className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
+                  >
                     <svg
                       className="w-5 h-5 rotate-90 rtl:-rotate-90"
                       aria-hidden="true"

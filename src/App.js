@@ -112,7 +112,7 @@ function App() {
           <SliderLeft username={username} isDarkMode={isDarkMode} />
         </div>
         <div className="main w-auto m-auto flex justify-center items-center min-h-screen">
-          <Outlet />
+          <Outlet isDarkMode={isDarkMode} />
         </div>
         <div className="right mt-4">
           <SiderRight

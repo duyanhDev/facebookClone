@@ -159,6 +159,40 @@ const postLikeFromAPI = async (_id, authorId, userId, reaction) => {
   return await axios.post("http://localhost:8001/v1/api/like", data);
 };
 
+/// tính năng bình luận
+
+const getCommentsAPI = async () => {
+  try {
+    return await axios.get("http://localhost:8001/v1/api/comment");
+  } catch (error) {
+    console.log(error);
+    return;
+  }
+};
+
+const CreateCommentsAPI = async (
+  postId,
+  authorId,
+  content,
+  image,
+  replies = []
+) => {
+  const data = new FormData();
+  data.append("postId", postId);
+  data.append("authorId", authorId);
+  data.append("content", content);
+  data.append("image", image);
+
+  // Kiểm tra nếu replies là một mảng và append từng phần tử
+  if (Array.isArray(replies)) {
+    replies.forEach((reply) => {
+      data.append("replies[]", reply); // Sử dụng 'replies[]' để chỉ định mảng
+    });
+  }
+
+  return await axios.post("http://localhost:8001/v1/api/comment", data);
+};
+
 export {
   getUser,
   getAddUser,
@@ -175,4 +209,6 @@ export {
   fetchLikesFromApi,
   postLikeFromAPI,
   postRegisterUser,
+  getCommentsAPI,
+  CreateCommentsAPI,
 };
