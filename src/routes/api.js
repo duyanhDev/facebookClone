@@ -31,6 +31,8 @@ const {
 const {
   getCommentsAPI,
   CreateCommentsAPI,
+  postLikeComment,
+  getLikesForComment,
 } = require("./../controllers/comment");
 
 // crud users
@@ -95,5 +97,8 @@ routerAPI.get("/post", getNewPostUsers);
 // comment
 routerAPI.get("/comment", getCommentsAPI);
 routerAPI.post("/comment", CreateCommentsAPI);
+//like comment
+routerAPI.get("/likeComment/:postIds", getLikesForComment);
+routerAPI.post("/likecomment", postLikeComment);
 
 module.exports = routerAPI;

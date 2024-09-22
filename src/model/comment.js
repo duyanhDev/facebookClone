@@ -14,9 +14,9 @@ const CommentSchema = new Schema(
       required: true,
     },
     authorName: { type: String },
-    avatar: { type: String }, // Optionally store the author's avatar here as well
+    avatar: { type: String },
     content: { type: String, required: true },
-    image: { type: String }, // The actual comment text
+    image: { type: String },
     likes: [
       {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },

@@ -1,8 +1,14 @@
 const Comments = require("./../model/comment");
-
+const Users = require("./../model/users");
 const getComments = async () => {
   try {
-    const result = await Comments.find({});
+    const result = await Comments.find({})
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "likes.userId", // Path to the field to populate
+        select: "profile.name", // Select the name field in the profile subdocument
+      })
+      .exec();
     return result;
   } catch (error) {
     console.log(error);
@@ -44,8 +50,78 @@ const CreateComments = async (commentData) => {
     throw error; // Re-throw the error to be handled by the calling function or middleware
   }
 };
+const postCommentLike = async (_id, authorId, userId, reaction) => {
+  try {
+    if (!_id || !authorId || !userId || !reaction) {
+      throw new Error("Invalid input parameters");
+    }
+
+    // Lấy thông tin người dùng
+    const user = await Users.findById(userId).select("name"); // Chỉ chọn tên
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const userName = user.name;
+
+    // Kiểm tra nếu bài viết tồn tại và người dùng đã thích
+    const post = await Comments.findOne({
+      _id,
+      authorId,
+      "likes.userId": userId,
+    });
+
+    let res;
+
+    if (post) {
+      if (reaction === "like") {
+        // Nếu reaction là 'like', gỡ bỏ like
+        res = await Comments.findOneAndUpdate(
+          { _id, authorId },
+          {
+            $pull: { likes: { userId: userId } }, // Gỡ bỏ like
+          },
+          { new: true } // Trả về tài liệu đã cập nhật
+        );
+      } else {
+        // Nếu người dùng đã thích, cập nhật reaction của like hiện tại
+        res = await Comments.findOneAndUpdate(
+          { _id, authorId, "likes.userId": userId },
+          {
+            $set: {
+              "likes.$.reaction": reaction, // Cập nhật reaction
+            },
+          },
+          { new: true } // Trả về tài liệu đã cập nhật
+        );
+      }
+    } else {
+      // Nếu người dùng chưa thích bài viết, thêm like mới
+      res = await Comments.findOneAndUpdate(
+        { _id, authorId },
+        {
+          $push: {
+            likes: {
+              userId: userId,
+              reaction: reaction, // Thêm reaction
+              userName: userName, // Thêm tên người dùng
+            },
+          },
+        },
+        { new: true } // Trả về tài liệu đã cập nhật
+      );
+    }
+
+    return res;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error toggling like: " + error.message);
+  }
+};
 
 module.exports = {
   getComments,
   CreateComments,
+  postCommentLike,
 };
