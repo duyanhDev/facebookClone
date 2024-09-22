@@ -9,6 +9,7 @@ export const fetchLikesCount = createAsyncThunk(
     return response; // Make sure this is the array of like objects
   }
 );
+
 const likesSlice = createSlice({
   name: "likes",
   initialState: {

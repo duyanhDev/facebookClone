@@ -14,6 +14,7 @@ import {
   postLikeFromAPI,
   getCommentsAPI,
   CreateCommentsAPI,
+  postCommentLikes,
 } from "../../service/apiAxios";
 import { IoEllipsisHorizontal, IoEarth } from "react-icons/io5";
 import { AiOutlineLike } from "react-icons/ai";
@@ -27,10 +28,11 @@ import {
 import { PiShareFatThin } from "react-icons/pi";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLikesCount } from "../../reduxToolKit/like/likesSlice";
+import { fetchLikesCountComment } from "../../reduxToolKit/comment/commentSlice";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { toast } from "react-toastify";
-
+import { useOutletContext } from "react-router-dom";
 const Main = () => {
   const userId = localStorage.getItem("id");
   const username = localStorage.getItem("name");
@@ -41,6 +43,8 @@ const Main = () => {
 
   let [content, setContent] = useState("");
   let [image, setImage] = useState(null);
+
+  const { isDarkMode } = useOutletContext();
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -101,6 +105,7 @@ const Main = () => {
 
   const dispatch = useDispatch();
   const totalLikes = useSelector((state) => state.likes.totalLikes);
+  const totalLikesComment = useSelector((state) => state.comments.totalLikes);
 
   useEffect(() => {
     const postIds = data.map((item) => item._id).join(",");
@@ -109,7 +114,21 @@ const Main = () => {
     }
   }, [data, dispatch]);
 
+  useEffect(() => {
+    const postIDs = comments.map((item) => item._id).join(",");
+    if (postIDs) {
+      dispatch(fetchLikesCountComment(postIDs));
+    }
+  }, [comments, dispatch]);
+
   const likesMap = totalLikes.reduce((acc, like) => {
+    const postId = like._id;
+    if (postId) {
+      acc[postId] = like.totalLikes;
+    }
+    return acc;
+  }, {});
+  const likesMapComment = totalLikesComment.reduce((acc, like) => {
     const postId = like._id;
     if (postId) {
       acc[postId] = like.totalLikes;
@@ -123,7 +142,13 @@ const Main = () => {
     if (res) {
     }
   };
+  const handleClickCommentLike = async (_id, authorId, reaction) => {
+    let res = await postCommentLikes(_id, authorId, userId, reaction);
 
+    setSelectedReaction(reaction);
+    if (res) {
+    }
+  };
   const getReactionIcon = (reaction) => {
     switch (reaction) {
       case "like":
@@ -190,6 +215,7 @@ const Main = () => {
     const grouped = likes.reduce((acc, like) => {
       if (like.userId && like.userId.profile) {
         const userName = like.userId.profile.name;
+
         const reaction = like.reaction || "Unknown";
 
         if (!acc[reaction]) {
@@ -225,8 +251,10 @@ const Main = () => {
     }
   };
 
+  const [loading, setLoading] = useState(false);
+
   const handleComment = async (postId) => {
-    console.log("xx");
+    setLoading(true);
     try {
       let data = await CreateCommentsAPI(postId, userId, content, image);
       if (data) {
@@ -238,6 +266,8 @@ const Main = () => {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -298,7 +328,11 @@ const Main = () => {
       <button className="custom-next" onClick={handleNextClick}>
         &gt;
       </button>
-      <div className="content_status m-auto text-center mt-8 h-32 ">
+      <div
+        className={`content_status ${
+          isDarkMode ? "bg-[#333334]" : "bg-[#ffffff]"
+        } m-auto text-center mt-8 h-32 `}
+      >
         <div className="w-full flex items-center gap-4 ml-4  bottom_text mt-5">
           <img src={avtart} alt="lỗi" className="image_status" />
           <Status
@@ -310,7 +344,7 @@ const Main = () => {
           />
         </div>
 
-        <div className="live flex justify-between pt-12 ml-3 ">
+        <div className={`live flex justify-between pt-12 ml-3 `}>
           <div className="w-full flex justify-between items-center -mt-10 cursor-pointer ">
             <div className="flex items-center justify-center gap-2">
               <MdVideoCameraFront className="size-8 text-red-800 " />
@@ -335,10 +369,13 @@ const Main = () => {
             (like) =>
               like.userId && like.userId._id.toString() === userId.toString()
           )?.reaction;
+          console.log(item.likes);
 
           return (
             <div
-              className="content_status m-auto mt-8 min-h-max p-5"
+              className={`   ${
+                isDarkMode ? "bg-[#333334]" : "bg-[#ffffff]"
+              } content_status m-auto mt-8 min-h-max p-5`}
               key={item._id}
             >
               <div
@@ -514,6 +551,12 @@ const Main = () => {
               <div className="comment_post">
                 {comments.length > 0 ? (
                   comments.map((comment, index) => {
+                    const userReaction1 = item.likes.find(
+                      (like) =>
+                        like.userId &&
+                        like.userId._id.toString() === userId.toString()
+                    )?.reaction;
+
                     if (comment.postId === item._id) {
                       return (
                         <div
@@ -521,13 +564,144 @@ const Main = () => {
                           className="flex items-center gap-1"
                         >
                           <img
-                            className="w-10 h-10 rounded-full"
+                            className="w-10 h-10 rounded-full -mt-7"
                             src={comment.avatar}
                             alt="avart lỗi"
                           />
-                          <div className="block ml-1 comment_bg">
-                            <span>{comment.authorName}</span>
-                            <p>{comment.content}</p>
+                          <div className="block ml-1">
+                            <div className=" comment_bg mt-4">
+                              <span>{comment.authorName}</span>
+                              <p>{comment.content}</p>
+                              {comment.image && (
+                                <img
+                                  className="w-32 h-32 object-cover rounded-lg"
+                                  src={comment.image}
+                                  alt="ảnh bình luận"
+                                />
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-1 comments_like">
+                              <span className="comment_text">
+                                {getTimeAgoInMinutes(comment.createdAt)}
+                              </span>
+                              <div className="comment_text like_hover">
+                                <span
+                                  onClick={() =>
+                                    handleClickCommentLike(
+                                      comment._id,
+                                      comment.authorId,
+                                      "like"
+                                    )
+                                  }
+                                >
+                                  {userReaction1 ? (
+                                    getReactionIcon(userReaction1)
+                                  ) : (
+                                    <>Thích</>
+                                  )}
+                                </span>
+                                <div className="laugh-icon flex items-center gap-5 absolute ">
+                                  <span className="icon-animation">
+                                    <AiOutlineLike
+                                      size={30}
+                                      color="blue"
+                                      onClick={() =>
+                                        handleClickCommentLike(
+                                          comment._id,
+                                          comment.authorId,
+                                          "like"
+                                        )
+                                      }
+                                    />
+                                  </span>
+                                  <span
+                                    className="icon-animation"
+                                    onClick={() =>
+                                      handleClickCommentLike(
+                                        comment._id,
+                                        comment.authorId,
+                                        "love"
+                                      )
+                                    }
+                                  >
+                                    <FaHeart size={30} color="red" />
+                                  </span>
+
+                                  <span className="icon-animation">
+                                    <FaRegFaceGrinHearts
+                                      size={30}
+                                      color="orange"
+                                      onClick={() =>
+                                        handleClickCommentLike(
+                                          comment._id,
+                                          comment.authorId,
+                                          "thương thương"
+                                        )
+                                      }
+                                    />
+                                  </span>
+                                  <span className="icon-animation">
+                                    <FaRegLaughSquint
+                                      size={30}
+                                      color="orange"
+                                      onClick={() =>
+                                        handleClickCommentLike(
+                                          comment._id,
+                                          comment.authorId,
+                                          "haha"
+                                        )
+                                      }
+                                    />
+                                  </span>
+                                  <span className="icon-animation">
+                                    <FaRegFaceSurprise
+                                      size={30}
+                                      color="orange"
+                                      onClick={() =>
+                                        handleClickCommentLike(
+                                          comment._id,
+                                          comment.authorId,
+                                          "wow"
+                                        )
+                                      }
+                                    />
+                                  </span>
+                                  <span className="icon-animation">
+                                    <FaRegFaceSadTear
+                                      size={30}
+                                      color="orange"
+                                      onClick={() =>
+                                        handleClickCommentLike(
+                                          comment._id,
+                                          comment.authorId,
+                                          "sad"
+                                        )
+                                      }
+                                    />
+                                  </span>
+                                  <span className="icon-animation">
+                                    <FaRegFaceTired
+                                      size={30}
+                                      color="orange"
+                                      onClick={() =>
+                                        handleClickCommentLike(
+                                          comment._id,
+                                          comment.authorId,
+                                          "angry"
+                                        )
+                                      }
+                                    />
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="comment_text">Phản hồi</div>
+                              <div className="comment_text flex items-center gap-2">
+                                {renderUsersByReaction(comment.likes)}
+                                {likesMapComment[comment._id]
+                                  ? `${likesMapComment[comment._id]} `
+                                  : null}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       );

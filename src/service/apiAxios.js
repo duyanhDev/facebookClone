@@ -193,6 +193,32 @@ const CreateCommentsAPI = async (
   return await axios.post("http://localhost:8001/v1/api/comment", data);
 };
 
+// thêm like comment
+
+const postCommentLikes = async (_id, authorId, userId, reaction) => {
+  const data = {
+    _id,
+    authorId,
+    like: {
+      userId: userId,
+      reaction: reaction,
+    },
+  };
+  return await axios.post("http://localhost:8001/v1/api/likecomment", data);
+};
+
+// get like comment
+const fetchLikesCommentFromApi = async (postId) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8001/v1/api/likeComment/${postId}`
+    );
+    return response.data; // This should be an array of likes
+  } catch (error) {
+    throw error;
+  }
+};
+
 export {
   getUser,
   getAddUser,
@@ -211,4 +237,6 @@ export {
   postRegisterUser,
   getCommentsAPI,
   CreateCommentsAPI,
+  postCommentLikes,
+  fetchLikesCommentFromApi,
 };
