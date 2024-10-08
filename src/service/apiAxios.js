@@ -2,7 +2,7 @@ import axios from "./../untils/axios";
 // list Users
 const getUser = async () => {
   try {
-    const response = await axios.get("/v1/api/users");
+    const response = await axios.get("http://localhost:8001/v1/v1/api/users");
     return response.data; // Return the data directly
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -23,11 +23,11 @@ const putAddFriend = async (userId, friendId) => {
     );
   } catch (error) {
     console.log(error);
-    return null;
+    return;
   }
 };
 
-// xem tin nhắn
+// xem tin nhắn 1 vs 1
 const getMessagesBetweenUsers = async (senderId, receiverId) => {
   try {
     const response = await axios.get(
@@ -39,7 +39,12 @@ const getMessagesBetweenUsers = async (senderId, receiverId) => {
     throw error; // Ném lỗi để xử lý ở nơi gọi hàm
   }
 };
-
+// xem all tin nhắn
+const getAllMessAPI = async (receiverId) => {
+  return await axios.get(
+    `http://localhost:8001/v1/api/allmessage/${receiverId}`
+  );
+};
 // gửi tin nhắn
 const postMessages = async (senderId, receiverId, content) => {
   const data = new FormData();
@@ -213,10 +218,18 @@ const fetchLikesCommentFromApi = async (postId) => {
     const response = await axios.get(
       `http://localhost:8001/v1/api/likeComment/${postId}`
     );
-    return response.data; // This should be an array of likes
+    return response.data;
   } catch (error) {
     throw error;
   }
+};
+
+const getCountComments = async (postIdArray) => {
+  return await axios.get(`http://localhost:8001/v1/api/comentCount`, {
+    params: {
+      postId: postIdArray, // Gửi mảng postId
+    },
+  });
 };
 
 export {
@@ -224,6 +237,7 @@ export {
   getAddUser,
   putAddFriend,
   getMessagesBetweenUsers,
+  getAllMessAPI,
   postMessages,
   getSeenUser,
   getBestfriend,
@@ -239,4 +253,5 @@ export {
   CreateCommentsAPI,
   postCommentLikes,
   fetchLikesCommentFromApi,
+  getCountComments,
 };

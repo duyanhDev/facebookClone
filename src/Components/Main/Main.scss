@@ -24,7 +24,7 @@
   .custom-prev,
   .custom-next {
     position: absolute;
-    top: 2%;
+    // top: 1%;
     width: 30px;
     height: 30px;
     background-color: #ddd;
@@ -38,7 +38,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: -38px;
+    margin-top: -141px !important;
   }
 
   .custom-prev {
@@ -99,6 +99,7 @@
     max-width: 480px;
     margin: auto;
     margin-top: 20px;
+    border: 1px solid #ddd;
     .bottom_text {
       border-bottom: 1px solid #626262;
       margin: auto;
@@ -135,6 +136,10 @@
       margin-top: 7px;
       border-top: 1px solid rgba(220, 220, 220, 1);
       padding: 10px;
+
+      span.reaction-icon {
+        margin-top: 11px;
+      }
     }
     .comment_bg {
       background-color: rgba(240, 240, 240, 1);
@@ -233,6 +238,19 @@
         &:hover .laugh-icon {
           visibility: visible;
         }
+      }
+    }
+    .comment_par {
+      .comment_hover {
+        background-color: rgba(0, 0, 0, 0.8);
+        display: none;
+        border: 1px solid #ddd;
+        padding: 5px;
+        z-index: 1;
+        border-radius: 5px;
+      }
+      &:hover .comment_hover {
+        display: block;
       }
     }
   }

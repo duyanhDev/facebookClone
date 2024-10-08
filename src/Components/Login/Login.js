@@ -9,10 +9,10 @@ const Login = () => {
   const navigate = useNavigate();
   // Handle login
   const { setIsAuthenticated } = useContext(AuthContext);
-
+  const { setRole } = useContext(AuthContext);
   const handleLogin = async () => {
     try {
-      let res = await postLoginUser(email, password);
+      // Kiểm tra định dạng email
       let InVaild =
         /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       if (!InVaild.test(email)) {
@@ -20,23 +20,34 @@ const Login = () => {
         return;
       }
 
-      if (res && res.EC === 0) {
-        const { name, id, avatar } = res.data;
-        const { token, refreshToken } = res;
-        console.log(res.data);
+      // Gọi API đăng nhập
+      let res = await postLoginUser(email, password);
+      console.log("API response:", res); // Log phản hồi từ API
 
-        // Save token to localStorage
+      if (res && res.EC === 0) {
+        const { name, id, avatar, role } = res.data;
+        const { token, refreshToken } = res;
+
+        // Lưu vào localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("name", name);
         localStorage.setItem("avatar", avatar);
         localStorage.setItem("id", id);
         localStorage.setItem("refreshToken", refreshToken);
+        localStorage.setItem("role", role);
 
-        // Update authentication state
+        // Cập nhật trạng thái xác thực và vai trò
         setIsAuthenticated(true);
+        setRole(role); // Cập nhật vai trò
 
         toast.success("Đăng nhập thành công");
-        navigate("/");
+
+        // Điều hướng đến trang chính hoặc trang admin nếu là admin
+        if (role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       } else {
         toast.error(res.error || "Đăng nhập thất bại");
       }

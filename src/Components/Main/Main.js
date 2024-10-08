@@ -15,6 +15,7 @@ import {
   getCommentsAPI,
   CreateCommentsAPI,
   postCommentLikes,
+  getCountComments,
 } from "../../service/apiAxios";
 import { IoEllipsisHorizontal, IoEarth } from "react-icons/io5";
 import { AiOutlineLike } from "react-icons/ai";
@@ -45,6 +46,15 @@ const Main = () => {
   let [image, setImage] = useState(null);
 
   const { isDarkMode } = useOutletContext();
+  const avatar = localStorage.getItem("avatar");
+
+  const dispatch = useDispatch();
+  const totalLikes = useSelector((state) => state.likes.totalLikes);
+  const totalLikesComment = useSelector((state) => state.comments.totalLikes);
+
+  const [countComment, setCountComment] = useState([]);
+  const [shouldRefetch, setShouldRefetch] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -103,10 +113,6 @@ const Main = () => {
     }
   };
 
-  const dispatch = useDispatch();
-  const totalLikes = useSelector((state) => state.likes.totalLikes);
-  const totalLikesComment = useSelector((state) => state.comments.totalLikes);
-
   useEffect(() => {
     const postIds = data.map((item) => item._id).join(",");
     if (postIds) {
@@ -143,32 +149,110 @@ const Main = () => {
     }
   };
   const handleClickCommentLike = async (_id, authorId, reaction) => {
-    let res = await postCommentLikes(_id, authorId, userId, reaction);
+    try {
+      // Optimistically update the UI
+      setSelectedReaction(reaction);
 
-    setSelectedReaction(reaction);
-    if (res) {
+      // Post the reaction
+      let res = await postCommentLikes(_id, authorId, userId, reaction);
+
+      if (res && res.success) {
+        // Optionally handle success (like updating likes count if needed)
+        console.log("Reaction posted successfully");
+        FetchGetComment();
+      } else {
+        // Handle failure (rollback UI change or show error message)
+        setSelectedReaction(null);
+        console.error("Failed to post reaction");
+        FetchGetComment();
+      }
+    } catch (error) {
+      // Handle error during the request
+      console.error("An error occurred:", error);
+      setSelectedReaction(null);
     }
   };
+
   const getReactionIcon = (reaction) => {
     switch (reaction) {
       case "like":
-        return <AiOutlineLike size={20} height={20} color="blue" />;
+        return <AiOutlineLike size={20} height={20} color="#4267B2" />; // Màu xanh của nút Like Facebook
       case "love":
-        return <FaHeart size={20} color="red" />;
+        return <FaHeart size={20} className="text-[#F33E58] font-bold" />; // Màu đỏ của Love
       case "thương thương":
-        return <FaRegFaceGrinHearts size={20} height={20} color="orange" />;
+        return (
+          <FaRegFaceGrinHearts
+            size={20}
+            height={20}
+            className="text-[rgb(247,177,37)] font-bold"
+          />
+        ); // Màu vàng của "Thương thương"
       case "haha":
-        return <FaRegLaughSquint size={20} height={20} color="orange" />;
+        return (
+          <FaRegLaughSquint
+            size={20}
+            height={20}
+            className="text-[rgb(247,177,37)] font-bold"
+          />
+        ); // Màu vàng của Haha
       case "wow":
-        return <FaRegFaceSurprise size={20} height={20} color="orange" />;
+        return (
+          <FaRegFaceSurprise
+            size={20}
+            height={20}
+            className="text-[rgb(247,177,37)] font-bold"
+          />
+        ); // Màu vàng của Wow
       case "sad":
-        return <FaRegFaceSadTear size={20} height={20} color="orange" />;
+        return (
+          <FaRegFaceSadTear
+            size={20}
+            height={20}
+            className="text-[rgb(247,177,37)] font-bold"
+          />
+        ); // Màu cam nhạt của Sad
       case "angry":
-        return <FaRegFaceTired size={20} height={20} color="orange" />;
+        return (
+          <FaRegFaceTired
+            size={20}
+            height={20}
+            className="text-[rgb(233,113,15)] font-bold"
+          />
+        ); // Màu đỏ của Angry
       default:
-        return <AiOutlineLike className="text-gray-600" />;
+        return <AiOutlineLike size={20} className="text-gray-600" />; // Mặc định là màu xám
     }
   };
+
+  const getReactionIcon1 = (reaction) => {
+    switch (reaction) {
+      case "like":
+        return <span className="text-[rgb(8,102,255)] font-bold">Thích</span>;
+      case "love":
+        return (
+          <span className="text-[rgb(243,62,88)] font-bold">Yêu thích</span>
+        );
+      case "thương thương":
+        return (
+          <span className="text-[rgb(247,177,37)] font-bold">
+            Thương thương
+          </span>
+        );
+      case "haha":
+        return <span className="text-[rgb(247,177,37)] font-bold">Haha</span>;
+      case "wow":
+        return <span className="text-[rgb(247,177,37)] font-bold">Wow</span>;
+      case "sad":
+        return <span className="text-[rgb(247,177,37)] font-bold">Buồn</span>;
+      case "angry":
+        return (
+          <span className="text-[rgb(233,113,15)] font-bold">Phẫn Nộ</span>
+        );
+      default:
+        return <span className="like">Thích</span>;
+    }
+  };
+
   const getReactionLabel = (reaction) => {
     switch (reaction) {
       case "like":
@@ -235,23 +319,24 @@ const Main = () => {
   const fileInputRef = useRef(null);
 
   const handleClick = () => {
-    // Kích hoạt sự kiện click cho thẻ input type="file"
     fileInputRef.current.click();
   };
 
-  const FetchGetComment = async () => {
+  const FetchGetComment = useCallback(async () => {
     try {
       let res = await getCommentsAPI();
+
       if (res && res.status === 200) {
         setComments(res.data.data);
       }
     } catch (error) {
       console.log(error);
-      return null;
     }
-  };
+  }, []);
 
-  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    FetchGetComment();
+  }, [FetchGetComment]);
 
   const handleComment = async (postId) => {
     setLoading(true);
@@ -261,6 +346,31 @@ const Main = () => {
         toast.success("Bình luận thành công");
         setContent("");
         setImage(null);
+
+        // Update comments immediately
+        setComments((prevComments) => {
+          if (!prevComments.some((comment) => comment.id === data.id)) {
+            return [...prevComments, data];
+          }
+          return prevComments;
+        });
+
+        // Update comment count immediately
+        setCountComment((prevCount) => {
+          const updatedCount = [...prevCount];
+          const index = updatedCount.findIndex(
+            (item) => item.postId === postId
+          );
+          if (index !== -1) {
+            updatedCount[index].count += 1;
+          } else {
+            updatedCount.push({ postId, count: 1 });
+          }
+          return updatedCount;
+        });
+
+        // Mark for refetch
+        setShouldRefetch(true);
       } else {
         toast.error("Bình luận bị lỗi");
       }
@@ -270,10 +380,39 @@ const Main = () => {
       setLoading(false);
     }
   };
+  const handleChangeEnter = (e) => {
+    if (e.key === "Enter") {
+      console.log("xx");
+
+      e.preventDefault();
+      handleComment();
+    }
+  };
+
+  const getCountComment = useCallback(async () => {
+    if (comments.length === 0) return;
+    try {
+      const postIds = comments.map((item) => item.postId);
+      let res = await getCountComments(postIds);
+      if (res && res.data.data) {
+        setCountComment(res.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching comment count:", error);
+    }
+  }, [comments]);
 
   useEffect(() => {
-    FetchGetComment();
-  }, [handleComment]);
+    if (shouldRefetch) {
+      FetchGetComment(); // Refetch comments
+      getCountComment(); // Refetch comment counts
+      setShouldRefetch(false); // Reset refetch flag
+    }
+  }, [shouldRefetch, FetchGetComment, getCountComment]);
+
+  useEffect(() => {
+    getCountComment(); // Fetch comment counts on mount
+  }, [getCountComment]);
 
   return (
     <div className="slider-container">
@@ -283,7 +422,11 @@ const Main = () => {
         className="w_slider flex gap-1  cursor-pointer"
       >
         <div className="flex items-center  ">
-          <img className="slider-image" src={avtart} alt="ảnh lỗi" />
+          {avatar ? (
+            <img className="slider-image" src={avatar} alt="ảnh lỗi" />
+          ) : (
+            <img className="slider-image" src={avtart} alt="ảnh lỗi" />
+          )}
           <div className="news ">
             <div className="icon">
               <AiFillPlusCircle className="size-9 text-[#0866ff]" />
@@ -369,7 +512,6 @@ const Main = () => {
             (like) =>
               like.userId && like.userId._id.toString() === userId.toString()
           )?.reaction;
-          console.log(item.likes);
 
           return (
             <div
@@ -408,13 +550,14 @@ const Main = () => {
                 <div className="w-full flex items-center justify-center m-auto">
                   <Zoom>
                     <picture className="w-full h-full">
-                      {item.image ? (
+                      {item.image && (
                         <img
                           className="image_post"
                           src={item.image}
                           alt="ảnh lỗi"
                         />
-                      ) : (
+                      )}
+                      {item.video && (
                         <video className="image_post" controls loop>
                           <source
                             src={item.video}
@@ -439,10 +582,35 @@ const Main = () => {
                   </div>
                 </div>
                 <div className="w-full flex justify-end items-center -mt-2">
-                  <span className="pr-10">
-                    {" "}
-                    <FaRegComment size={20} color="gray" />
-                  </span>
+                  <div className="pr-10 flex items-center g-2  cursor-pointer comment_par">
+                    {countComment && countComment.length > 0 && (
+                      <span>
+                        {
+                          countComment.find(
+                            (count) => count.postId === item._id
+                          )?.totalUniqueCommenters
+                        }
+                      </span>
+                    )}
+                    <FaRegComment size={20} color="gray" className="ml-1" />{" "}
+                    {Array.isArray(countComment) &&
+                      countComment.length > 0 &&
+                      countComment
+                        .filter((itemId) => itemId.postId === item._id) // Only filter out matching post IDs
+                        .map((itemId, index) => (
+                          <div
+                            className="mt-20 absolute text-nowrap comment_hover text-white"
+                            key={itemId.postId}
+                          >
+                            {Array.isArray(itemId.commenters) &&
+                              itemId.commenters.map((cmt, index) => (
+                                <div key={index}>
+                                  <span>{cmt.name}</span>
+                                </div>
+                              ))}
+                          </div>
+                        ))}
+                  </div>
                   <span>
                     {" "}
                     <PiShareFatThin size={20} color="gray" />
@@ -551,7 +719,7 @@ const Main = () => {
               <div className="comment_post">
                 {comments.length > 0 ? (
                   comments.map((comment, index) => {
-                    const userReaction1 = item.likes.find(
+                    const userReaction1 = comment.likes.find(
                       (like) =>
                         like.userId &&
                         like.userId._id.toString() === userId.toString()
@@ -595,7 +763,7 @@ const Main = () => {
                                   }
                                 >
                                   {userReaction1 ? (
-                                    getReactionIcon(userReaction1)
+                                    getReactionIcon1(userReaction1)
                                   ) : (
                                     <>Thích</>
                                   )}
@@ -784,6 +952,7 @@ const Main = () => {
                     placeholder={`Bình luận dưới tên là ${username}`}
                     onChange={(e) => setContent(e.target.value)}
                     value={content}
+                    onKeyDown={handleChangeEnter}
                   />
                   <button
                     onClick={() => handleComment(item._id)}

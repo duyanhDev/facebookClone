@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./Status.scss";
 import { PostCreateNew } from "../../service/apiAxios";
 import { toast } from "react-toastify";
+import ClipLoader from "react-spinners/ClipLoader";
 export default function Status({ showModal, setShowModal, getPostAPI }) {
   const authorId = localStorage.getItem("id");
 
@@ -12,6 +13,7 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
   const [previewVideo, setPreviewVideo] = useState("");
   const [isCheckVideo, seIsCheckVideo] = useState(false);
   const [isCheckImage, seIsCheckImage] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   const handleChanFile = (e) => {
     if (e.target && e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -31,17 +33,31 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
       }
     }
   };
+  const handleChangeEnter = (e) => {
+    if (e.key === "Enter") {
+      APICreatePost();
+      console.log("xx");
+    }
+  };
 
   const APICreatePost = async () => {
-    let res = await PostCreateNew(authorId, content, image, video);
-    if (res && res.status === 201) {
-      toast.success("Đăng bài thành công");
-    } else {
-      toast.error("Lỗi đăng bài");
+    setLoading(true);
+    try {
+      setTimeout(async () => {
+        let res = await PostCreateNew(authorId, content, image, video);
+        if (res && res.status === 201) {
+          toast.success("Đăng bài thành công");
+        } else {
+          toast.error("Lỗi đăng bài");
+        }
+        setContent("");
+        setImage("");
+        setPreviewImage();
+        setLoading(false);
+      }, 2000);
+    } catch (error) {
+      console.log(error);
     }
-    setContent("");
-    setImage("");
-    setPreviewImage();
   };
 
   const handleHidenModel = () => {
@@ -67,7 +83,10 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
       </button>
       {showModal ? (
         <>
-          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none ">
+          <div
+            className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none  "
+            onKeyDown={handleChangeEnter}
+          >
             <div className="relative  my-6 mx-auto max-w-md w-4/5">
               {/*content*/}
               <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none w">
@@ -167,7 +186,13 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
                     // onClick={() => setShowModal(false)}
                     onClick={() => APICreatePost()}
                   >
-                    Đăng bài viết
+                    {isLoading ? (
+                      <div className="loader-overlay">
+                        <ClipLoader className="loader-wrapper" />
+                      </div>
+                    ) : (
+                      "Đăng Bài Viết"
+                    )}
                   </button>
                 </div>
               </div>

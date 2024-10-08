@@ -104,6 +104,15 @@
         }
       }
     }
+    .mess_text {
+      position: absolute;
+      top: 59px;
+      background-color: #fff;
+      z-index: 9;
+      border-radius: 5px;
+      width: 300px;
+      right: 25px;
+    }
   }
 
   // respoinsive

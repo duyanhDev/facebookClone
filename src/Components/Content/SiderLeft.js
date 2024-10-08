@@ -7,7 +7,6 @@ import { MdGroupWork } from "react-icons/md";
 import { Link } from "react-router-dom";
 const SliderLeft = ({ username, isDarkMode }) => {
   const avatar = localStorage.getItem("avatar");
-  console.log(avatar);
 
   return (
     <div className="nav_left">
