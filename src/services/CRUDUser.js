@@ -92,6 +92,7 @@ const postLoginJWT = async (email, password) => {
         name: user.profile.name,
         avatar: user.profile.avatar,
         id: user._id,
+        role: user.role,
       },
     };
   } catch (error) {

@@ -2,6 +2,7 @@ const {
   getComments,
   CreateComments,
   postCommentLike,
+  getUniqueCommentersWithNames,
 } = require("./../services/comment");
 const {
   uploadFileToCloudinary,
@@ -136,9 +137,42 @@ const postLikeComment = async (req, res) => {
     });
   }
 };
+
+const getUniqueCommentersWithNamesAPI = async (req, res) => {
+  try {
+    let { postId } = req.query;
+
+    if (!postId || !Array.isArray(postId)) {
+      return res.status(400).json({
+        EC: 1,
+        message: "Invalid postId",
+      });
+    }
+
+    // Lọc các postId duy nhất để tránh gọi nhiều lần cho cùng một postId
+    const uniquePostIds = [...new Set(postId)];
+
+    // Gọi hàm getUniqueCommentersWithNames cho từng postId duy nhất
+    const results = await Promise.all(
+      uniquePostIds.map((id) => getUniqueCommentersWithNames(id))
+    );
+
+    return res.status(200).json({
+      EC: 0,
+      data: results,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      EC: 1,
+      message: "Server Error",
+    });
+  }
+};
 module.exports = {
   getCommentsAPI,
   CreateCommentsAPI,
   getLikesForComment,
   postLikeComment,
+  getUniqueCommentersWithNamesAPI,
 };

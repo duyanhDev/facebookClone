@@ -16,6 +16,7 @@ const {
   getMessagesAPI,
   getSeenMessagesAPI,
   putMessageAPI,
+  getAllMessAPI,
 } = require("./../controllers/messageCustomer");
 
 const { refreshAccessToken } = require("./../services/CRUDUser");
@@ -33,6 +34,7 @@ const {
   CreateCommentsAPI,
   postLikeComment,
   getLikesForComment,
+  getUniqueCommentersWithNamesAPI,
 } = require("./../controllers/comment");
 
 // crud users
@@ -50,7 +52,7 @@ routerAPI.get("/users/:id", getListFriendUser);
 
 // xem tin nhắn
 routerAPI.get("/message/:senderId/:receiverId", getMessagesAPI);
-
+routerAPI.get("/allmessage/:receiverId", getAllMessAPI);
 // gưi tin nhắn
 routerAPI.post("/message", postMessages);
 // count seen
@@ -101,4 +103,6 @@ routerAPI.post("/comment", CreateCommentsAPI);
 routerAPI.get("/likeComment/:postIds", getLikesForComment);
 routerAPI.post("/likecomment", postLikeComment);
 
+// count tổng sô bình luận trên bài viết
+routerAPI.get("/comentCount", getUniqueCommentersWithNamesAPI);
 module.exports = routerAPI;

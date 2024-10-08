@@ -3,6 +3,7 @@ const {
   getMessagesBetweenUsers,
   getSeenMessagesCount,
   putMessage,
+  GetseenAllMess,
 } = require("./../services/messCRUD");
 
 const postMessages = async (req, res) => {
@@ -103,9 +104,28 @@ const putMessageAPI = async (req, res) => {
   }
 };
 
+const getAllMessAPI = async (req, res) => {
+  try {
+    let { receiverId } = req.params;
+    let data = await GetseenAllMess(receiverId);
+
+    return res.status(200).json({
+      EC: 0,
+      data: data,
+    });
+  } catch (error) {
+    console.error("Error updating seen messages:", error);
+    return res.status(500).json({
+      EC: -1,
+      message: "Failed to update seen messages",
+    });
+  }
+};
+
 module.exports = {
   postMessages,
   getMessagesAPI,
   getSeenMessagesAPI,
   putMessageAPI,
+  getAllMessAPI,
 };

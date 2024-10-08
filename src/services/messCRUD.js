@@ -18,6 +18,19 @@ const getSeenMessagesCount = async (receiverId) => {
     return 0; // Trả về 0 nếu có lỗi
   }
 };
+const GetseenAllMess = async (receiverId) => {
+  try {
+    // Tìm tất cả các tin nhắn có receiverId cụ thể
+    const messages = await Messages.find({ receiverId })
+      .populate("senderId", "profile.avatar profile.name") // Lấy avatar và tên của người gửi (sender)
+      .exec();
+
+    return messages; // Trả về danh sách các tin nhắn đã populate dữ liệu
+  } catch (error) {
+    console.error("Error:", error);
+    return null; // Trả về null nếu xảy ra lỗi
+  }
+};
 
 const getMessagesBetweenUsers = async (senderId, receiverId) => {
   try {
@@ -103,4 +116,5 @@ module.exports = {
   postMessAPi,
   getMessagesBetweenUsers,
   putMessage,
+  GetseenAllMess,
 };

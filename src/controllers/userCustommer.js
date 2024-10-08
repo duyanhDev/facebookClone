@@ -229,6 +229,7 @@ const postLogin = async (req, res) => {
       message: result.message, // Thông báo lỗi
     });
   }
+  console.log(result);
 
   // Nếu thành công, trả về token và refresh token
   return res.status(200).json({

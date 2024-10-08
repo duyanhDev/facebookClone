@@ -1,5 +1,6 @@
 const Comments = require("./../model/comment");
 const Users = require("./../model/users");
+const mongoose = require("mongoose");
 const getComments = async () => {
   try {
     const result = await Comments.find({})
@@ -119,9 +120,51 @@ const postCommentLike = async (_id, authorId, userId, reaction) => {
     throw new Error("Error toggling like: " + error.message);
   }
 };
+const getUniqueCommentersWithNames = async (postId) => {
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    throw new Error(`Invalid postId: ${postId}`);
+  }
 
+  const uniqueCommenters = await Comments.aggregate([
+    {
+      $match: { postId: new mongoose.Types.ObjectId(postId) },
+    },
+    {
+      $group: {
+        _id: "$authorId",
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "_id",
+        foreignField: "_id",
+        as: "userDetails",
+      },
+    },
+    {
+      $unwind: {
+        path: "$userDetails",
+        preserveNullAndEmptyArrays: true, // Giữ lại bình luận nếu không có thông tin người dùng
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        name: "$userDetails.profile.name",
+      },
+    },
+  ]);
+
+  return {
+    totalUniqueCommenters: uniqueCommenters.length,
+    commenters: uniqueCommenters,
+    postId: postId,
+  };
+};
 module.exports = {
   getComments,
   CreateComments,
   postCommentLike,
+  getUniqueCommentersWithNames,
 };
