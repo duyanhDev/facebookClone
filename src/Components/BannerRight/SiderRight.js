@@ -38,7 +38,7 @@ const SiderRight = ({
     setReceverid(id); // Still update the state for receiverId
     setCheck(true);
     try {
-      await pustSeenUser(id, currentUserId); // Use 'id' directly here
+      await pustSeenUser(id, currentUserId);
       await fetchSeenUserData();
     } catch (error) {
       console.error("Failed to update seen user:", error);

@@ -18,6 +18,7 @@ const Header = ({ status, username, HandleTogleBtn, isDarkMode }) => {
   const hiddenModel = useRef();
   const [isModel, setModel] = useState(false);
   const [data, setData] = useState([]);
+  const [showBox, setShowBox] = useState(false);
   const avatar = localStorage.getItem("avatar");
 
   const handleLogOut = () => {
@@ -50,7 +51,6 @@ const Header = ({ status, username, HandleTogleBtn, isDarkMode }) => {
   useEffect(() => {
     getAllMess();
   }, []);
-  console.log(data);
 
   const handleClickOutside = (event) => {
     if (hiddenModel.current && !hiddenModel.current.contains(event.target)) {
@@ -64,6 +64,9 @@ const Header = ({ status, username, HandleTogleBtn, isDarkMode }) => {
     };
   }, []);
 
+  const handleShowBoxMess = () => {
+    setShowBox(!showBox);
+  };
   return (
     <div className="Header flex w-full items-center">
       <div className="w-80 flex items-center gap-5 -mt-2">
@@ -153,7 +156,7 @@ const Header = ({ status, username, HandleTogleBtn, isDarkMode }) => {
           </div>
         </div>
         <div className="border-icon">
-          <FaFacebookMessenger className="size-6" />
+          <FaFacebookMessenger className="size-6" onClick={handleShowBoxMess} />
           <span
             className={
               status ? "count absolute flex items-center justify-center" : ""
@@ -166,9 +169,11 @@ const Header = ({ status, username, HandleTogleBtn, isDarkMode }) => {
           <div className="text">
             <span className="">Messenger</span>
           </div>
-          <div className="mess_text ">
-            <BoxMessages />
-          </div>
+          {showBox && (
+            <div className="mess_text ">
+              <BoxMessages data={data} getAllMess={getAllMess} />
+            </div>
+          )}
         </div>
         <div className="border-icon">
           <IoIosNotifications className="size-6" />
