@@ -2,7 +2,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const Users = require("../model/users");
 const bcrypt = require("bcryptjs");
-
+const nodemailer = require("nodemailer");
 const jwtSecret = process.env.JWT_SECRET_KEY;
 const refreshSecret = process.env.REFRESH_SECRET_KEY;
 
@@ -19,7 +19,7 @@ const postCreateUser = async (data) => {
   try {
     // Hash mật khẩu trước khi lưu
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    console.log("Mật khẩu đã băm:", hashedPassword); // In ra để kiểm tra
+
     data.password = hashedPassword;
 
     return await Users.create(data);
@@ -136,10 +136,63 @@ const refreshAccessToken = async (refreshToken) => {
   }
 };
 
+// send maill
+
+const sendResetEmail = async (email) => {
+  try {
+    // Tìm người dùng theo email
+    const user = await Users.findOne({ email });
+    if (!user) {
+      throw new Error("Email không tồn tại trong hệ thống");
+    }
+
+    // Tạo token đặt lại mật khẩu
+    const resetToken = jwt.sign(
+      { userId: user._id },
+      process.env.REFRESH_SECRET_KEY,
+      {
+        // Ensure you use the correct environment variable
+        expiresIn: "1h",
+      }
+    );
+
+    // Tạo link để đặt lại mật khẩu
+    const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
+
+    // Cấu hình transporter cho Nodemailer
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    // Thông tin email
+    const mailOptions = {
+      from: process.env.EMAIL_USERNAME,
+      to: user.email,
+      subject: "Đặt lại mật khẩu",
+      text: `Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng click vào link sau để đặt lại mật khẩu: ${resetLink}`,
+    };
+
+    // Gửi email
+    await transporter.sendMail(mailOptions);
+    console.log(`Email đã được gửi đến: ${user.email}`);
+  } catch (error) {
+    // Ghi log chi tiết lỗi
+    console.error("Lỗi khi gửi email:", error.message);
+    if (error.response) {
+      console.error("Chi tiết lỗi từ Gmail:", error.response);
+    }
+  }
+};
+
 module.exports = {
   getReadUser,
   postCreateUser,
   postLoginJWT,
   refreshAccessToken,
   putUserAPI,
+  sendResetEmail,
 };

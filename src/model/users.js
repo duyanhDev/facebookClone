@@ -7,8 +7,8 @@ const UsersSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["user", "admin"], // Phân quyền, có thể là "user" hoặc "admin"
-      default: "user", // Mặc định là "user"
+      enum: ["User", "Admin"], // Phân quyền, có thể là "user" hoặc "admin"
+      default: "User", // Mặc định là "user"
     },
     profile: {
       name: String,

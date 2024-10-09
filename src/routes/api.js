@@ -1,5 +1,10 @@
 const express = require("express");
 const routerAPI = express.Router();
+const jwt = require("jsonwebtoken");
+const Users = require("../model/users");
+const bcrypt = require("bcryptjs");
+require("dotenv").config(); // Ensure this is at the top of your file
+
 const {
   getReadUserFB,
   postUpdateUserFB,
@@ -19,7 +24,10 @@ const {
   getAllMessAPI,
 } = require("./../controllers/messageCustomer");
 
-const { refreshAccessToken } = require("./../services/CRUDUser");
+const {
+  refreshAccessToken,
+  sendResetEmail,
+} = require("./../services/CRUDUser");
 const authenticateJWT = require("./../middleware/authenticateJWT");
 
 const {
@@ -105,4 +113,54 @@ routerAPI.post("/likecomment", postLikeComment);
 
 // count tổng sô bình luận trên bài viết
 routerAPI.get("/comentCount", getUniqueCommentersWithNamesAPI);
+
+// senmail
+
+routerAPI.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    await sendResetEmail(email);
+    res
+      .status(200)
+      .json({ message: "Vui lòng kiểm tra email để đặt lại mật khẩu" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+routerAPI.post("/reset-password/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    // Giải mã token
+    const decoded = jwt.verify(token, process.env.REFRESH_SECRET_KEY);
+    const userId = decoded.userId;
+
+    // Tìm người dùng theo userId
+    const user = await Users.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "Người dùng không tồn tại" });
+    }
+
+    // Mã hóa mật khẩu mới
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Mật khẩu đã được đặt lại thành công" });
+  } catch (error) {
+    // Log the error for debugging
+    console.error("Error during password reset:", error);
+
+    // Distinguish between token expiration and invalid signature
+    if (error instanceof jwt.TokenExpiredError) {
+      return res.status(400).json({ message: "Token đã hết hạn" });
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(400).json({ message: "Token không hợp lệ" });
+    }
+
+    res.status(400).json({ message: "Lỗi không xác định" });
+  }
+});
+
 module.exports = routerAPI;

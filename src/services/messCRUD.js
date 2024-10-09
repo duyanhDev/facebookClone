@@ -40,8 +40,8 @@ const getMessagesBetweenUsers = async (senderId, receiverId) => {
         { senderId: receiverId, receiverId: senderId },
       ],
     })
-      .populate("senderId", "username profile.name profile.avatar") // Populate sender data
-      .populate("receiverId", "username profile.name profile.avatar") // Populate receiver data
+      .populate("senderId", "username profile.name profile.avatar")
+      .populate("receiverId", "username profile.name profile.avatar")
       .exec();
 
     return messages;
@@ -64,8 +64,6 @@ const postMessAPi = async (senderId, receiverId, content) => {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-
-    console.log(data);
     return data; // Trả về kết quả tạo tin nhắn
   } catch (error) {
     console.error("Error creating message:", error);
