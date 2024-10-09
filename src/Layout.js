@@ -8,6 +8,8 @@ import PrivateRoute from "./PrivateRoute.js";
 import { AuthContext } from "./AuthContext .js"; // Fixed the path (remove the space before .js)
 import Register from "./Components/Regsiter/Regsiter.js"; // Corrected spelling from "Regsiter" to "Register"
 import Admin from "./Components/Admin/Admin.js";
+import ForgotPassword from "./Components/ForgotPassword/ForgotPassword.js";
+import ResetPassword from "./Components/ResetPassword/ResetPassword.js";
 
 const Layout = () => {
   const { isAuthenticated, role } = useContext(AuthContext); // Combine useContext for both values
@@ -16,6 +18,8 @@ const Layout = () => {
     <Routes>
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgotPassword" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
 
       <Route
         path="/"

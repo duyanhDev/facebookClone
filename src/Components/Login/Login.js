@@ -73,6 +73,10 @@ const Login = () => {
   const handleResgin = () => {
     navigate("/register");
   };
+
+  const handleForgotPassword = () => {
+    navigate("/forgotPassword");
+  };
   return (
     <>
       {isLoading && (
@@ -154,7 +158,12 @@ const Login = () => {
                         </button>
 
                         {/* <!--Forgot password link--> */}
-                        <a href="#!">Quên mật khẩu?</a>
+                        <p
+                          onClick={handleForgotPassword}
+                          className="cursor-pointer"
+                        >
+                          Quên mật khẩu?
+                        </p>
                       </div>
 
                       {/* <!--Register button--> */}
@@ -163,7 +172,7 @@ const Login = () => {
                         <div className="">
                           <button
                             type="button"
-                            className="inline-block rounded border-2 border-danger px-6 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-danger transition duration-150 ease-in-out hover:border-danger-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-danger-600 focus:border-danger-600 focus:text-danger-600 focus:outline-none focus:ring-0 active:border-danger-700 active:text-danger-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
+                            className="cursor-pointer inline-block rounded border-2 border-danger px-6 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-danger transition duration-150 ease-in-out hover:border-danger-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-danger-600 focus:border-danger-600 focus:text-danger-600 focus:outline-none focus:ring-0 active:border-danger-700 active:text-danger-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
                             onClick={handleResgin}
                           >
                             Đăng ký
