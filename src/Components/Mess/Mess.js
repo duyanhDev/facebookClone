@@ -10,6 +10,9 @@ const Mess = ({
   setCheck,
   receiverId,
 }) => {
+  console.log(("ff00", receiverId));
+  console.log(mess);
+
   const [text, setText] = useState("");
 
   const handlePostMess = async () => {
@@ -17,6 +20,7 @@ const Mess = ({
       let data = await postMessages(currentUserId, receiverId, text);
       if (data) {
         setText("");
+        fetchAndSetMessages();
       }
     } catch (error) {
       console.error("Error sending message:", error);

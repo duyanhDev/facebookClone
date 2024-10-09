@@ -13,7 +13,13 @@ import Logo from "./../../asset/images/logo-vantc-1679219983.jpg";
 import { getAllMessAPI } from "./../../service/apiAxios";
 
 import BoxMessages from "../BoxMessages/BoxMessages";
-const Header = ({ status, username, HandleTogleBtn, isDarkMode }) => {
+const Header = ({
+  status,
+  username,
+  HandleTogleBtn,
+  isDarkMode,
+  fetchSeenUserData,
+}) => {
   let navigate = useNavigate();
   const hiddenModel = useRef();
   const [isModel, setModel] = useState(false);
@@ -171,7 +177,11 @@ const Header = ({ status, username, HandleTogleBtn, isDarkMode }) => {
           </div>
           {showBox && (
             <div className="mess_text ">
-              <BoxMessages data={data} getAllMess={getAllMess} />
+              <BoxMessages
+                data={data}
+                getAllMess={getAllMess}
+                fetchSeenUserData={fetchSeenUserData}
+              />
             </div>
           )}
         </div>
@@ -181,21 +191,23 @@ const Header = ({ status, username, HandleTogleBtn, isDarkMode }) => {
             <span className="">Thông báo</span>
           </div>
         </div>
-        <div className="border-icon" onClick={handleHidenModel}>
-          {avatar ? (
-            <img
-              className="w-8 h-8 object-cover rounded-full"
-              src={avatar}
-              alt="ảnh lỗi"
-            />
-          ) : (
-            <IoMdContact className="size-6" />
-          )}
 
-          <div className="text -ml-8">
-            <span className="">Tài khoản</span>
+        {avatar ? (
+          <img
+            className="w-10 h-10 object-cover rounded-full "
+            src={avatar}
+            alt="ảnh lỗi"
+            onClick={handleHidenModel}
+          />
+        ) : (
+          <div className="border-icon" onClick={handleHidenModel}>
+            <IoMdContact className="size-6" />
+            <div className="text -ml-8">
+              <span className="">Tài khoản</span>
+            </div>
           </div>
-        </div>
+        )}
+
         {isModel && (
           <div className="dropdown-content  " ref={hiddenModel}>
             <ul className="p-8">

@@ -53,16 +53,16 @@ function App() {
     try {
       const response = await getSeenUser(currentUserId);
       if (response && response.data && response.data.data) {
-        const unreadCount = response.data.data; // Get the unread message count
-        setStatus(unreadCount); // Update the state
-        return unreadCount; // Return the value so it can be logged or used elsewhere
+        const unreadCount = response.data.data;
+        setStatus(unreadCount);
+        return unreadCount; //
       } else {
-        setStatus(0); // Reset status to 0 if no data
-        return 0; // Return 0 if there's no data
+        setStatus(0);
+        return 0;
       }
     } catch (error) {
-      setStatus(0); // Handle error by resetting the status
-      return 0; // Return 0 in case of an error
+      setStatus(0);
+      return 0;
     }
   };
   useEffect(() => {
@@ -104,6 +104,7 @@ function App() {
           HandleTogleBtn={HandleTogleBtn}
           isDarkMode={isDarkMode}
           setIsDarkMode={setIsDarkMode}
+          fetchSeenUserData={fetchSeenUserData}
         />
       </div>
 
