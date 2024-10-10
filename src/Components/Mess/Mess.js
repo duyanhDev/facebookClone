@@ -10,9 +10,6 @@ const Mess = ({
   setCheck,
   receiverId,
 }) => {
-  console.log(("ff00", receiverId));
-  console.log(mess);
-
   const [text, setText] = useState("");
 
   const handlePostMess = async () => {

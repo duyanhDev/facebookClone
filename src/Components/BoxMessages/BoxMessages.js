@@ -1,5 +1,5 @@
 import { AiOutlineFullscreen } from "react-icons/ai";
-import { FaRegEdit, FaSearch } from "react-icons/fa";
+import { FaLeaf, FaRegEdit, FaSearch } from "react-icons/fa";
 import { IoEllipsisHorizontal } from "react-icons/io5";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeftOutlined } from "@ant-design/icons";
@@ -29,6 +29,7 @@ const BoxMessages = ({ data, getAllMess, fetchSeenUserData }) => {
   const handleClickChat = async (id) => {
     setReceiverId(id);
     setCheck(true);
+
     try {
       await pustSeenUser(id, currentUserId);
       await fetchSeenUserData();
@@ -50,6 +51,31 @@ const BoxMessages = ({ data, getAllMess, fetchSeenUserData }) => {
 
   const handleSearchToggle = () => {
     setIsSearchMode((prev) => !prev);
+  };
+  const getTimeAgoInMinutes = (postTime) => {
+    const now = new Date(); // Current time
+    const postDate = new Date(postTime); // Convert postTime to Date object
+
+    const diffInMilliseconds = now - postDate;
+    const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60)); // Convert milliseconds to minutes
+
+    if (diffInMinutes === 0) {
+      return "vừa xong";
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes} phút trước`;
+    } else if (diffInMinutes < 1440) {
+      // Less than a day
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      return `${diffInHours} giờ trước`;
+    } else if (diffInMinutes < 10080) {
+      // Less than a week (7 days)
+      const diffInDays = Math.floor(diffInMinutes / 1440);
+      return `${diffInDays} ngày trước`;
+    } else {
+      // More than a week
+      const diffInWeeks = Math.floor(diffInMinutes / 10080);
+      return `${diffInWeeks} tuần trước`;
+    }
   };
 
   return (
@@ -102,7 +128,7 @@ const BoxMessages = ({ data, getAllMess, fetchSeenUserData }) => {
         return (
           <div
             key={index}
-            className="flex items-center gap-4 mt-4 ml-3"
+            className="flex items-center gap-2 mt-4 ml-3"
             onClick={() => handleClickChat(message.senderId._id)}
           >
             <img
@@ -117,9 +143,10 @@ const BoxMessages = ({ data, getAllMess, fetchSeenUserData }) => {
                   message.seen ? "" : "font-bold text-[#333]"
                 }`}
               >
-                {message.content}
+                {`${message.content} ${getTimeAgoInMinutes(message.updatedAt)}`}
               </p>
             </div>
+
             {!message.seen && <div className="blue-rounder"></div>}
           </div>
         );

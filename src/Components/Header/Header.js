@@ -181,6 +181,7 @@ const Header = ({
                 data={data}
                 getAllMess={getAllMess}
                 fetchSeenUserData={fetchSeenUserData}
+                setShowBox={setShowBox}
               />
             </div>
           )}
