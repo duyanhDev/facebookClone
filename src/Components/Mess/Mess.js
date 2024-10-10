@@ -2,6 +2,7 @@ import { GoDotFill } from "react-icons/go";
 import "./Mess.scss";
 import { useEffect, useState } from "react";
 import { postMessages, pustSeenUser } from "../../service/apiAxios";
+import avtart from "./../../asset/images/2.png";
 const Mess = ({
   mess,
   currentUserId,
@@ -130,7 +131,11 @@ const Mess = ({
                       >
                         <div className="message-avatar">
                           <img
-                            src={item.senderId.profile.avatar}
+                            src={
+                              item.senderId.profile.avatar
+                                ? item.senderId.profile.avatar
+                                : avtart
+                            }
                             alt={`${item.senderId.profile.name}'s avatar`}
                           />
                         </div>

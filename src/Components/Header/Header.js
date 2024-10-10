@@ -175,16 +175,16 @@ const Header = ({
           <div className="text">
             <span className="">Messenger</span>
           </div>
-          {showBox && (
-            <div className="mess_text ">
-              <BoxMessages
-                data={data}
-                getAllMess={getAllMess}
-                fetchSeenUserData={fetchSeenUserData}
-                setShowBox={setShowBox}
-              />
-            </div>
-          )}
+
+          <div>
+            <BoxMessages
+              data={data}
+              getAllMess={getAllMess}
+              fetchSeenUserData={fetchSeenUserData}
+              setShowBox={setShowBox}
+              showBox={showBox}
+            />
+          </div>
         </div>
         <div className="border-icon">
           <IoIosNotifications className="size-6" />

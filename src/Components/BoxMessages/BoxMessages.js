@@ -5,14 +5,20 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 import "./BoxMessage.scss";
-import lin from "./../../asset/images/linjpg.jpg";
+import avtart from "./../../asset/images/2.png";
 import { getMessagesBetweenUsers, pustSeenUser } from "../../service/apiAxios";
 import Mess from "../Mess/Mess";
 
-const BoxMessages = ({ data, getAllMess, fetchSeenUserData }) => {
+const BoxMessages = ({
+  data,
+  getAllMess,
+  fetchSeenUserData,
+  showBox,
+  setShowBox,
+}) => {
   const [isSearchMode, setIsSearchMode] = useState(false);
   const [receiverId, setReceiverId] = useState("");
-  const [messages, setMessage] = useState([]); // Changed to an array for message storage
+  const [messages, setMessage] = useState([]);
   const currentUserId = localStorage.getItem("id");
   const [check, setCheck] = useState(false);
   // Group messages by sender
@@ -29,7 +35,7 @@ const BoxMessages = ({ data, getAllMess, fetchSeenUserData }) => {
   const handleClickChat = async (id) => {
     setReceiverId(id);
     setCheck(true);
-
+    setShowBox(false);
     try {
       await pustSeenUser(id, currentUserId);
       await fetchSeenUserData();
@@ -79,82 +85,85 @@ const BoxMessages = ({ data, getAllMess, fetchSeenUserData }) => {
   };
 
   return (
-    <div>
-      <div className="ml-3 font-bold flex justify-between items-center mt-3">
-        <h1 className="text-xl">Đoạn chat</h1>
-        <div className="flex gap-2 justify-between items-center">
-          <IoEllipsisHorizontal className="text-xl" />
-          <AiOutlineFullscreen className="text-xl" />
-          <FaRegEdit className="text-xl" />
-        </div>
-      </div>
-
-      {/* Search Input */}
-      <div className="flex items-center w-full mt-3">
-        {isSearchMode ? (
-          <>
-            <ArrowLeftOutlined onClick={handleSearchToggle} />
-            <div className="mx-3 flex items-center rounded-3xl bg-[#f0f2f5] w-5/6">
-              <input
-                type="text"
-                placeholder="Tìm kiếm trên Messenger"
-                className="w-full h-7 outline-none input-icon bg-transparent text-sm ml-2"
-              />
+    <>
+      {showBox && (
+        <div className={`${showBox}? mess_text : null`}>
+          <div className="ml-3 font-bold flex justify-between items-center mt-3">
+            <h1 className="text-xl">Đoạn chat</h1>
+            <div className="flex gap-2 justify-between items-center">
+              <IoEllipsisHorizontal className="text-xl" />
+              <AiOutlineFullscreen className="text-xl" />
+              <FaRegEdit className="text-xl" />
             </div>
-          </>
-        ) : (
-          <div
-            className="mx-3 flex items-center rounded-3xl bg-[#f0f2f5] mt-3"
-            onClick={handleSearchToggle}
-          >
-            <FaSearch className="text-gray-500 ml-2" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm trên Messenger"
-              className="w-full h-7 outline-none input-icon bg-transparent text-sm ml-2"
-            />
           </div>
-        )}
-      </div>
 
-      <div className="flex items-center ml-4 mt-5 gap-3">
-        <Button>Hộp Thư</Button>
-        <Button>Cộng Đồng</Button>
-      </div>
-
-      {/* List of Last Messages */}
-      {Object.keys(groupedLastMessages).map((sender, index) => {
-        const message = groupedLastMessages[sender];
-        return (
-          <div
-            key={index}
-            className="flex items-center gap-2 mt-4 ml-3"
-            onClick={() => handleClickChat(message.senderId._id)}
-          >
-            <img
-              className="w-12 h-12 rounded-full object-cover"
-              src={message.senderId.profile.avatar || lin}
-              alt="avatar"
-            />
-            <div className="flex-grow">
-              <p className="text-sm font-bold">{sender}</p>
-              <p
-                className={`text-sm ${
-                  message.seen ? "" : "font-bold text-[#333]"
-                }`}
+          <div className="flex items-center w-full mt-3">
+            {isSearchMode ? (
+              <>
+                <ArrowLeftOutlined onClick={handleSearchToggle} />
+                <div className="mx-3 flex items-center rounded-3xl bg-[#f0f2f5] w-5/6">
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm trên Messenger"
+                    className="w-full h-7 outline-none input-icon bg-transparent text-sm ml-2"
+                  />
+                </div>
+              </>
+            ) : (
+              <div
+                className="mx-3 flex items-center rounded-3xl bg-[#f0f2f5] mt-3"
+                onClick={handleSearchToggle}
               >
-                {`${message.content} ${getTimeAgoInMinutes(message.updatedAt)}`}
-              </p>
-            </div>
-
-            {!message.seen && <div className="blue-rounder"></div>}
+                <FaSearch className="text-gray-500 ml-2" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm trên Messenger"
+                  className="w-full h-7 outline-none input-icon bg-transparent text-sm ml-2"
+                />
+              </div>
+            )}
           </div>
-        );
-      })}
 
+          <div className="flex items-center ml-4 mt-5 gap-3">
+            <Button>Hộp Thư</Button>
+            <Button>Cộng Đồng</Button>
+          </div>
+
+          {Object.keys(groupedLastMessages).map((sender, index) => {
+            const message = groupedLastMessages[sender];
+            return (
+              <div
+                key={index}
+                className="flex items-center gap-2 mt-4 ml-3"
+                onClick={() => handleClickChat(message.senderId._id)}
+              >
+                <img
+                  className="w-12 h-12 rounded-full object-cover"
+                  src={message.senderId.profile.avatar || avtart}
+                  alt="avatar"
+                />
+                <div className="flex-grow">
+                  <p className="text-sm font-bold">{sender}</p>
+                  <p
+                    className={`text-sm ${
+                      message.seen ? "" : "font-bold text-[#333]"
+                    }`}
+                  >
+                    {`${message.content} ${getTimeAgoInMinutes(
+                      message.updatedAt
+                    )}`}
+                  </p>
+                </div>
+
+                {!message.seen && <div className="blue-rounder"></div>}
+              </div>
+            );
+          })}
+        </div>
+      )}
       {/* Message Component */}
       {receiverId && (
-        <div className="message">
+        <div className="message1">
           <Mess
             mess={messages}
             currentUserId={currentUserId}
@@ -165,7 +174,7 @@ const BoxMessages = ({ data, getAllMess, fetchSeenUserData }) => {
           />
         </div>
       )}
-    </div>
+    </>
   );
 };
 
