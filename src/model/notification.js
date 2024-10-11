@@ -1,3 +1,6 @@
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
+
 const NotificationSchema = new Schema(
   {
     receiverId: {
@@ -12,14 +15,18 @@ const NotificationSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ["friend_request", "like", "comment"],
+      enum: ["friend_request", "like", "comment", "new_post"], // Add new_post here
       required: true,
     },
     postId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Post",
       required: function () {
-        return this.type === "Thích" || this.type === "comment";
+        return (
+          this.type === "like" ||
+          this.type === "comment" ||
+          this.type === "new_post"
+        ); // Update the condition
       },
     },
     commentId: {

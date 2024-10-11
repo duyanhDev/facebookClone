@@ -44,6 +44,10 @@ const {
   getLikesForComment,
   getUniqueCommentersWithNamesAPI,
 } = require("./../controllers/comment");
+const {
+  getNotifications,
+  getCountNotifications,
+} = require("../controllers/notifications");
 
 // crud users
 routerAPI.get("/users", getReadUserFB);
@@ -163,4 +167,6 @@ routerAPI.post("/reset-password/:token", async (req, res) => {
   }
 });
 
+routerAPI.get("/nocatifition/:userId", getNotifications);
+routerAPI.get("/nocatifitionCount/:userId", getCountNotifications);
 module.exports = routerAPI;

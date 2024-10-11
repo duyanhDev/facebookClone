@@ -1,15 +1,7 @@
 // src/services/PostSchema.js
 const Posts = require("./../model/post");
 const Users = require("./../model/users");
-// const GetNewPost = async () => {
-//   try {
-//     let res = await Posts.find({}).sort({ createdAt: -1 });
-//     return res;
-//   } catch (error) {
-//     console.log("error", error);
-//     return null;
-//   }
-// };
+const { createPostNotification } = require("./../services/notification");
 const GetNewPost = async () => {
   try {
     let res = await Posts.find({})
@@ -57,6 +49,8 @@ const CreateNewPost = async (postData) => {
           },
           { new: true } // Return the updated document
         );
+        await createPostNotification(updatedPost._id, newPost.authorId);
+        console.log("thông báo", createPostNotification);
 
         return updatedPost;
       } else {
