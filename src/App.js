@@ -4,7 +4,12 @@ import Header from "./Components/Header/Header";
 import SiderRight from "./Components/BannerRight/SiderRight";
 import "./App.scss";
 import SliderLeft from "./Components/Content/SiderLeft";
-import { getAddUser, getSeenUser, getBestfriend } from "./service/apiAxios";
+import {
+  getAddUser,
+  getSeenUser,
+  getBestfriend,
+  getCountNotifications,
+} from "./service/apiAxios";
 
 function App() {
   const username = localStorage.getItem("name");
@@ -14,6 +19,7 @@ function App() {
   const [friend, setFriend] = useState("");
   const currentUserId = localStorage.getItem("id");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [countNotifications, setcountNotifications] = useState(0);
 
   // Memoize hàm feachBestFriend
   const feachBestFriend = useCallback(async () => {
@@ -91,6 +97,26 @@ function App() {
       document.body.classList.remove("dark-mode");
     }
   }, [isDarkMode]);
+
+  const fetchCountNotification = useCallback(async () => {
+    try {
+      const res = await getCountNotifications(currentUserId);
+      if (res && res.data.EC === 0) {
+        setcountNotifications(res.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching notification count:", error);
+    }
+  }, [currentUserId]);
+
+  useEffect(() => {
+    fetchCountNotification();
+    // Set up an interval to fetch the count periodically
+    const intervalId = setInterval(fetchCountNotification, 3000); // every minute
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [fetchCountNotification]);
   return (
     <div className="App">
       <div
@@ -105,6 +131,7 @@ function App() {
           isDarkMode={isDarkMode}
           setIsDarkMode={setIsDarkMode}
           fetchSeenUserData={fetchSeenUserData}
+          countNotifications={countNotifications}
         />
       </div>
 
@@ -113,7 +140,7 @@ function App() {
           <SliderLeft username={username} isDarkMode={isDarkMode} />
         </div>
         <div className="main w-auto m-auto flex justify-center items-center min-h-screen">
-          <Outlet context={{ isDarkMode }} />
+          <Outlet context={{ isDarkMode, fetchCountNotification }} />
         </div>
         <div className="right mt-4">
           <SiderRight

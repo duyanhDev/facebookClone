@@ -3,7 +3,12 @@ import "./Status.scss";
 import { PostCreateNew } from "../../service/apiAxios";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
-export default function Status({ showModal, setShowModal, getPostAPI }) {
+export default function Status({
+  showModal,
+  setShowModal,
+  getPostAPI,
+  fetchCountNotification,
+}) {
   const authorId = localStorage.getItem("id");
 
   let [content, setContent] = useState("");
@@ -48,6 +53,7 @@ export default function Status({ showModal, setShowModal, getPostAPI }) {
         setImage("");
         setPreviewImage();
         setLoading(false);
+        console.log(await fetchCountNotification);
       }, 2000);
     } catch (error) {
       console.log(error);

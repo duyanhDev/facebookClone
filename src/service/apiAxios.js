@@ -232,6 +232,15 @@ const getCountComments = async (postIdArray) => {
   });
 };
 
+// thông báo
+
+// đếm thông báo
+const getCountNotifications = async (userId) => {
+  return await axios.get(
+    `http://localhost:8001/v1/api/nocatifitionCount/${userId}`
+  );
+};
+
 export {
   getUser,
   getAddUser,
@@ -254,4 +263,5 @@ export {
   postCommentLikes,
   fetchLikesCommentFromApi,
   getCountComments,
+  getCountNotifications,
 };

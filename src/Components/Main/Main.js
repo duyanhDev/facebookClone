@@ -45,7 +45,8 @@ const Main = () => {
   let [content, setContent] = useState("");
   let [image, setImage] = useState(null);
 
-  const { isDarkMode } = useOutletContext();
+  const { isDarkMode, fetchCountNotification } = useOutletContext();
+
   const avatar = localStorage.getItem("avatar");
 
   const dispatch = useDispatch();
@@ -484,6 +485,7 @@ const Main = () => {
             getPostAPI={getPostAPI}
             data={data}
             setData={setData}
+            fetchCountNotification={fetchCountNotification}
           />
         </div>
 

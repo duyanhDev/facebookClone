@@ -19,6 +19,7 @@ const Header = ({
   HandleTogleBtn,
   isDarkMode,
   fetchSeenUserData,
+  countNotifications,
 }) => {
   let navigate = useNavigate();
   const hiddenModel = useRef();
@@ -188,6 +189,17 @@ const Header = ({
         </div>
         <div className="border-icon">
           <IoIosNotifications className="size-6" />
+          <span
+            className={
+              countNotifications
+                ? "count absolute flex items-center justify-center"
+                : ""
+            }
+          >
+            <span className="text-count text-center text-white">
+              {countNotifications ? countNotifications : ""}
+            </span>
+          </span>
           <div className="text">
             <span className="">Thông báo</span>
           </div>
