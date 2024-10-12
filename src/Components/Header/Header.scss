@@ -104,6 +104,30 @@
         }
       }
     }
+    .online_radium::after {
+      position: absolute;
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 100%;
+      background-color: red;
+      top: 5px;
+      right: 0;
+      margin-right: 2px;
+      /* Thêm bóng trắng */
+      box-shadow: 0 0 4px white;
+      text-align: center;
+    }
+    .online_radium::before {
+      position: absolute;
+      content: "";
+      width: 14px;
+      height: 14px;
+      border-radius: 100%;
+      background-color: #fff;
+      right: 0px;
+      top: 3px;
+    }
   }
 
   // respoinsive

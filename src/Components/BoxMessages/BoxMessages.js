@@ -1,5 +1,5 @@
 import { AiOutlineFullscreen } from "react-icons/ai";
-import { FaLeaf, FaRegEdit, FaSearch } from "react-icons/fa";
+import { FaRegEdit, FaSearch } from "react-icons/fa";
 import { IoEllipsisHorizontal } from "react-icons/io5";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeftOutlined } from "@ant-design/icons";

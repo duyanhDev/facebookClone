@@ -13,6 +13,7 @@ import Logo from "./../../asset/images/logo-vantc-1679219983.jpg";
 import { getAllMessAPI } from "./../../service/apiAxios";
 
 import BoxMessages from "../BoxMessages/BoxMessages";
+import Nocatifion from "../Nocatifion/Nocatifion";
 const Header = ({
   status,
   username,
@@ -20,14 +21,17 @@ const Header = ({
   isDarkMode,
   fetchSeenUserData,
   countNotifications,
+  dataNocatifion,
 }) => {
   let navigate = useNavigate();
   const hiddenModel = useRef();
+  const hiddenMes = useRef();
+  const hiddenNocatifion = useRef();
   const [isModel, setModel] = useState(false);
   const [data, setData] = useState([]);
   const [showBox, setShowBox] = useState(false);
   const avatar = localStorage.getItem("avatar");
-
+  const [showNocatfion, setShowNocatfion] = useState(false);
   const handleLogOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("name");
@@ -71,9 +75,41 @@ const Header = ({
     };
   }, []);
 
+  const handleCickOutSideMess = (event) => {
+    if (hiddenMes.current && !hiddenMes.current.contains(event.target)) {
+      setShowBox(false);
+    }
+  };
+  useEffect(() => {
+    document.addEventListener("mousedown", handleCickOutSideMess);
+    return () => {
+      document.removeEventListener("mousedown", handleCickOutSideMess);
+    };
+  }, []);
   const handleShowBoxMess = () => {
     setShowBox(!showBox);
+    setShowNocatfion(false);
   };
+
+  const hanldeShowNocatifion = () => {
+    setShowNocatfion(!showNocatfion);
+    setShowBox(false);
+  };
+
+  const handleCickOutSideNocatifion = (e) => {
+    if (
+      hiddenNocatifion.current &&
+      !hiddenNocatifion.current.contains(e.target)
+    ) {
+      setShowNocatfion(false);
+    }
+  };
+  useEffect(() => {
+    document.addEventListener("mousedown", handleCickOutSideNocatifion);
+    return () => {
+      document.removeEventListener("mousedown", handleCickOutSideNocatifion);
+    };
+  }, []);
   return (
     <div className="Header flex w-full items-center">
       <div className="w-80 flex items-center gap-5 -mt-2">
@@ -177,7 +213,7 @@ const Header = ({
             <span className="">Messenger</span>
           </div>
 
-          <div>
+          <div ref={hiddenMes}>
             <BoxMessages
               data={data}
               getAllMess={getAllMess}
@@ -188,7 +224,10 @@ const Header = ({
           </div>
         </div>
         <div className="border-icon">
-          <IoIosNotifications className="size-6" />
+          <IoIosNotifications
+            className="size-6"
+            onClick={hanldeShowNocatifion}
+          />
           <span
             className={
               countNotifications
@@ -203,17 +242,25 @@ const Header = ({
           <div className="text">
             <span className="">Thông báo</span>
           </div>
+          <div ref={hiddenNocatifion}>
+            <Nocatifion
+              showNocatfion={showNocatfion}
+              setShowNocatfion={setShowNocatfion}
+              dataNocatifion={dataNocatifion}
+            />
+          </div>
         </div>
 
         {avatar ? (
-          <img
-            className="w-10 h-10 object-cover rounded-full "
-            src={avatar}
-            alt="ảnh lỗi"
-            onClick={handleHidenModel}
-          />
+          <div className="online_radium" onClick={handleHidenModel}>
+            <img
+              className="w-10 h-10 object-cover rounded-full "
+              src={avatar}
+              alt="ảnh lỗi"
+            />
+          </div>
         ) : (
-          <div className="border-icon" onClick={handleHidenModel}>
+          <div className="border-icon " onClick={handleHidenModel}>
             <IoMdContact className="size-6" />
             <div className="text -ml-8">
               <span className="">Tài khoản</span>

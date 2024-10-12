@@ -9,6 +9,7 @@ import {
   getSeenUser,
   getBestfriend,
   getCountNotifications,
+  getNotificationsAPI,
 } from "./service/apiAxios";
 
 function App() {
@@ -20,7 +21,7 @@ function App() {
   const currentUserId = localStorage.getItem("id");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [countNotifications, setcountNotifications] = useState(0);
-
+  const [data, setData] = useState([]);
   // Memoize hàm feachBestFriend
   const feachBestFriend = useCallback(async () => {
     let res = await getBestfriend(currentUserId);
@@ -34,11 +35,8 @@ function App() {
   const fetchAddUserData = async () => {
     try {
       const data = await getAddUser(currentUserId);
-      console.log(data);
-
       if (data.data && data.status === 200) {
         const result = data.data.map((item) => item.friendId.profile.name);
-        console.log(data.data);
 
         const idResult = data.data.map((item) => item.friendId._id);
 
@@ -111,12 +109,30 @@ function App() {
 
   useEffect(() => {
     fetchCountNotification();
-    // Set up an interval to fetch the count periodically
-    const intervalId = setInterval(fetchCountNotification, 3000); // every minute
+
+    const intervalId = setInterval(fetchCountNotification, 3000);
 
     // Clean up the interval on component unmount
     return () => clearInterval(intervalId);
   }, [fetchCountNotification]);
+
+  const getNotifications = async () => {
+    try {
+      const res = await getNotificationsAPI(currentUserId);
+      if (res && res.data) {
+        setData(res.data.notifications);
+      }
+    } catch (error) {
+      console.log("Error fetching notification :", error);
+    }
+  };
+  useEffect(() => {
+    getNotifications();
+
+    const intervalId = setInterval(getNotifications, 3000);
+    return () => clearInterval(intervalId);
+  }, [getNotifications]);
+
   return (
     <div className="App">
       <div
@@ -132,6 +148,7 @@ function App() {
           setIsDarkMode={setIsDarkMode}
           fetchSeenUserData={fetchSeenUserData}
           countNotifications={countNotifications}
+          dataNocatifion={data}
         />
       </div>
 

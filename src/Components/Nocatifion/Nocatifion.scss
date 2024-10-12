@@ -1,0 +1,33 @@
+.nocatifion {
+  position: absolute;
+  top: 59px;
+  background-color: #fff;
+  z-index: 9;
+  border-radius: 5px;
+  width: 350px;
+  height: 100%;
+  height: 90vh;
+  right: 25px;
+}
+.blue-rounderNocatifion {
+  position: relative;
+  top: -15px;
+}
+.blue-rounderNocatifion::after {
+  position: absolute;
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 100%;
+  top: 45px;
+  background-color: blue;
+  right: 10px;
+}
+.nocatifion p {
+  display: -webkit-box; /* Flexbox-based layout */
+  -webkit-box-orient: vertical; /* Vertical text layout */
+  -webkit-line-clamp: 3; /* Limit to 2 lines */
+  overflow: hidden; /* Hide the overflowing content */
+  text-overflow: ellipsis; /* Show ellipsis at the end */
+  font-size: 14px;
+}

@@ -17,6 +17,7 @@ import {
   pustSeenUser,
   putAddFriend,
 } from "../../service/apiAxios";
+import avtart from "./../../asset/images/2.png";
 
 const SiderRight = ({
   add,
@@ -242,7 +243,11 @@ const SiderRight = ({
                   >
                     <span className="span_green">
                       {" "}
-                      <img className="best_friend" src={icon1} alt="lỗi" />
+                      <img
+                        className="best_friend"
+                        src={item.profile.avatar ? item.profile.avatar : avtart}
+                        alt="lỗi"
+                      />
                     </span>
                     <span
                       className={`${
