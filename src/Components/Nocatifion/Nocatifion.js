@@ -56,7 +56,7 @@ const Nocatifion = ({ showNocatfion, setShowNocatfion, dataNocatifion }) => {
                   <div className="">
                     <div className=" flex gap-2">
                       {item.seen ? (
-                        <p className="">
+                        <p className="text-[#65676B]">
                           {`${item.sender.name} đã đăng bài viết với nội dung "${item.postId.content}"`}
                         </p>
                       ) : (
@@ -69,7 +69,13 @@ const Nocatifion = ({ showNocatfion, setShowNocatfion, dataNocatifion }) => {
                         <div className="blue-rounderNocatifion"></div>
                       )}
                     </div>
-                    <p>{getTimeAgoInMinutes(item.updatedAt)}</p>
+                    {item.seen ? (
+                      <p>{getTimeAgoInMinutes(item.updatedAt)}</p>
+                    ) : (
+                      <p className="text-blue-700">
+                        {getTimeAgoInMinutes(item.updatedAt)}
+                      </p>
+                    )}
                   </div>
                 </div>
               );

@@ -14,6 +14,7 @@ import { getAllMessAPI } from "./../../service/apiAxios";
 
 import BoxMessages from "../BoxMessages/BoxMessages";
 import Nocatifion from "../Nocatifion/Nocatifion";
+import SearchFriends from "../SearchFriends/SearchFriends";
 const Header = ({
   status,
   username,
@@ -22,16 +23,21 @@ const Header = ({
   fetchSeenUserData,
   countNotifications,
   dataNocatifion,
+  searchTerm,
+  setSearchTerm,
+  friends,
 }) => {
   let navigate = useNavigate();
   const hiddenModel = useRef();
   const hiddenMes = useRef();
+  const hidden = useRef();
   const hiddenNocatifion = useRef();
   const [isModel, setModel] = useState(false);
   const [data, setData] = useState([]);
   const [showBox, setShowBox] = useState(false);
   const avatar = localStorage.getItem("avatar");
   const [showNocatfion, setShowNocatfion] = useState(false);
+  const [hiddenSearch, setHiddenSearch] = useState(false);
   const handleLogOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("name");
@@ -110,21 +116,49 @@ const Header = ({
       document.removeEventListener("mousedown", handleCickOutSideNocatifion);
     };
   }, []);
+
+  const handleChangeSearch = (e) => {
+    // Check if the click is outside the search element
+    if (hidden.current && !hidden.current.contains(e.target)) {
+      setHiddenSearch(false); // Hide search when clicked outside
+    }
+  };
+
+  // Attach the event listener to the document
+  useEffect(() => {
+    document.addEventListener("mousedown", handleChangeSearch);
+    return () => {
+      document.removeEventListener("mousedown", handleChangeSearch);
+    };
+  }, []);
   return (
     <div className="Header flex w-full items-center">
       <div className="w-80 flex items-center gap-5 -mt-2">
         <div className="icon-fb">
           <img src={Logo} alt="duyanh" className="size-10 fb_logo mt-2 ml-5" />
         </div>
-        <div className="Input mt-2 relatives w-full flex items-center">
-          <div className="icon_search ml-3">
-            <FaSearch />
+
+        <div>
+          <div className="Input mt-2 relatives w-full flex items-center">
+            <div className="icon_search ml-3">
+              <FaSearch />
+            </div>
+            <input
+              type="text"
+              placeholder="Tìm kiếm trên FaceBook"
+              className="outline-none flex-none"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onClick={() => setHiddenSearch(true)}
+            />
           </div>
-          <input
-            type="text"
-            placeholder="Tìm kiếm trên FaceBook"
-            className="outline-none flex-none"
-          />
+          <div ref={hidden}>
+            <SearchFriends
+              friends={friends}
+              hiddenSearch={hiddenSearch}
+              setHiddenSearch={setHiddenSearch}
+            />
+          </div>
         </div>
       </div>
       <div className="Tag flex justify-center items-center m-auto cursor-pointer">

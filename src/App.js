@@ -17,11 +17,13 @@ function App() {
   const [add, setAdd] = useState([]);
   const [status, setStatus] = useState("");
   const [idFriend, setIdFriend] = useState("");
-  const [friend, setFriend] = useState("");
+  const [friend, setFriend] = useState([]);
   const currentUserId = localStorage.getItem("id");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [countNotifications, setcountNotifications] = useState(0);
   const [data, setData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [friendsToShow, setFriendsToShow] = useState([]);
   // Memoize hàm feachBestFriend
   const feachBestFriend = useCallback(async () => {
     let res = await getBestfriend(currentUserId);
@@ -32,6 +34,7 @@ function App() {
       setFriend(data);
     }
   }, [currentUserId]);
+
   const fetchAddUserData = async () => {
     try {
       const data = await getAddUser(currentUserId);
@@ -133,6 +136,21 @@ function App() {
     return () => clearInterval(intervalId);
   }, [getNotifications]);
 
+  useEffect(() => {
+    // Set initial friends to show (first 4)
+    setFriendsToShow(friend.slice(0, 4));
+  }, [friend]);
+
+  useEffect(() => {
+    if (searchTerm) {
+      const filteredFriends = friend.filter((item) =>
+        item.profile.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFriendsToShow(filteredFriends);
+    } else {
+      setFriendsToShow(friend.slice(0, 4));
+    }
+  }, [searchTerm, friend]);
   return (
     <div className="App">
       <div
@@ -149,6 +167,9 @@ function App() {
           fetchSeenUserData={fetchSeenUserData}
           countNotifications={countNotifications}
           dataNocatifion={data}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          friends={friendsToShow}
         />
       </div>
 
@@ -157,7 +178,9 @@ function App() {
           <SliderLeft username={username} isDarkMode={isDarkMode} />
         </div>
         <div className="main w-auto m-auto flex justify-center items-center min-h-screen">
-          <Outlet context={{ isDarkMode, fetchCountNotification }} />
+          <Outlet
+            context={{ isDarkMode, fetchCountNotification, getNotifications }}
+          />
         </div>
         <div className="right mt-4">
           <SiderRight
