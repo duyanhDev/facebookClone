@@ -26,3 +26,9 @@
   height: 90vh;
   right: 25px;
 }
+.messages-container {
+  max-height: 70vh; /* Điều chỉnh chiều cao tối đa theo nhu cầu */
+  overflow-y: auto; /* Bật thanh cuộn dọc */
+  padding-right: 10px; /* Thêm khoảng cách phải để không bị chèn vào thanh cuộn */
+  scroll-behavior: smooth; /* Tạo hiệu ứng cuộn mượt mà */
+}

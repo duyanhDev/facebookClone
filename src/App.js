@@ -24,6 +24,7 @@ function App() {
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [friendsToShow, setFriendsToShow] = useState([]);
+  const [isLoading, setLoading] = useState(false);
   // Memoize hàm feachBestFriend
   const feachBestFriend = useCallback(async () => {
     let res = await getBestfriend(currentUserId);
@@ -140,16 +141,23 @@ function App() {
     // Set initial friends to show (first 4)
     setFriendsToShow(friend.slice(0, 4));
   }, [friend]);
-
   useEffect(() => {
-    if (searchTerm) {
-      const filteredFriends = friend.filter((item) =>
-        item.profile.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFriendsToShow(filteredFriends);
-    } else {
-      setFriendsToShow(friend.slice(0, 4));
-    }
+    setLoading(true);
+    const timer = setTimeout(
+      () => {
+        if (searchTerm) {
+          const filteredFriends = friend.filter((item) =>
+            item.profile.name.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+          setFriendsToShow(filteredFriends);
+        } else {
+          setFriendsToShow(friend.slice(0, 4));
+        }
+        setLoading(false);
+      },
+      searchTerm ? 1000 : 0
+    );
+    return () => clearTimeout(timer);
   }, [searchTerm, friend]);
   return (
     <div className="App">
@@ -170,6 +178,7 @@ function App() {
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           friends={friendsToShow}
+          isLoading={isLoading}
         />
       </div>
 

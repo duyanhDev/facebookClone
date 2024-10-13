@@ -15,6 +15,7 @@ import { getAllMessAPI } from "./../../service/apiAxios";
 import BoxMessages from "../BoxMessages/BoxMessages";
 import Nocatifion from "../Nocatifion/Nocatifion";
 import SearchFriends from "../SearchFriends/SearchFriends";
+import GoogleTranslate from "../GoogleTranslate/GoogleTranslate";
 const Header = ({
   status,
   username,
@@ -26,6 +27,7 @@ const Header = ({
   searchTerm,
   setSearchTerm,
   friends,
+  isLoading,
 }) => {
   let navigate = useNavigate();
   const hiddenModel = useRef();
@@ -157,6 +159,7 @@ const Header = ({
               friends={friends}
               hiddenSearch={hiddenSearch}
               setHiddenSearch={setHiddenSearch}
+              isLoading={isLoading}
             />
           </div>
         </div>
@@ -226,6 +229,9 @@ const Header = ({
         </ul>
       </div>
       <div className="mess flex justify-center items-center gap-4 cursor-pointer">
+        {/* <div>
+          <GoogleTranslate />
+        </div> */}
         <div className="border-icon">
           <IoMdMenu className="size-6" />
           <div className="text">

@@ -23,10 +23,31 @@ const BoxMessages = ({
   const [check, setCheck] = useState(false);
   // Group messages by sender
   const groupedLastMessages = data.reduce((acc, mess) => {
-    const sender = mess.senderId.profile.name;
-    acc[sender] = mess;
+    // Kiểm tra xem `senderId` và `receiverId` có tồn tại không
+    if (!mess.senderId || !mess.receiverId) {
+      console.error("Message has null sender or receiver:", mess);
+      return acc; // Bỏ qua tin nhắn nếu thiếu dữ liệu
+    }
+
+    // Xác định người dùng khác dựa trên `currentUserId`
+    const otherUser =
+      mess.senderId._id === currentUserId ? mess.receiverId : mess.senderId;
+
+    // Kiểm tra nếu `otherUser` có tồn tại và có `_id`
+    if (!otherUser || !otherUser._id) {
+      console.error("Invalid otherUser in message:", mess);
+      return acc; // Bỏ qua tin nhắn nếu thiếu thông tin người dùng
+    }
+
+    // Sử dụng `otherUser._id` làm khóa để nhóm tin nhắn
+    acc[otherUser._id] = mess;
+
     return acc;
   }, {});
+
+  console.log("check", groupedLastMessages);
+
+  console.log("check", groupedLastMessages);
 
   useEffect(() => {
     getAllMess();
@@ -128,37 +149,54 @@ const BoxMessages = ({
             <Button>Hộp Thư</Button>
             <Button>Cộng Đồng</Button>
           </div>
+          <div className="messages-container">
+            {/* Chuyển đổi đối tượng thành mảng và sắp xếp */}
+            {Object.keys(groupedLastMessages)
+              .map((sender) => groupedLastMessages[sender])
+              .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)) // Sắp xếp theo thời gian cập nhật
+              .map((message, index) => {
+                const isSender = message.senderId._id === currentUserId;
+                const otherUser = isSender
+                  ? message.receiverId
+                  : message.senderId;
 
-          {Object.keys(groupedLastMessages).map((sender, index) => {
-            const message = groupedLastMessages[sender];
-            return (
-              <div
-                key={index}
-                className="flex items-center gap-2 mt-4 ml-3"
-                onClick={() => handleClickChat(message.senderId._id)}
-              >
-                <img
-                  className="w-12 h-12 rounded-full object-cover"
-                  src={message.senderId.profile.avatar || avtart}
-                  alt="avatar"
-                />
-                <div className="flex-grow">
-                  <p className="text-sm font-bold">{sender}</p>
-                  <p
-                    className={`text-sm ${
-                      message.seen ? "" : "font-bold text-[#333]"
-                    }`}
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 mt-4 ml-3"
+                    onClick={() => handleClickChat(otherUser._id)}
                   >
-                    {`${message.content} ${getTimeAgoInMinutes(
-                      message.updatedAt
-                    )}`}
-                  </p>
-                </div>
-
-                {!message.seen && <div className="blue-rounder"></div>}
-              </div>
-            );
-          })}
+                    <img
+                      className="w-12 h-12 rounded-full object-cover"
+                      src={otherUser.profile.avatar || avtart}
+                      alt="avatar"
+                    />
+                    <div className="flex-grow">
+                      <p className="text-sm font-bold">
+                        {otherUser.profile.name}
+                      </p>
+                      <p
+                        className={`text-sm ${
+                          message.seen
+                            ? "text-[#65686c] text-xs" // Nếu tin nhắn đã xem, sử dụng màu xám
+                            : isSender
+                            ? "text-[#65686c] text-xs" // Nếu người dùng hiện tại là người gửi và chưa xem
+                            : "font-bold text-[#333] text-xs" // Nếu người dùng hiện tại không phải là người gửi và chưa xem
+                        }`}
+                      >
+                        {`${isSender ? "Bạn : " : ""} ${
+                          message.content
+                        } ${getTimeAgoInMinutes(message.updatedAt)}`}
+                      </p>
+                    </div>
+                    {/* Chỉ hiển thị chấm xanh nếu tin nhắn chưa xem và không phải là người gửi */}
+                    {!message.seen && !isSender && (
+                      <div className="blue-rounder"></div>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
         </div>
       )}
       {/* Message Component */}
