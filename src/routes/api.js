@@ -48,6 +48,7 @@ const {
   getNotifications,
   getCountNotifications,
 } = require("../controllers/notifications");
+const Messages = require("../model/message");
 
 // crud users
 routerAPI.get("/users", getReadUserFB);
@@ -64,7 +65,35 @@ routerAPI.get("/users/:id", getListFriendUser);
 
 // xem tin nhắn
 routerAPI.get("/message/:senderId/:receiverId", getMessagesAPI);
-routerAPI.get("/allmessage/:receiverId", getAllMessAPI);
+routerAPI.get("/allmessage/:currentUserId", async (req, res) => {
+  try {
+    // Lấy ID người dùng hiện tại từ body hoặc params (tùy cách bạn gửi yêu cầu từ frontend)
+    let { currentUserId } = req.params;
+
+    // Tìm tất cả các tin nhắn mà currentUserId là người gửi hoặc người nhận
+    const messages = await Messages.find({
+      $or: [
+        { senderId: currentUserId }, // Tin nhắn mà người dùng là người gửi
+        { receiverId: currentUserId }, // Tin nhắn mà người dùng là người nhận
+      ],
+    })
+      .populate("senderId", "profile.avatar profile.name") // Lấy avatar và tên của người gửi
+      .populate("receiverId", "profile.avatar profile.name") // Lấy avatar và tên của người nhận
+      .exec();
+
+    // Trả về kết quả với dữ liệu tin nhắn đã lấy
+    return res.status(200).json({
+      EC: 0, // Success
+      data: messages, // Trả về danh sách tin nhắn
+    });
+  } catch (error) {
+    console.error("Error retrieving messages:", error);
+    return res.status(500).json({
+      EC: -1, // Error code
+      message: "Failed to retrieve messages", // Thông báo lỗi
+    });
+  }
+});
 // gưi tin nhắn
 routerAPI.post("/message", postMessages);
 // count seen
@@ -166,7 +195,7 @@ routerAPI.post("/reset-password/:token", async (req, res) => {
     res.status(400).json({ message: "Lỗi không xác định" });
   }
 });
-
+routerAPI.get("/messFace/:currentUserId", async (req, res) => {});
 routerAPI.get("/nocatifition/:userId", getNotifications);
 routerAPI.get("/nocatifitionCount/:userId", getCountNotifications);
 module.exports = routerAPI;

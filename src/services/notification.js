@@ -3,7 +3,7 @@ const Users = require("../model/users");
 
 const createPostNotification = async (postId, authorId) => {
   try {
-    const Author = await Users.findById(authorId); // Don't forget to await this call
+    const Author = await Users.findById(authorId);
     if (!Author) {
       throw new Error("Không tìm thấy tác giả");
     }
@@ -15,7 +15,7 @@ const createPostNotification = async (postId, authorId) => {
     const notifications = friends.map((friend) => ({
       receiverId: friend.friendId,
       senderId: authorId,
-      type: "new_post", // This should now be valid
+      type: "new_post",
       postId: postId,
       seen: false,
     }));
