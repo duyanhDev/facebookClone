@@ -3,9 +3,8 @@
     color: var(--fb-logo);
   }
   .Input {
-    background-color: var(--web-site);
     border-radius: 30px;
-
+    padding-right: 50px;
     input {
       width: 100%;
       padding: 10px;
@@ -56,7 +55,7 @@
     .border-icon {
       border-radius: 50%;
       padding: 10px;
-      background-color: var(--web-site);
+      // background-color: var(--web-site);
       .text {
         position: absolute;
         top: 62px;
@@ -150,7 +149,7 @@
     .Input {
       width: 50px;
       height: 50px;
-      background-color: var(--web-site);
+      // background-color: var(--web-site);
       border-radius: 30px;
     }
     .Input input {

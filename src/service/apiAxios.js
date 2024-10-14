@@ -106,12 +106,14 @@ const postLoginUser = async (email, password) => {
   }
 };
 
-const postLogOut = async (refresh_token) => {
-  return await axios.post("http://localhost:8001/v1/api/refresh-token", {
-    refresh_token,
-  });
+// const postLogOut = async (refresh_token) => {
+//   return await axios.post("http://localhost:8001/v1/api/refresh-token", {
+//     refresh_token,
+//   });
+// };
+const postLogOut = async (userId) => {
+  return await axios.post(`http://localhost:8001/v1/api/logout/${userId}`);
 };
-
 //POST
 // bài post
 const PostCreateNew = async (

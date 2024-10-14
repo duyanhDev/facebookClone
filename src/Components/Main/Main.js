@@ -335,10 +335,6 @@ const Main = () => {
     }
   }, []);
 
-  useEffect(() => {
-    FetchGetComment();
-  }, [FetchGetComment]);
-
   const handleComment = async (postId) => {
     setLoading(true);
     try {
@@ -369,7 +365,7 @@ const Main = () => {
           }
           return updatedCount;
         });
-
+        FetchGetComment();
         // Mark for refetch
         setShouldRefetch(true);
       } else {
@@ -381,6 +377,9 @@ const Main = () => {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    FetchGetComment();
+  }, [handleComment]);
   const handleChangeEnter = (e) => {
     if (e.key === "Enter") {
       console.log("xx");
@@ -474,7 +473,9 @@ const Main = () => {
       </button>
       <div
         className={`content_status ${
-          isDarkMode ? "bg-[#333334]" : "bg-[#ffffff]"
+          isDarkMode
+            ? "bg-[rgba(16,17,18,1)]"
+            : "bg-[#ffffff] border border-[#ddd]"
         } m-auto text-center mt-8 h-32 `}
       >
         <div className="w-full flex items-center gap-4 ml-4  bottom_text mt-5">
@@ -486,6 +487,7 @@ const Main = () => {
             data={data}
             setData={setData}
             fetchCountNotification={fetchCountNotification}
+            isDarkMode={isDarkMode}
           />
         </div>
 
@@ -493,15 +495,21 @@ const Main = () => {
           <div className="w-full flex justify-between items-center -mt-10 cursor-pointer ">
             <div className="flex items-center justify-center gap-2">
               <MdVideoCameraFront className="size-8 text-red-800 " />
-              <span>Video Trực Tiếp</span>
+              <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
+                Video Trực Tiếp
+              </span>
             </div>
             <div className="flex items-center justify-center gap-2">
               <BsFillFileImageFill className="size-8 text-green-800" />
-              <span>Ảnh/Video</span>
+              <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
+                Ảnh/Video
+              </span>
             </div>
             <div className="flex items-center justify-center gap-2">
               <MdInsertEmoticon className="size-8 text-yellow-400 " />
-              <span>Cảm xúc hoạt động</span>
+              <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
+                Cảm xúc hoạt động
+              </span>
             </div>
           </div>
         </div>
@@ -511,14 +519,15 @@ const Main = () => {
         data.length > 0 &&
         data.map((item) => {
           const userReaction = item.likes.find(
-            (like) =>
-              like.userId && like.userId._id.toString() === userId.toString()
+            (like) => like.userId && like.userId._id === userId
           )?.reaction;
 
           return (
             <div
-              className={`   ${
-                isDarkMode ? "bg-[#333334]" : "bg-[#ffffff]"
+              className={`${
+                isDarkMode
+                  ? "bg-[rgba(16,17,18,1)]"
+                  : "bg-[#ffffff] border border-[#ddd]"
               } content_status m-auto mt-8 min-h-max p-5`}
               key={item._id}
             >
@@ -722,9 +731,7 @@ const Main = () => {
                 {comments.length > 0 ? (
                   comments.map((comment, index) => {
                     const userReaction1 = comment.likes.find(
-                      (like) =>
-                        like.userId &&
-                        like.userId._id.toString() === userId.toString()
+                      (like) => like.userId && like.userId._id === userId
                     )?.reaction;
 
                     if (comment.postId === item._id) {

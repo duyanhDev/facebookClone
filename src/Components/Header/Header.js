@@ -1,5 +1,6 @@
 import "./Header.scss";
-import { FaSearch, FaFacebookMessenger } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
+import { FaFacebookMessenger } from "react-icons/fa6";
 import { CiHome } from "react-icons/ci";
 import { PiMonitorPlayLight } from "react-icons/pi";
 import { MdGroupWork } from "react-icons/md";
@@ -10,7 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useEffect, useRef, useState } from "react";
 import Logo from "./../../asset/images/logo-vantc-1679219983.jpg";
-import { getAllMessAPI } from "./../../service/apiAxios";
+import { getAllMessAPI, postLogOut } from "./../../service/apiAxios";
 
 import BoxMessages from "../BoxMessages/BoxMessages";
 import Nocatifion from "../Nocatifion/Nocatifion";
@@ -18,7 +19,6 @@ import SearchFriends from "../SearchFriends/SearchFriends";
 import GoogleTranslate from "../GoogleTranslate/GoogleTranslate";
 const Header = ({
   status,
-  username,
   HandleTogleBtn,
   isDarkMode,
   fetchSeenUserData,
@@ -40,17 +40,34 @@ const Header = ({
   const avatar = localStorage.getItem("avatar");
   const [showNocatfion, setShowNocatfion] = useState(false);
   const [hiddenSearch, setHiddenSearch] = useState(false);
-  const handleLogOut = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("name");
-    localStorage.removeItem("id");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("role");
-
-    toast.success("Đăng xuất thành công");
-    navigate("/login");
-  };
   const receiverId = localStorage.getItem("id");
+
+  const handleLogOut = async () => {
+    try {
+      // Call the logout API
+      const response = await postLogOut(receiverId);
+      console.log(response);
+
+      if (data) {
+        // Clear local storage
+        localStorage.removeItem("token");
+        localStorage.removeItem("name");
+        localStorage.removeItem("id");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("role");
+        localStorage.removeItem("isOnline");
+
+        // Notify user of successful logout
+        toast.success("Đăng xuất thành công");
+        navigate("/login");
+      } else {
+        toast.error("Đăng xuất thất bại: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Đăng xuất thất bại do lỗi hệ thống");
+    }
+  };
 
   const handleHidenModel = () => {
     setModel(!isModel);
@@ -141,14 +158,20 @@ const Header = ({
         </div>
 
         <div>
-          <div className="Input mt-2 relatives w-full flex items-center">
+          <div
+            className={`Input mt-2 relatives w-full flex items-center ${
+              isDarkMode ? "bg-[#3A3B3C]" : "bg-[#F0F2F5]"
+            }`}
+          >
             <div className="icon_search ml-3">
-              <FaSearch />
+              <FaSearch
+                className={isDarkMode ? "text-[#F0F2F5]" : "text-[#3A3B3C]"}
+              />
             </div>
             <input
               type="text"
               placeholder="Tìm kiếm trên FaceBook"
-              className="outline-none flex-none"
+              className="outline-none flex-none h-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onClick={() => setHiddenSearch(true)}
@@ -194,7 +217,7 @@ const Header = ({
             <Link>
               <BsShop
                 className={`${
-                  isDarkMode ? "text-[#fff]" : "text-[#333]"
+                  isDarkMode ? "text-[#fff]" : "text-[#65676b]"
                 } size-8`}
               />
             </Link>
@@ -206,10 +229,13 @@ const Header = ({
             <Link>
               <MdGroupWork
                 className={`${
-                  isDarkMode ? "text-[#fff]" : "text-[#333]"
-                } size-8`}
+                  isDarkMode
+                    ? "text-[#fff] border border-white"
+                    : "text-[#65676b] border border-[#65676b]"
+                } size-8 rounded-full p-1`}
               />
             </Link>
+
             <div className="text">
               <span className="">Nhóm</span>
             </div>
@@ -218,7 +244,7 @@ const Header = ({
             <Link>
               <RiPlayListAddFill
                 className={`${
-                  isDarkMode ? "text-[#fff]" : "text-[#333]"
+                  isDarkMode ? "text-[#fff]" : "text-[#3A3B3C]"
                 } size-8`}
               />
             </Link>
@@ -233,13 +259,25 @@ const Header = ({
           <GoogleTranslate />
         </div> */}
         <div className="border-icon">
-          <IoMdMenu className="size-6" />
+          <IoMdMenu
+            className={`size-8 rounded-full ${
+              isDarkMode
+                ? "bg-[#3A3B3C] text-[#fff]"
+                : "bg-[#f0f2f5] text-[#333]"
+            }`}
+          />
           <div className="text">
             <span className="">Menu</span>
           </div>
         </div>
         <div className="border-icon">
-          <FaFacebookMessenger className="size-6" onClick={handleShowBoxMess} />
+          <FaFacebookMessenger
+            className={`size-6  ${
+              isDarkMode ? " text-[#fff]" : " text-[#333]"
+            }`}
+            onClick={handleShowBoxMess}
+          />
+
           <span
             className={
               status ? "count absolute flex items-center justify-center" : ""
@@ -265,7 +303,11 @@ const Header = ({
         </div>
         <div className="border-icon">
           <IoIosNotifications
-            className="size-6"
+            className={`size-8 rounded-full ${
+              isDarkMode
+                ? "bg-[#3A3B3C] text-[#fff]"
+                : "bg-[#f0f2f5] text-[#333]"
+            }`}
             onClick={hanldeShowNocatifion}
           />
           <span

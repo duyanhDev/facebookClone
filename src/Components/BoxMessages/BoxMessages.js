@@ -25,7 +25,6 @@ const BoxMessages = ({
   const groupedLastMessages = data.reduce((acc, mess) => {
     // Kiểm tra xem `senderId` và `receiverId` có tồn tại không
     if (!mess.senderId || !mess.receiverId) {
-      console.error("Message has null sender or receiver:", mess);
       return acc; // Bỏ qua tin nhắn nếu thiếu dữ liệu
     }
 
@@ -44,10 +43,6 @@ const BoxMessages = ({
 
     return acc;
   }, {});
-
-  console.log("check", groupedLastMessages);
-
-  console.log("check", groupedLastMessages);
 
   useEffect(() => {
     getAllMess();

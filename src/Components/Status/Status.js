@@ -8,6 +8,7 @@ export default function Status({
   setShowModal,
   getPostAPI,
   fetchCountNotification,
+  isDarkMode,
 }) {
   const authorId = localStorage.getItem("id");
 
@@ -74,12 +75,15 @@ export default function Status({
   return (
     <>
       <button
-        className="p-3 w-4/5 btn_title text-[#333] font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+        className={`${
+          isDarkMode ? "bg-[#3A3B3C] text-[#fff]" : "bg-[#f0f2f5] text-[#333]"
+        } p-3 w-4/5 btn_title font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150`}
         type="button"
         onClick={() => setShowModal(true)}
       >
-        <span className="mt-2 "> Anh bạn đang nghĩ gì thế ? </span>
+        <span className="mt-2">Anh bạn đang nghĩ gì thế?</span>
       </button>
+
       {showModal ? (
         <>
           <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none  ">

@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { postLoginUser } from "../../service/apiAxios";
+import { getBestfriend, postLoginUser } from "../../service/apiAxios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../AuthContext ";
@@ -16,6 +16,7 @@ const Login = () => {
   // Handle login
   const { setIsAuthenticated } = useContext(AuthContext);
   const { setRole } = useContext(AuthContext);
+
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -33,8 +34,9 @@ const Login = () => {
       console.log("API response:", res);
 
       if (res && res.EC === 0) {
-        const { name, id, avatar, role } = res.data;
+        const { name, id, avatar, role, isOnline } = res.data;
         const { token, refreshToken } = res;
+        console.log(res);
 
         // Lưu vào localStorage
         localStorage.setItem("token", token);
@@ -43,6 +45,7 @@ const Login = () => {
         localStorage.setItem("id", id);
         localStorage.setItem("refreshToken", refreshToken);
         localStorage.setItem("role", role);
+        localStorage.setItem("isOnline", isOnline);
 
         // Cập nhật trạng thái xác thực và vai trò
         setIsAuthenticated(true);

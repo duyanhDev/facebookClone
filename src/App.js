@@ -184,7 +184,11 @@ function App() {
 
       <div className="content flex justify-between">
         <div className="left">
-          <SliderLeft username={username} isDarkMode={isDarkMode} />
+          <SliderLeft
+            username={username}
+            isDarkMode={isDarkMode}
+            friend={friend}
+          />
         </div>
         <div className="main w-auto m-auto flex justify-center items-center min-h-screen">
           <Outlet

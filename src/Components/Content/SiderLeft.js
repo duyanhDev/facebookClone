@@ -5,9 +5,13 @@ import { PiMonitorPlayLight } from "react-icons/pi";
 import { FaBookmark, FaRegClock } from "react-icons/fa6";
 import { MdGroupWork } from "react-icons/md";
 import { Link } from "react-router-dom";
-const SliderLeft = ({ username, isDarkMode }) => {
+const SliderLeft = ({ username, isDarkMode, friend }) => {
   const avatar = localStorage.getItem("avatar");
+  const isOnline = localStorage.getItem("isOnline");
 
+  const onlineFriendsCount = friend
+    ? friend.filter((friend) => friend.isOnline).length
+    : "";
   return (
     <div className="nav_left">
       <div className="top w-full -mt-7 ">
@@ -46,7 +50,14 @@ const SliderLeft = ({ username, isDarkMode }) => {
                     isDarkMode ? "text-blue-600" : "text-[#333]"
                   }`}
                 />
-                Bạn bè
+                Bạn bè{" "}
+                {
+                  <h3>
+                    {onlineFriendsCount > 0
+                      ? `(${onlineFriendsCount} người online)`
+                      : ""}
+                  </h3>
+                }
               </div>
             </Link>
           </li>
