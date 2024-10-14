@@ -132,7 +132,7 @@ const listFriends = async (userId) => {
     const user = await Users.findById(userId)
       .populate({
         path: "friends.friendId",
-        select: "username profile.name profile.avatar",
+        select: "username isOnline profile.name profile.avatar ",
       })
       .exec();
 

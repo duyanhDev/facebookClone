@@ -67,21 +67,15 @@ routerAPI.get("/users/:id", getListFriendUser);
 routerAPI.get("/message/:senderId/:receiverId", getMessagesAPI);
 routerAPI.get("/allmessage/:currentUserId", async (req, res) => {
   try {
-    // Lấy ID người dùng hiện tại từ body hoặc params (tùy cách bạn gửi yêu cầu từ frontend)
     let { currentUserId } = req.params;
 
-    // Tìm tất cả các tin nhắn mà currentUserId là người gửi hoặc người nhận
     const messages = await Messages.find({
-      $or: [
-        { senderId: currentUserId }, // Tin nhắn mà người dùng là người gửi
-        { receiverId: currentUserId }, // Tin nhắn mà người dùng là người nhận
-      ],
+      $or: [{ senderId: currentUserId }, { receiverId: currentUserId }],
     })
-      .populate("senderId", "profile.avatar profile.name") // Lấy avatar và tên của người gửi
-      .populate("receiverId", "profile.avatar profile.name") // Lấy avatar và tên của người nhận
+      .populate("senderId", "profile.avatar profile.name")
+      .populate("receiverId", "profile.avatar profile.name")
       .exec();
 
-    // Trả về kết quả với dữ liệu tin nhắn đã lấy
     return res.status(200).json({
       EC: 0, // Success
       data: messages, // Trả về danh sách tin nhắn
@@ -103,6 +97,25 @@ routerAPI.put("/message/:senderId/:receiverId", putMessageAPI);
 
 // login
 routerAPI.post("/login", postLogin);
+routerAPI.post("/logout/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Update user status to offline
+    await Users.findByIdAndUpdate(userId, {
+      isOnline: false,
+      lastActive: new Date(), // Optional: Update last active time
+    });
+
+    // Clear any session data if needed
+    // For example, you might want to invalidate JWT tokens if you're using them.
+
+    res.status(200).json({ success: true, message: "Logout successful" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ success: false, message: "Logout failed" });
+  }
+});
 routerAPI.get("/protected", authenticateJWT, (req, res) => {
   res.send("This is a protected route");
 });

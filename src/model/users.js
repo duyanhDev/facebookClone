@@ -26,6 +26,8 @@ const UsersSchema = new mongoose.Schema(
       },
     ],
     posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
+    lastActive: { type: Date, default: Date.now }, // Tracks the last activity of the user
+    isOnline: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

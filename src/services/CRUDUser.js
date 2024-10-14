@@ -64,40 +64,48 @@ const putUserAPI = async (id, username, password, role, avatar) => {
 };
 
 // Đăng nhập
-
 const postLoginJWT = async (email, password) => {
   try {
+    // Find the user by email
     const user = await Users.findOne({ email });
     if (!user) {
-      return { success: false, message: "Người dùng không tồn tại" };
+      return { success: false, message: "Người dùng không tồn tại" }; // User does not exist
     }
 
+    // Compare provided password with stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log(password, user.password);
+    console.log(password, user.password); // For debugging purposes; remove in production
 
     if (!isMatch) {
-      return { success: false, message: "Sai mật khẩu" };
+      return { success: false, message: "Sai mật khẩu" }; // Invalid password
     }
 
-    const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: "1h" });
+    // Generate JWT tokens
+    const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: "1h" }); // Access token
     const refreshToken = jwt.sign({ id: user._id }, refreshSecret, {
       expiresIn: "7d",
-    });
+    }); // Refresh token
+
+    user.lastActive = new Date();
+    user.isOnline = true;
+    await user.save();
 
     return {
       success: true,
       token,
       refreshToken,
+
       user: {
         name: user.profile.name,
         avatar: user.profile.avatar,
         id: user._id,
         role: user.role,
+        isOnline: user.isOnline,
       },
     };
   } catch (error) {
     console.error("Error during login:", error);
-    return null;
+    return { success: false, message: "Có lỗi xảy ra. Vui lòng thử lại." }; // Generic error message
   }
 };
 
