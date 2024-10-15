@@ -43,6 +43,7 @@ const {
   postLikeComment,
   getLikesForComment,
   getUniqueCommentersWithNamesAPI,
+  CreateCommentsFeetBackAPI,
 } = require("./../controllers/comment");
 const {
   getNotifications,
@@ -153,6 +154,7 @@ routerAPI.get("/post", getNewPostUsers);
 // comment
 routerAPI.get("/comment", getCommentsAPI);
 routerAPI.post("/comment", CreateCommentsAPI);
+routerAPI.post("/feedbackComment", CreateCommentsFeetBackAPI);
 //like comment
 routerAPI.get("/likeComment/:postIds", getLikesForComment);
 routerAPI.post("/likecomment", postLikeComment);

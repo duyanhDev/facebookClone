@@ -3,6 +3,7 @@ const {
   CreateComments,
   postCommentLike,
   getUniqueCommentersWithNames,
+  CreateCommentsfeedback,
 } = require("./../services/comment");
 const {
   uploadFileToCloudinary,
@@ -30,21 +31,16 @@ const getCommentsAPI = async (req, res) => {
 // thêm bình luận
 const CreateCommentsAPI = async (req, res) => {
   let { postId, authorId, content, replies } = req.body;
-  console.log(authorId);
 
   let imageUrl = "";
   if (!authorId || !content) {
     return res.status(400).json({ success: false, message: "Missing fields" });
   }
-  console.log("gg", req.files);
 
-  // Handle video upload if provided
-  console.log("Uploaded files:", req.files);
   if (req.files && req.files.image) {
     try {
       const resultImage = await uploadFileToCloudinary(req.files.image); // Upload image và lấy URL
-      imageUrl = resultImage.secure_url; // Gán link image sau khi upload thành công
-      console.log("Image URL:", imageUrl);
+      imageUrl = resultImage.secure_url;
     } catch (uploadError) {
       console.error("Error uploading image:", uploadError.message);
       return res
@@ -74,6 +70,57 @@ const CreateCommentsAPI = async (req, res) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
+
+const CreateCommentsFeetBackAPI = async (req, res) => {
+  const { postId, authorId, content, replies, receiverId, senderId } = req.body;
+  console.log(senderId);
+
+  if (!authorId || !content) {
+    return res.status(400).json({ success: false, message: "Missing fields" });
+  }
+
+  let imageUrl = "";
+
+  // Kiểm tra nếu có tệp hình ảnh được gửi lên
+  if (req.files && req.files.image) {
+    try {
+      const resultImage = await uploadFileToCloudinary(req.files.image); // Upload image và lấy URL
+      imageUrl = resultImage.secure_url; // Lưu URL của hình ảnh
+    } catch (uploadError) {
+      console.error("Error uploading image:", uploadError.message);
+      return res
+        .status(500)
+        .json({ success: false, message: "Error uploading image" });
+    }
+  }
+
+  try {
+    const commentData = {
+      postId: postId,
+      authorId: authorId,
+      content: content,
+      image: imageUrl || null,
+      replies: replies || [],
+    };
+
+    const results = await CreateCommentsfeedback(
+      commentData,
+      receiverId,
+      senderId
+    );
+
+    return res.status(201).json({
+      success: true,
+      data: results,
+    });
+  } catch (error) {
+    console.error("Error while creating comment:", error.message);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 const getLikesForComment = async (req, res) => {
   try {
     const { postIds } = req.params;
@@ -175,4 +222,5 @@ module.exports = {
   getLikesForComment,
   postLikeComment,
   getUniqueCommentersWithNamesAPI,
+  CreateCommentsFeetBackAPI,
 };

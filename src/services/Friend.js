@@ -68,8 +68,6 @@ const sendFriendRequest = async (senderId, receiverId) => {
         },
       },
     });
-
-    console.log("Friend request sent successfully.");
   } catch (error) {
     console.error("Error sending friend request:", error.message);
   }
@@ -84,8 +82,6 @@ const acceptFriendRequest = async (userId, friendIds) => {
     for (const friendId of friendIdArray) {
       const friendObjectId = new mongoose.Types.ObjectId(friendId.trim());
 
-      console.log("Processing friendId:", friendObjectId);
-
       // Update the friend status to accepted for the user
       await Users.updateOne(
         { _id: userObjectId, "friends.friendId": friendObjectId },
@@ -99,7 +95,6 @@ const acceptFriendRequest = async (userId, friendIds) => {
       );
     }
 
-    console.log("Friend request accepted successfully.");
     return { success: true, message: "Friend request accepted successfully." }; // Return a success message
   } catch (error) {
     console.error("Error accepting friend request:", error);
@@ -119,8 +114,6 @@ const rejectFriendRequest = async (userId, friendId) => {
       { _id: friendId },
       { $pull: { friends: { friendId: userId } } }
     );
-
-    console.log("Friend request rejected successfully.");
   } catch (error) {
     console.error("Error rejecting friend request:", error);
   }

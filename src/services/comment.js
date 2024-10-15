@@ -1,6 +1,7 @@
 const Comments = require("./../model/comment");
 const Users = require("./../model/users");
 const mongoose = require("mongoose");
+const { CreateCommentsNotification } = require("./notification");
 const getComments = async () => {
   try {
     const result = await Comments.find({})
@@ -26,7 +27,6 @@ const CreateComments = async (commentData) => {
         select: "profile.name profile.avatar",
       })
       .exec();
-    console.log("Post with Author:", CommentWithAuthor);
     if (CommentWithAuthor && CommentWithAuthor.authorId) {
       const { profile } = CommentWithAuthor.authorId;
 
@@ -39,6 +39,7 @@ const CreateComments = async (commentData) => {
           },
           { new: true }
         );
+
         return updateComment;
       } else {
         throw new Error("Author profile is missing `name` or `avatar`.");
@@ -48,9 +49,54 @@ const CreateComments = async (commentData) => {
     }
   } catch (error) {
     console.error("Error creating new post:", error);
-    throw error; // Re-throw the error to be handled by the calling function or middleware
+    throw error;
   }
 };
+
+const CreateCommentsfeedback = async (commentData, receiverId, senderId) => {
+  try {
+    const newComment = await Comments.create(commentData);
+
+    const CommentWithAuthor = await Comments.findById(newComment._id)
+      .populate({
+        path: "authorId",
+        select: "profile.name profile.avatar",
+      })
+      .exec();
+
+    if (CommentWithAuthor && CommentWithAuthor.authorId) {
+      const { profile } = CommentWithAuthor.authorId;
+
+      if (profile && profile.name && profile.avatar) {
+        const updatedComment = await Comments.findByIdAndUpdate(
+          CommentWithAuthor._id,
+          {
+            authorName: profile.name,
+            avatar: profile.avatar,
+          },
+          { new: true }
+        );
+
+        await CreateCommentsNotification(
+          updatedComment.postId,
+          receiverId,
+          senderId, // Ensure this is not undefined
+          updatedComment._id
+        );
+
+        return updatedComment;
+      } else {
+        throw new Error("Author profile is missing `name` or `avatar`.");
+      }
+    } else {
+      throw new Error("Comment with author details could not be populated.");
+    }
+  } catch (error) {
+    console.error("Error creating new comment:", error);
+    throw error;
+  }
+};
+
 const postCommentLike = async (_id, authorId, userId, reaction) => {
   try {
     if (!_id || !authorId || !userId || !reaction) {
@@ -105,12 +151,12 @@ const postCommentLike = async (_id, authorId, userId, reaction) => {
           $push: {
             likes: {
               userId: userId,
-              reaction: reaction, // Thêm reaction
-              userName: userName, // Thêm tên người dùng
+              reaction: reaction,
+              userName: userName,
             },
           },
         },
-        { new: true } // Trả về tài liệu đã cập nhật
+        { new: true }
       );
     }
 
@@ -167,4 +213,5 @@ module.exports = {
   CreateComments,
   postCommentLike,
   getUniqueCommentersWithNames,
+  CreateCommentsfeedback,
 };

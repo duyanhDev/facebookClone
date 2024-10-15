@@ -78,7 +78,6 @@ const putMessage = async (senderId, receiverId) => {
       receiverId: receiverId,
       seen: false,
     });
-    console.log("Pending messages before update:", pendingMessagesBefore);
 
     // Cập nhật trạng thái tin nhắn
     const result = await Messages.updateMany(
@@ -92,7 +91,6 @@ const putMessage = async (senderId, receiverId) => {
       receiverId: receiverId,
       seen: false,
     });
-    console.log("Pending messages after update:", pendingMessagesAfter);
 
     return {
       success: true,

@@ -1,3 +1,4 @@
+const Comments = require("./../model/comment");
 const Notification = require("../model/notification");
 const Users = require("../model/users");
 
@@ -30,7 +31,54 @@ const createPostNotification = async (postId, authorId) => {
     console.error("Error creating notifications:", error);
   }
 };
+const CreateCommentsNotification = async (
+  postId,
+  receiverId,
+  senderId,
+  commentId
+) => {
+  try {
+    // console.log(
+    //   "Creating notification for post:",
+    //   postId,
+    //   "receiverId:",
+    //   receiverId,
+    //   "senderId:",
+    //   senderId
+    // );
+
+    // Check if senderId is defined
+    if (!senderId) {
+      throw new Error("senderId is required and cannot be undefined.");
+    }
+
+    // Fetch the receiver to ensure they exist
+    const receiver = await Users.findById(receiverId);
+    if (!receiver) {
+      throw new Error("Receiver not found");
+    }
+
+    // Prepare the notification object
+    const notification = {
+      receiverId: receiverId,
+      senderId: senderId,
+      type: "comment",
+      postId: postId,
+      commentId: commentId,
+      seen: false,
+    };
+
+    // Create the notification
+    const savedNotification = await Notification.create(notification);
+    console.log("Notification created successfully:", savedNotification);
+    return savedNotification;
+  } catch (error) {
+    console.error("Error creating notification:", error);
+    throw error; // Re-throw the error for higher-level handling
+  }
+};
 
 module.exports = {
   createPostNotification,
+  CreateCommentsNotification,
 };

@@ -74,7 +74,7 @@ const postLoginJWT = async (email, password) => {
 
     // Compare provided password with stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log(password, user.password); // For debugging purposes; remove in production
+    // console.log(password, user.password); // For debugging purposes; remove in production
 
     if (!isMatch) {
       return { success: false, message: "Sai mật khẩu" }; // Invalid password
@@ -186,7 +186,6 @@ const sendResetEmail = async (email) => {
 
     // Gửi email
     await transporter.sendMail(mailOptions);
-    console.log(`Email đã được gửi đến: ${user.email}`);
   } catch (error) {
     // Ghi log chi tiết lỗi
     console.error("Lỗi khi gửi email:", error.message);
