@@ -42,7 +42,8 @@ const Main = () => {
   const [showModal, setShowModal] = useState(false);
   const [comments, setComments] = useState([]);
 
-  let [content, setContent] = useState("");
+  const [contents, setContents] = useState(Array(data.length).fill(""));
+
   let [image, setImage] = useState(null);
 
   const { isDarkMode, fetchCountNotification } = useOutletContext();
@@ -334,14 +335,18 @@ const Main = () => {
       console.log(error);
     }
   }, []);
-
+  const handleContentChange = (index, value) => {
+    const newContents = [...contents];
+    newContents[index] = value;
+    setContents(newContents);
+  };
   const handleComment = async (postId) => {
     setLoading(true);
     try {
-      let data = await CreateCommentsAPI(postId, userId, content, image);
+      let data = await CreateCommentsAPI(postId, userId, contents, image);
       if (data) {
         toast.success("Bình luận thành công");
-        setContent("");
+        setContents(Array(data.length).fill(""));
         setImage(null);
 
         // Update comments immediately
@@ -517,7 +522,7 @@ const Main = () => {
 
       {data &&
         data.length > 0 &&
-        data.map((item) => {
+        data.map((item, index) => {
           const userReaction = item.likes.find(
             (like) => like.userId && like.userId._id === userId
           )?.reaction;
@@ -954,15 +959,18 @@ const Main = () => {
                     </svg>
                     <span className="sr-only">Add emoji</span>
                   </button>
+
                   <textarea
-                    id="chat"
+                    id={`chat-${index}`}
+                    key={index + 1}
                     rows={1}
                     className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 dark:bg-white dark:placeholder-gray-400 dark:text-[#333] focus:bg-white outline-none"
                     placeholder={`Bình luận dưới tên là ${username}`}
-                    onChange={(e) => setContent(e.target.value)}
-                    value={content}
+                    onChange={(e) => handleContentChange(index, e.target.value)}
+                    value={contents[index]}
                     onKeyDown={handleChangeEnter}
                   />
+
                   <button
                     onClick={() => handleComment(item._id)}
                     className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"

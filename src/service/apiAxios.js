@@ -200,6 +200,32 @@ const CreateCommentsAPI = async (
   return await axios.post("http://localhost:8001/v1/api/comment", data);
 };
 
+const CreatefeedbackComment = async (
+  postId,
+  authorId,
+  content,
+  image,
+  replies = [],
+  receiverId,
+  senderId
+) => {
+  const data = new FormData();
+  data.append("postId", postId);
+  data.append("authorId", authorId);
+  data.append("content", content);
+  data.append("image", image);
+
+  // Kiểm tra nếu replies là một mảng và append từng phần tử
+  if (Array.isArray(replies)) {
+    replies.forEach((reply) => {
+      data.append("replies[]", reply); // Sử dụng 'replies[]' để chỉ định mảng
+    });
+  }
+  data.append("receiverId", receiverId);
+  data.append("senderId", senderId);
+  return await axios.post("http://localhost:8001/v1/api/feedbackComment", data);
+};
+
 // thêm like comment
 
 const postCommentLikes = async (_id, authorId, userId, reaction) => {
@@ -264,6 +290,7 @@ export {
   postRegisterUser,
   getCommentsAPI,
   CreateCommentsAPI,
+  CreatefeedbackComment,
   postCommentLikes,
   fetchLikesCommentFromApi,
   getCountComments,

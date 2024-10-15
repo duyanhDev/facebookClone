@@ -20,7 +20,6 @@ const Login = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      // Kiểm tra định dạng email
       let InVaild =
         /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       if (!InVaild.test(email)) {
@@ -29,7 +28,6 @@ const Login = () => {
         return;
       }
 
-      // Gọi API đăng nhập
       let res = await postLoginUser(email, password);
       console.log("API response:", res);
 
@@ -38,7 +36,6 @@ const Login = () => {
         const { token, refreshToken } = res;
         console.log(res);
 
-        // Lưu vào localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("name", name);
         localStorage.setItem("avatar", avatar);
@@ -47,13 +44,11 @@ const Login = () => {
         localStorage.setItem("role", role);
         localStorage.setItem("isOnline", isOnline);
 
-        // Cập nhật trạng thái xác thực và vai trò
         setIsAuthenticated(true);
         setRole(role);
 
         toast.success("Đăng nhập thành công");
 
-        // Điều hướng dựa trên vai trò
         if (role === "admin") {
           navigate("/admin");
         } else {
@@ -66,7 +61,7 @@ const Login = () => {
       console.error("Lỗi đăng nhập:", error);
       toast.error("Đã xảy ra lỗi, vui lòng thử lại");
     } finally {
-      setLoading(false); // Dừng loader dù thành công hay thất bại
+      setLoading(false);
     }
   };
 

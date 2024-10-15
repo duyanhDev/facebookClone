@@ -159,6 +159,7 @@ function App() {
     );
     return () => clearTimeout(timer);
   }, [searchTerm, friend]);
+
   return (
     <div className="App">
       <div

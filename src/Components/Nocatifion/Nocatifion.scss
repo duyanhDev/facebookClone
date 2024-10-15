@@ -31,3 +31,17 @@
   text-overflow: ellipsis; /* Show ellipsis at the end */
   font-size: 14px;
 }
+
+/* Tùy chỉnh thanh cuộn cho phần thông báo */
+.nocatifion .overflow-y-auto::-webkit-scrollbar {
+  width: 8px; /* Chiều rộng của thanh cuộn */
+}
+
+.nocatifion .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #888; /* Màu của thanh cuộn */
+  border-radius: 10px; /* Bo góc cho thanh cuộn */
+}
+
+.nocatifion .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Màu khi hover */
+}

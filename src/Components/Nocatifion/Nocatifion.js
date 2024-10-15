@@ -59,10 +59,15 @@ const Nocatifion = ({ showNocatfion, setShowNocatfion, dataNocatifion }) => {
                         <p className="text-[#65676B]">
                           {`${item.sender.name} đã đăng bài viết với nội dung "${item.postId.content}"`}
                         </p>
-                      ) : (
+                      ) : item.type === "new_post" ? (
                         <p className="">
                           <span className="font-bold">{`${item.sender.name}`}</span>{" "}
                           đã đăng bài viết với nội dung "{item.postId.content}"
+                        </p>
+                      ) : (
+                        <p className="">
+                          <span className="font-bold">{`${item.sender.name}`}</span>{" "}
+                          đã nhắc đến bạn trong bình luận của họ
                         </p>
                       )}
                       {!item.seen && (
