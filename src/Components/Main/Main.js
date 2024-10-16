@@ -741,151 +741,311 @@ const Main = () => {
 
                     if (comment.postId === item._id) {
                       return (
-                        <div
-                          key={comment._id}
-                          className="flex items-center gap-1"
-                        >
-                          <img
-                            className="w-10 h-10 rounded-full -mt-7"
-                            src={comment.avatar}
-                            alt="avart lỗi"
-                          />
-                          <div className="block ml-1">
-                            <div className=" comment_bg mt-4">
-                              <span>{comment.authorName}</span>
-                              <p>{comment.content}</p>
-                              {comment.image && (
-                                <img
-                                  className="w-32 h-32 object-cover rounded-lg"
-                                  src={comment.image}
-                                  alt="ảnh bình luận"
-                                />
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 mt-1 comments_like">
-                              <span className="comment_text">
-                                {getTimeAgoInMinutes(comment.createdAt)}
-                              </span>
-                              <div className="comment_text like_hover">
-                                <span
-                                  onClick={() =>
-                                    handleClickCommentLike(
-                                      comment._id,
-                                      comment.authorId,
-                                      "like"
-                                    )
-                                  }
-                                >
-                                  {userReaction1 ? (
-                                    getReactionIcon1(userReaction1)
-                                  ) : (
-                                    <>Thích</>
-                                  )}
+                        <>
+                          <div
+                            key={comment._id}
+                            className="flex items-center gap-1"
+                          >
+                            <img
+                              className="w-10 h-10 rounded-full -mt-7"
+                              src={comment.avatar}
+                              alt="avart lỗi"
+                            />
+                            <div className="block ml-1">
+                              <div className=" comment_bg mt-4">
+                                <span>{comment.authorName}</span>
+                                <p>{comment.content}</p>
+                                {comment.image && (
+                                  <img
+                                    className="w-32 h-32 object-cover rounded-lg"
+                                    src={comment.image}
+                                    alt="ảnh bình luận"
+                                  />
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1 comments_like">
+                                <span className="comment_text">
+                                  {getTimeAgoInMinutes(comment.createdAt)}
                                 </span>
-                                <div className="laugh-icon flex items-center gap-5 absolute ">
-                                  <span className="icon-animation">
-                                    <AiOutlineLike
-                                      size={30}
-                                      color="blue"
-                                      onClick={() =>
-                                        handleClickCommentLike(
-                                          comment._id,
-                                          comment.authorId,
-                                          "like"
-                                        )
-                                      }
-                                    />
-                                  </span>
+                                <div className="comment_text like_hover">
                                   <span
-                                    className="icon-animation"
                                     onClick={() =>
                                       handleClickCommentLike(
                                         comment._id,
                                         comment.authorId,
-                                        "love"
+                                        "like"
                                       )
                                     }
                                   >
-                                    <FaHeart size={30} color="red" />
+                                    {userReaction1 ? (
+                                      getReactionIcon1(userReaction1)
+                                    ) : (
+                                      <>Thích</>
+                                    )}
                                   </span>
+                                  <div className="laugh-icon flex items-center gap-5 absolute ">
+                                    <span className="icon-animation">
+                                      <AiOutlineLike
+                                        size={30}
+                                        color="blue"
+                                        onClick={() =>
+                                          handleClickCommentLike(
+                                            comment._id,
+                                            comment.authorId,
+                                            "like"
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                    <span
+                                      className="icon-animation"
+                                      onClick={() =>
+                                        handleClickCommentLike(
+                                          comment._id,
+                                          comment.authorId,
+                                          "love"
+                                        )
+                                      }
+                                    >
+                                      <FaHeart size={30} color="red" />
+                                    </span>
 
-                                  <span className="icon-animation">
-                                    <FaRegFaceGrinHearts
-                                      size={30}
-                                      color="orange"
-                                      onClick={() =>
-                                        handleClickCommentLike(
-                                          comment._id,
-                                          comment.authorId,
-                                          "thương thương"
-                                        )
-                                      }
-                                    />
-                                  </span>
-                                  <span className="icon-animation">
-                                    <FaRegLaughSquint
-                                      size={30}
-                                      color="orange"
-                                      onClick={() =>
-                                        handleClickCommentLike(
-                                          comment._id,
-                                          comment.authorId,
-                                          "haha"
-                                        )
-                                      }
-                                    />
-                                  </span>
-                                  <span className="icon-animation">
-                                    <FaRegFaceSurprise
-                                      size={30}
-                                      color="orange"
-                                      onClick={() =>
-                                        handleClickCommentLike(
-                                          comment._id,
-                                          comment.authorId,
-                                          "wow"
-                                        )
-                                      }
-                                    />
-                                  </span>
-                                  <span className="icon-animation">
-                                    <FaRegFaceSadTear
-                                      size={30}
-                                      color="orange"
-                                      onClick={() =>
-                                        handleClickCommentLike(
-                                          comment._id,
-                                          comment.authorId,
-                                          "sad"
-                                        )
-                                      }
-                                    />
-                                  </span>
-                                  <span className="icon-animation">
-                                    <FaRegFaceTired
-                                      size={30}
-                                      color="orange"
-                                      onClick={() =>
-                                        handleClickCommentLike(
-                                          comment._id,
-                                          comment.authorId,
-                                          "angry"
-                                        )
-                                      }
-                                    />
-                                  </span>
+                                    <span className="icon-animation">
+                                      <FaRegFaceGrinHearts
+                                        size={30}
+                                        color="orange"
+                                        onClick={() =>
+                                          handleClickCommentLike(
+                                            comment._id,
+                                            comment.authorId,
+                                            "thương thương"
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                    <span className="icon-animation">
+                                      <FaRegLaughSquint
+                                        size={30}
+                                        color="orange"
+                                        onClick={() =>
+                                          handleClickCommentLike(
+                                            comment._id,
+                                            comment.authorId,
+                                            "haha"
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                    <span className="icon-animation">
+                                      <FaRegFaceSurprise
+                                        size={30}
+                                        color="orange"
+                                        onClick={() =>
+                                          handleClickCommentLike(
+                                            comment._id,
+                                            comment.authorId,
+                                            "wow"
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                    <span className="icon-animation">
+                                      <FaRegFaceSadTear
+                                        size={30}
+                                        color="orange"
+                                        onClick={() =>
+                                          handleClickCommentLike(
+                                            comment._id,
+                                            comment.authorId,
+                                            "sad"
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                    <span className="icon-animation">
+                                      <FaRegFaceTired
+                                        size={30}
+                                        color="orange"
+                                        onClick={() =>
+                                          handleClickCommentLike(
+                                            comment._id,
+                                            comment.authorId,
+                                            "angry"
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="comment_text">Phản hồi</div>
-                              <div className="comment_text flex items-center gap-2">
-                                {renderUsersByReaction(comment.likes)}
-                                {likesMapComment[comment._id]
-                                  ? `${likesMapComment[comment._id]} `
-                                  : null}
+                                <div className="comment_text">Phản hồi</div>
+                                <div className="comment_text flex items-center gap-2">
+                                  {renderUsersByReaction(comment.likes)}
+                                  {likesMapComment[comment._id]
+                                    ? `${likesMapComment[comment._id]} `
+                                    : null}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
+                          <div className=" block reply_item">
+                            {comment.replies &&
+                              comment.replies.length > 0 &&
+                              comment.replies.map((replie) => {
+                                return (
+                                  <div
+                                    key={replie._id}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <img
+                                      className="w-10 h-10 rounded-full -mt-7"
+                                      src={replie.avatar}
+                                      alt="avart lỗi"
+                                    />
+                                    <div className="block ml-1">
+                                      <div className=" comment_bg mt-4">
+                                        <span>{replie.authorName}</span>
+                                        <p>{replie.content}</p>
+                                        {replie.image && (
+                                          <img
+                                            className="w-32 h-32 object-cover rounded-lg"
+                                            src={replie.image}
+                                            alt="ảnh bình luận"
+                                          />
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-2 mt-1 comments_like">
+                                        <span className="comment_text">
+                                          {getTimeAgoInMinutes(
+                                            replie.createdAt
+                                          )}
+                                        </span>
+                                        <div className="comment_text like_hover">
+                                          <span
+                                            onClick={() =>
+                                              handleClickCommentLike(
+                                                replie._id,
+                                                replie.authorId,
+                                                "like"
+                                              )
+                                            }
+                                          >
+                                            {userReaction1 ? (
+                                              getReactionIcon1(userReaction1)
+                                            ) : (
+                                              <>Thích</>
+                                            )}
+                                          </span>
+                                          <div className="laugh-icon flex items-center gap-5 absolute ">
+                                            <span className="icon-animation">
+                                              <AiOutlineLike
+                                                size={30}
+                                                color="blue"
+                                                onClick={() =>
+                                                  handleClickCommentLike(
+                                                    comment._id,
+                                                    comment.authorId,
+                                                    "like"
+                                                  )
+                                                }
+                                              />
+                                            </span>
+                                            <span
+                                              className="icon-animation"
+                                              onClick={() =>
+                                                handleClickCommentLike(
+                                                  comment._id,
+                                                  comment.authorId,
+                                                  "love"
+                                                )
+                                              }
+                                            >
+                                              <FaHeart size={30} color="red" />
+                                            </span>
+
+                                            <span className="icon-animation">
+                                              <FaRegFaceGrinHearts
+                                                size={30}
+                                                color="orange"
+                                                onClick={() =>
+                                                  handleClickCommentLike(
+                                                    comment._id,
+                                                    comment.authorId,
+                                                    "thương thương"
+                                                  )
+                                                }
+                                              />
+                                            </span>
+                                            <span className="icon-animation">
+                                              <FaRegLaughSquint
+                                                size={30}
+                                                color="orange"
+                                                onClick={() =>
+                                                  handleClickCommentLike(
+                                                    comment._id,
+                                                    comment.authorId,
+                                                    "haha"
+                                                  )
+                                                }
+                                              />
+                                            </span>
+                                            <span className="icon-animation">
+                                              <FaRegFaceSurprise
+                                                size={30}
+                                                color="orange"
+                                                onClick={() =>
+                                                  handleClickCommentLike(
+                                                    comment._id,
+                                                    comment.authorId,
+                                                    "wow"
+                                                  )
+                                                }
+                                              />
+                                            </span>
+                                            <span className="icon-animation">
+                                              <FaRegFaceSadTear
+                                                size={30}
+                                                color="orange"
+                                                onClick={() =>
+                                                  handleClickCommentLike(
+                                                    comment._id,
+                                                    comment.authorId,
+                                                    "sad"
+                                                  )
+                                                }
+                                              />
+                                            </span>
+                                            <span className="icon-animation">
+                                              <FaRegFaceTired
+                                                size={30}
+                                                color="orange"
+                                                onClick={() =>
+                                                  handleClickCommentLike(
+                                                    comment._id,
+                                                    comment.authorId,
+                                                    "angry"
+                                                  )
+                                                }
+                                              />
+                                            </span>
+                                          </div>
+                                        </div>
+                                        <div className="comment_text">
+                                          Phản hồi
+                                        </div>
+                                        <div className="comment_text flex items-center gap-2">
+                                          {renderUsersByReaction(comment.likes)}
+                                          {likesMapComment[comment._id]
+                                            ? `${likesMapComment[comment._id]} `
+                                            : null}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div></div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </>
                       );
                     } else {
                       return null;
