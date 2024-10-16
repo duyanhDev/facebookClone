@@ -2,6 +2,7 @@ const Comments = require("./../model/comment");
 const Users = require("./../model/users");
 const mongoose = require("mongoose");
 const { CreateCommentsNotification } = require("./notification");
+
 const getComments = async () => {
   try {
     const result = await Comments.find({})
@@ -208,10 +209,47 @@ const getUniqueCommentersWithNames = async (postId) => {
     postId: postId,
   };
 };
+
+const postRelyComment = async (req, res) => {
+  const { commentId, authorId, postId, authorName, content, avatar, image } =
+    req.body;
+  console.log(commentId, authorId, authorName, content);
+
+  try {
+    const comment = await Comments.findById(commentId);
+
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found." });
+    }
+
+    // Tạo đối tượng phản hồi
+    const newReply = {
+      content: content,
+      authorId: authorId,
+      postId: postId,
+      authorName: authorName,
+      content: content,
+      avatar: avatar,
+      image: image, // Có thể để trống nếu không có
+    };
+
+    console.log("New Reply Payload:", newReply); // Kiểm tra payload
+
+    // Thêm phản hồi vào mảng replies
+    comment.replies.push(newReply);
+    await comment.save(); // Lưu lại bình luận
+
+    res.status(200).json({ message: "Reply added successfully.", comment });
+  } catch (error) {
+    console.error("Error in reply API:", error);
+    res.status(500).json({ message: "Error adding reply.", error });
+  }
+};
 module.exports = {
   getComments,
   CreateComments,
   postCommentLike,
   getUniqueCommentersWithNames,
   CreateCommentsfeedback,
+  postRelyComment,
 };

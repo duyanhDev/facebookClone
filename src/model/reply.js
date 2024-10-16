@@ -1,23 +1,16 @@
 const mongoose = require("mongoose");
-
-const ReplySchema = require("./reply");
 const { Schema } = mongoose;
 
-const CommentSchema = new Schema(
+const ReplySchema = new Schema(
   {
-    postId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Post",
-      required: true,
-    },
+    content: { type: String, required: true },
     authorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Users",
       required: true,
     },
-    authorName: { type: String },
+    authorName: { type: String, required: true },
     avatar: { type: String },
-    content: { type: String, required: true },
     image: { type: String },
     likes: [
       {
@@ -37,10 +30,9 @@ const CommentSchema = new Schema(
         },
       },
     ],
-    replies: [ReplySchema], // Support for nested comments
   },
+
   { timestamps: true }
 );
 
-const Comment = mongoose.model("Comment", CommentSchema);
-module.exports = Comment;
+module.exports = ReplySchema;

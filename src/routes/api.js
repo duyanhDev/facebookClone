@@ -50,6 +50,8 @@ const {
   getCountNotifications,
 } = require("../controllers/notifications");
 const Messages = require("../model/message");
+const Comment = require("../model/comment");
+const { postRelyComment } = require("../services/comment");
 
 // crud users
 routerAPI.get("/users", getReadUserFB);
@@ -213,4 +215,7 @@ routerAPI.post("/reset-password/:token", async (req, res) => {
 routerAPI.get("/messFace/:currentUserId", async (req, res) => {});
 routerAPI.get("/nocatifition/:userId", getNotifications);
 routerAPI.get("/nocatifitionCount/:userId", getCountNotifications);
+
+routerAPI.post("/commentId/reply", postRelyComment);
+
 module.exports = routerAPI;

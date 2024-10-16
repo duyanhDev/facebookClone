@@ -41,7 +41,6 @@ const NotificationSchema = new Schema(
   { timestamps: true }
 );
 
-// Tạo index cho các trường receiverId và seen để tối ưu hóa tìm kiếm thông báo chưa đọc
 NotificationSchema.index({ receiverId: 1, seen: 1 });
 
 const Notification = mongoose.model("Notification", NotificationSchema);
