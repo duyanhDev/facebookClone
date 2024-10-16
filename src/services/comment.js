@@ -211,8 +211,17 @@ const getUniqueCommentersWithNames = async (postId) => {
 };
 
 const postRelyComment = async (req, res) => {
-  const { commentId, authorId, postId, authorName, content, avatar, image } =
-    req.body;
+  const {
+    commentId,
+    authorId,
+    postId,
+    authorName,
+    content,
+    avatar,
+    image,
+    receiverId,
+    senderId,
+  } = req.body;
   console.log(commentId, authorId, authorName, content);
 
   try {
@@ -238,6 +247,12 @@ const postRelyComment = async (req, res) => {
     // Thêm phản hồi vào mảng replies
     comment.replies.push(newReply);
     await comment.save(); // Lưu lại bình luận
+    await CreateCommentsNotification(
+      newReply.postId,
+      receiverId,
+      senderId, // Ensure this is not undefined
+      commentId
+    );
 
     res.status(200).json({ message: "Reply added successfully.", comment });
   } catch (error) {

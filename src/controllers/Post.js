@@ -97,8 +97,6 @@ const postLikeUser = async (req, res) => {
     let { _id, authorId, like } = req.body;
     const { userId, reaction } = like;
 
-    console.log("Request data:", { _id, authorId, userId, reaction });
-
     let data = await postLike(_id, authorId, userId, reaction);
 
     if (!data) {
