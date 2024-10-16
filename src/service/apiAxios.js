@@ -176,7 +176,7 @@ const getCommentsAPI = async () => {
     return;
   }
 };
-
+// bình luận
 const CreateCommentsAPI = async (
   postId,
   authorId,
@@ -271,6 +271,32 @@ const getCountNotifications = async (userId) => {
   );
 };
 
+const postReplyComment = async (
+  commentId,
+  authorId,
+  postId,
+  authorName,
+  avatar,
+  content,
+  image,
+  receiverId,
+  senderId
+) => {
+  const data = new FormData();
+  data.append("commentId", commentId);
+  data.append("authorId", authorId);
+  data.append("postId", postId);
+  data.append("authorName", authorName);
+  data.append("avatar", avatar);
+  data.append("content", content);
+  if (image !== null) {
+    data.append("image", image);
+  }
+  data.append("receiverId", receiverId);
+  data.append("senderId", senderId);
+  return await axios.post("http://localhost:8001/v1/api/commentId/reply", data);
+};
+
 export {
   getUser,
   getAddUser,
@@ -296,4 +322,5 @@ export {
   getCountComments,
   getNotificationsAPI,
   getCountNotifications,
+  postReplyComment,
 };
