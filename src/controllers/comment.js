@@ -4,6 +4,7 @@ const {
   postCommentLike,
   getUniqueCommentersWithNames,
   CreateCommentsfeedback,
+  postLikeRecomment,
 } = require("./../services/comment");
 const {
   uploadFileToCloudinary,
@@ -216,6 +217,33 @@ const getUniqueCommentersWithNamesAPI = async (req, res) => {
     });
   }
 };
+
+const postLikeRecommentAPI = async (req, res) => {
+  try {
+    const { authorId, userId, reaction, replyId } = req.body;
+    const { _id } = req.params;
+    console.log(authorId, userId, reaction, replyId);
+
+    const data = await postLikeRecomment(
+      _id,
+      authorId,
+      userId,
+      reaction,
+      replyId
+    );
+
+    return res.status(201).json({
+      EC: 0,
+      data: data,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      EC: 1,
+      message: "Server Error",
+    });
+  }
+};
 module.exports = {
   getCommentsAPI,
   CreateCommentsAPI,
@@ -223,4 +251,5 @@ module.exports = {
   postLikeComment,
   getUniqueCommentersWithNamesAPI,
   CreateCommentsFeetBackAPI,
+  postLikeRecommentAPI,
 };

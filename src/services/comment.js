@@ -167,6 +167,86 @@ const postCommentLike = async (_id, authorId, userId, reaction) => {
     throw new Error("Error toggling like: " + error.message);
   }
 };
+
+// like cái phản hổi
+const postLikeRecomment = async (_id, authorId, userId, reaction, replyId) => {
+  try {
+    console.log(_id, authorId, userId, reaction, replyId);
+
+    if (!_id || !authorId || !userId || !reaction || !replyId) {
+      throw new Error("Invalid input parameters");
+    }
+
+    // Lấy thông tin người dùng
+    const user = await Users.findById(userId).select("name");
+    if (!user) {
+      throw new Error("User not found");
+    }
+    const userName = user.name;
+
+    // Kiểm tra nếu comment tồn tại và reply có like từ người dùng
+    const comment = await Comments.findOne({
+      _id,
+      authorId,
+      "replies._id": replyId,
+      "replies.likes.userId": userId,
+    });
+
+    let res;
+
+    if (comment) {
+      if (reaction === "like") {
+        // Nếu reaction là 'like', gỡ bỏ like
+        res = await Comments.findOneAndUpdate(
+          { _id, authorId, "replies._id": replyId },
+          {
+            $pull: { "replies.$.likes": { userId: userId } },
+          },
+          { new: true }
+        );
+      } else {
+        // Nếu người dùng đã thích, cập nhật reaction của like hiện tại
+        res = await Comments.findOneAndUpdate(
+          {
+            _id,
+            authorId,
+            "replies._id": replyId,
+            "replies.likes.userId": userId,
+          },
+          {
+            $set: { "replies.$[reply].likes.$[like].reaction": reaction },
+          },
+          {
+            arrayFilters: [{ "reply._id": replyId }, { "like.userId": userId }],
+            new: true,
+          }
+        );
+      }
+    } else {
+      // Nếu người dùng chưa thích reply, thêm like mới
+      res = await Comments.findOneAndUpdate(
+        { _id, authorId, "replies._id": replyId },
+        {
+          $push: {
+            "replies.$.likes": {
+              userId: userId,
+              reaction: reaction,
+              userName: userName,
+            },
+          },
+        },
+        { new: true }
+      );
+    }
+
+    return res;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error toggling like on reply: " + error.message);
+  }
+};
+
+//  lấy bình luận
 const getUniqueCommentersWithNames = async (postId) => {
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     throw new Error(`Invalid postId: ${postId}`);
@@ -242,8 +322,6 @@ const postRelyComment = async (req, res) => {
       image: image, // Có thể để trống nếu không có
     };
 
-    console.log("New Reply Payload:", newReply); // Kiểm tra payload
-
     // Thêm phản hồi vào mảng replies
     comment.replies.push(newReply);
     await comment.save(); // Lưu lại bình luận
@@ -267,4 +345,5 @@ module.exports = {
   getUniqueCommentersWithNames,
   CreateCommentsfeedback,
   postRelyComment,
+  postLikeRecomment,
 };

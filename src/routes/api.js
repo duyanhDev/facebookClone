@@ -44,6 +44,7 @@ const {
   getLikesForComment,
   getUniqueCommentersWithNamesAPI,
   CreateCommentsFeetBackAPI,
+  postLikeRecommentAPI,
 } = require("./../controllers/comment");
 const {
   getNotifications,
@@ -217,5 +218,6 @@ routerAPI.get("/nocatifition/:userId", getNotifications);
 routerAPI.get("/nocatifitionCount/:userId", getCountNotifications);
 
 routerAPI.post("/commentId/reply", postRelyComment);
+routerAPI.post("/commentlikereply/:_id", postLikeRecommentAPI);
 
 module.exports = routerAPI;
