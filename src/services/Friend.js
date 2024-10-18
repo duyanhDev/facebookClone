@@ -130,7 +130,6 @@ const listFriends = async (userId) => {
       .exec();
 
     if (!user) {
-      console.log(`User with ID ${userId} not found`);
       return [];
     }
 
@@ -156,7 +155,6 @@ const listFriendsFiter = async (userId) => {
       .exec();
 
     if (!user) {
-      console.log(`User with ID ${userId} not found`);
       return [];
     }
 

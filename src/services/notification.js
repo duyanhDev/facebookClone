@@ -23,7 +23,6 @@ const createPostNotification = async (postId, authorId) => {
 
     if (notifications.length > 0) {
       await Notification.insertMany(notifications);
-      console.log("Notifications created for friends:", notifications);
     } else {
       console.log("No friends to notify.");
     }
@@ -70,7 +69,7 @@ const CreateCommentsNotification = async (
 
     // Create the notification
     const savedNotification = await Notification.create(notification);
-    console.log("Notification created successfully:", savedNotification);
+
     return savedNotification;
   } catch (error) {
     console.error("Error creating notification:", error);

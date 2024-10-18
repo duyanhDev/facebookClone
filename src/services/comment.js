@@ -171,73 +171,73 @@ const postCommentLike = async (_id, authorId, userId, reaction) => {
 // like cái phản hổi
 const postLikeRecomment = async (_id, authorId, userId, reaction, replyId) => {
   try {
-    console.log(_id, authorId, userId, reaction, replyId);
-
     if (!_id || !authorId || !userId || !reaction || !replyId) {
       throw new Error("Invalid input parameters");
     }
 
-    // Lấy thông tin người dùng
+    // Get user information
     const user = await Users.findById(userId).select("name");
     if (!user) {
       throw new Error("User not found");
     }
     const userName = user.name;
 
-    // Kiểm tra nếu comment tồn tại và reply có like từ người dùng
-    const comment = await Comments.findOne({
-      _id,
-      authorId,
-      "replies._id": replyId,
-      "replies.likes.userId": userId,
-    });
+    // Find the comment
+    const comment = await Comments.findOne({ _id, authorId });
+    if (!comment) {
+      throw new Error("Comment not found");
+    }
 
-    let res;
+    // Find the specific reply
+    const replyIndex = comment.replies.findIndex(
+      (reply) => reply._id.toString() === replyId
+    );
+    if (replyIndex === -1) {
+      throw new Error("Reply not found");
+    }
 
-    if (comment) {
+    // Check if the user has already liked this reply
+    const existingLikeIndex = comment.replies[replyIndex].likes.findIndex(
+      (like) => like.userId.toString() === userId
+    );
+
+    let updateOperation;
+
+    if (existingLikeIndex !== -1) {
+      // User has already liked this reply
       if (reaction === "like") {
-        // Nếu reaction là 'like', gỡ bỏ like
-        res = await Comments.findOneAndUpdate(
-          { _id, authorId, "replies._id": replyId },
-          {
-            $pull: { "replies.$.likes": { userId: userId } },
-          },
-          { new: true }
-        );
+        // Remove the like
+        updateOperation = {
+          $pull: { [`replies.${replyIndex}.likes`]: { userId: userId } },
+        };
       } else {
-        // Nếu người dùng đã thích, cập nhật reaction của like hiện tại
-        res = await Comments.findOneAndUpdate(
-          {
-            _id,
-            authorId,
-            "replies._id": replyId,
-            "replies.likes.userId": userId,
+        // Update the existing reaction
+        updateOperation = {
+          $set: {
+            [`replies.${replyIndex}.likes.${existingLikeIndex}.reaction`]:
+              reaction,
           },
-          {
-            $set: { "replies.$[reply].likes.$[like].reaction": reaction },
-          },
-          {
-            arrayFilters: [{ "reply._id": replyId }, { "like.userId": userId }],
-            new: true,
-          }
-        );
+        };
       }
     } else {
-      // Nếu người dùng chưa thích reply, thêm like mới
-      res = await Comments.findOneAndUpdate(
-        { _id, authorId, "replies._id": replyId },
-        {
-          $push: {
-            "replies.$.likes": {
-              userId: userId,
-              reaction: reaction,
-              userName: userName,
-            },
+      // User hasn't liked this reply yet, add a new like
+      updateOperation = {
+        $push: {
+          [`replies.${replyIndex}.likes`]: {
+            userId: userId,
+            reaction: reaction,
+            userName: userName,
           },
         },
-        { new: true }
-      );
+      };
     }
+
+    // Apply the update
+    const res = await Comments.findOneAndUpdate(
+      { _id, authorId },
+      updateOperation,
+      { new: true }
+    );
 
     return res;
   } catch (error) {
@@ -245,7 +245,6 @@ const postLikeRecomment = async (_id, authorId, userId, reaction, replyId) => {
     throw new Error("Error toggling like on reply: " + error.message);
   }
 };
-
 //  lấy bình luận
 const getUniqueCommentersWithNames = async (postId) => {
   if (!mongoose.Types.ObjectId.isValid(postId)) {
