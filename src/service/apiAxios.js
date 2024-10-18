@@ -297,6 +297,28 @@ const postReplyComment = async (
   return await axios.post("http://localhost:8001/v1/api/commentId/reply", data);
 };
 
+// like phản hồi
+
+const postLikeCommentReply = async (
+  _id,
+  authorId,
+  userId,
+  reaction,
+  replyId
+) => {
+  const data = {
+    authorId: authorId,
+    userId: userId,
+    reaction: reaction,
+    replyId: replyId,
+  };
+
+  return await axios.post(
+    `http://localhost:8001/v1/api/commentlikereply/${_id}`,
+    data
+  );
+};
+
 export {
   getUser,
   getAddUser,
@@ -323,4 +345,5 @@ export {
   getNotificationsAPI,
   getCountNotifications,
   postReplyComment,
+  postLikeCommentReply,
 };

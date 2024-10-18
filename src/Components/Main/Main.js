@@ -17,6 +17,7 @@ import {
   postCommentLikes,
   getCountComments,
   postReplyComment,
+  postLikeCommentReply,
 } from "../../service/apiAxios";
 import { IoEllipsisHorizontal, IoEarth } from "react-icons/io5";
 import { AiOutlineLike } from "react-icons/ai";
@@ -358,7 +359,7 @@ const Main = () => {
     } else if (typeof contents === "string") {
       lowerCaseComment = contents.toLowerCase(); // Nếu contents là chuỗi, chỉ cần chuyển thành chữ thường
     } else {
-      return false; // Nếu không phải là chuỗi hoặc mảng, không kiểm tra
+      return false;
     }
 
     // Kiểm tra xem nội dung có chứa từ nhạy cảm không
@@ -532,6 +533,29 @@ const Main = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const postLikeCommentReplyAPI = async (
+    _id,
+    authorId,
+    userId,
+    reaction,
+    replyId
+  ) => {
+    console.log(_id, authorId, userId, reaction, replyId);
+    try {
+      const data = await postLikeCommentReply(
+        _id,
+        authorId,
+        userId,
+        reaction,
+        replyId
+      );
+      console.log(data);
+      if (data && data.EC === 0) {
+        setSelectedReaction(reaction);
+      }
+    } catch (error) {}
   };
   return (
     <div className="slider-container">
@@ -1017,6 +1041,10 @@ const Main = () => {
                             {comment.replies &&
                               comment.replies.length > 0 &&
                               comment.replies.map((replie) => {
+                                const userReaction2 = replie.likes.find(
+                                  (like) => like.userId === userId
+                                )?.reaction;
+
                                 return (
                                   <div
                                     key={replie._id}
@@ -1048,15 +1076,17 @@ const Main = () => {
                                         <div className="comment_text like_hover">
                                           <span
                                             onClick={() =>
-                                              handleClickCommentLike(
-                                                replie._id,
+                                              postLikeCommentReplyAPI(
+                                                comment._id,
                                                 replie.authorId,
-                                                "like"
+                                                userId,
+                                                "like",
+                                                replie._id
                                               )
                                             }
                                           >
-                                            {userReaction1 ? (
-                                              getReactionIcon1(userReaction1)
+                                            {userReaction2 ? (
+                                              getReactionIcon1(userReaction2)
                                             ) : (
                                               <>Thích</>
                                             )}
@@ -1067,10 +1097,12 @@ const Main = () => {
                                                 size={30}
                                                 color="blue"
                                                 onClick={() =>
-                                                  handleClickCommentLike(
+                                                  postLikeCommentReplyAPI(
                                                     comment._id,
-                                                    comment.authorId,
-                                                    "like"
+                                                    replie.authorId,
+                                                    userId,
+                                                    "like",
+                                                    replie._id
                                                   )
                                                 }
                                               />
@@ -1078,10 +1110,12 @@ const Main = () => {
                                             <span
                                               className="icon-animation"
                                               onClick={() =>
-                                                handleClickCommentLike(
+                                                postLikeCommentReplyAPI(
                                                   comment._id,
-                                                  comment.authorId,
-                                                  "love"
+                                                  replie.authorId,
+                                                  userId,
+                                                  "love",
+                                                  replie._id
                                                 )
                                               }
                                             >
@@ -1093,10 +1127,12 @@ const Main = () => {
                                                 size={30}
                                                 color="orange"
                                                 onClick={() =>
-                                                  handleClickCommentLike(
+                                                  postLikeCommentReplyAPI(
                                                     comment._id,
-                                                    comment.authorId,
-                                                    "thương thương"
+                                                    replie.authorId,
+                                                    userId,
+                                                    "thương thương",
+                                                    replie._id
                                                   )
                                                 }
                                               />
@@ -1106,10 +1142,12 @@ const Main = () => {
                                                 size={30}
                                                 color="orange"
                                                 onClick={() =>
-                                                  handleClickCommentLike(
+                                                  postLikeCommentReplyAPI(
                                                     comment._id,
-                                                    comment.authorId,
-                                                    "haha"
+                                                    replie.authorId,
+                                                    userId,
+                                                    "haha",
+                                                    replie._id
                                                   )
                                                 }
                                               />
@@ -1119,10 +1157,12 @@ const Main = () => {
                                                 size={30}
                                                 color="orange"
                                                 onClick={() =>
-                                                  handleClickCommentLike(
+                                                  postLikeCommentReplyAPI(
                                                     comment._id,
-                                                    comment.authorId,
-                                                    "wow"
+                                                    replie.authorId,
+                                                    userId,
+                                                    "wow",
+                                                    replie._id
                                                   )
                                                 }
                                               />
@@ -1132,10 +1172,12 @@ const Main = () => {
                                                 size={30}
                                                 color="orange"
                                                 onClick={() =>
-                                                  handleClickCommentLike(
+                                                  postLikeCommentReplyAPI(
                                                     comment._id,
-                                                    comment.authorId,
-                                                    "sad"
+                                                    replie.authorId,
+                                                    userId,
+                                                    "sad",
+                                                    replie._id
                                                   )
                                                 }
                                               />
@@ -1145,10 +1187,12 @@ const Main = () => {
                                                 size={30}
                                                 color="orange"
                                                 onClick={() =>
-                                                  handleClickCommentLike(
+                                                  postLikeCommentReplyAPI(
                                                     comment._id,
-                                                    comment.authorId,
-                                                    "angry"
+                                                    replie.authorId,
+                                                    userId,
+                                                    "angry",
+                                                    replie._id
                                                   )
                                                 }
                                               />
@@ -1169,9 +1213,9 @@ const Main = () => {
                                           Phản hồi
                                         </div>
                                         <div className="comment_text flex items-center gap-2">
-                                          {renderUsersByReaction(comment.likes)}
-                                          {likesMapComment[comment._id]
-                                            ? `${likesMapComment[comment._id]} `
+                                          {renderUsersByReaction(replie.likes)}
+                                          {likesMapComment[replie._id]
+                                            ? `${likesMapComment[replie._id]} `
                                             : null}
                                         </div>
                                       </div>
