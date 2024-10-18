@@ -35,6 +35,8 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { toast } from "react-toastify";
 import { useOutletContext } from "react-router-dom";
+import sensitiveWordsData from "./../../sensitive-words.json";
+
 const Main = () => {
   const userId = localStorage.getItem("id");
   const username = localStorage.getItem("name");
@@ -51,7 +53,11 @@ const Main = () => {
   const [showID, setShowID] = useState("");
   const [showCmt, setShowCmt] = useState("");
   const [showPostID, setShowPostID] = useState("");
+
   const [contentCmt, setContentCmt] = useState("");
+  const [isReplyMode, setIsReplyMode] = useState(false);
+  const textareaRef = useRef(null);
+
   const dispatch = useDispatch();
   const totalLikes = useSelector((state) => state.likes.totalLikes);
   const totalLikesComment = useSelector((state) => state.comments.totalLikes);
@@ -338,39 +344,60 @@ const Main = () => {
     newContents[index] = value;
     setContents(newContents);
   };
+
+  const sensitiveWords = sensitiveWordsData.sensitiveWords;
+
+  const checkSensitiveContent = (contents) => {
+    console.log(contents);
+
+    // Nếu contents là một mảng, chuyển đổi nó thành chuỗi
+    let lowerCaseComment = "";
+
+    if (Array.isArray(contents)) {
+      lowerCaseComment = contents.join(" ").toLowerCase(); // Ghép các phần tử thành chuỗi và biến đổi thành chữ thường
+    } else if (typeof contents === "string") {
+      lowerCaseComment = contents.toLowerCase(); // Nếu contents là chuỗi, chỉ cần chuyển thành chữ thường
+    } else {
+      return false; // Nếu không phải là chuỗi hoặc mảng, không kiểm tra
+    }
+
+    // Kiểm tra xem nội dung có chứa từ nhạy cảm không
+    for (let word of sensitiveWords) {
+      if (lowerCaseComment.includes(word.toLowerCase())) {
+        return true; // Có chứa từ nhạy cảm
+      }
+    }
+
+    return false; // Không chứa từ nhạy cảm
+  };
+
   const handleComment = async (postId) => {
+    if (checkSensitiveContent(contents)) {
+      setContents(Array(data.length).fill(""));
+      toast.error("Bình luận của bạn chứa nội dùng không phù hợp !");
+      return;
+    }
     setLoading(true);
     try {
-      let data = await CreateCommentsAPI(postId, userId, contents, image);
+      // Lọc các bình luận hợp lệ (không phải null và không rỗng)
+      const validContents = contents.filter(
+        (content) => content && content.trim() !== ""
+      );
+
+      // Kiểm tra xem có bình luận hợp lệ không
+      if (validContents.length === 0) {
+        toast.error("Vui lòng nhập bình luận hợp lệ");
+        return;
+      }
+
+      console.log("Valid contents before sending:", validContents);
+      let data = await CreateCommentsAPI(postId, userId, validContents, image);
       if (data) {
         toast.success("Bình luận thành công");
-        setContents(Array(data.length).fill(""));
+        setContents(Array(data.length).fill("")); // Reset contents
         setImage(null);
 
-        // Update comments immediately
-        setComments((prevComments) => {
-          if (!prevComments.some((comment) => comment.id === data.id)) {
-            return [...prevComments, data];
-          }
-          return prevComments;
-        });
-
-        // Update comment count immediately
-        setCountComment((prevCount) => {
-          const updatedCount = [...prevCount];
-          const index = updatedCount.findIndex(
-            (item) => item.postId === postId
-          );
-          if (index !== -1) {
-            updatedCount[index].count += 1;
-          } else {
-            updatedCount.push({ postId, count: 1 });
-          }
-          return updatedCount;
-        });
-        FetchGetComment();
-        // Mark for refetch
-        setShouldRefetch(true);
+        // Cập nhật comments và counts...
       } else {
         toast.error("Bình luận bị lỗi");
       }
@@ -380,6 +407,7 @@ const Main = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     FetchGetComment();
   }, [handleComment]);
@@ -417,20 +445,33 @@ const Main = () => {
     getCountComment(); // Fetch comment counts on mount
   }, [getCountComment]);
 
+  useEffect(() => {
+    if (isReplyMode) {
+      textareaRef.current.focus();
+    }
+  }, [isReplyMode]);
+
+  const handleFocus = () => {
+    if (!isReplyMode) {
+      setIsReplyMode(true);
+      setContentCmt(`${showName} `);
+    }
+  };
+
   const handleChange = (e) => {
-    // Kiểm tra và đảm bảo nội dung không bao gồm phần tên bị lặp
-    const userInput = e.target.value;
-    if (userInput.startsWith(`${showName}: `)) {
-      setContentCmt(userInput.slice(showName.length + 2)); // Cắt bỏ phần tên đã có
-    } else {
-      setContentCmt(userInput); // Cập nhật phần nội dung thực tế
+    const value = e.target.value;
+    setContentCmt(value);
+  };
+
+  const handleBlur = () => {
+    if (contentCmt.trim() === "" || contentCmt.trim() === showName) {
+      setIsReplyMode(false);
+      setContentCmt("");
     }
   };
   const hanldeChanleReplie = (authorName, authorId, cmtId, postId) => {
-    console.log("tên bình luận", authorName);
-    console.log("tên id", authorId);
-    console.log("tên id", cmtId);
-    console.log("tên post id", postId);
+    console.log(authorName);
+
     setShowName(authorName);
     setShowID(authorId);
     setShowCmt(cmtId);
@@ -438,13 +479,18 @@ const Main = () => {
     setShowReplie(true);
   };
   const handleReplieCmt = async (showPostID) => {
+    if (checkSensitiveContent(contentCmt)) {
+      setContentCmt("");
+      toast.error("Bình luận của bạn chứa nội dùng không phù hợp !");
+      return;
+    }
     setLoading(true);
     try {
       let data = await postReplyComment(
         showCmt,
         showID,
         showPostID,
-        showName,
+        username,
         avatar,
         contentCmt,
         image,
@@ -453,7 +499,7 @@ const Main = () => {
       );
       if (data) {
         toast.success("phản hồi thành công");
-
+        setContentCmt("");
         // Update comments immediately
         setComments((prevComments) => {
           if (!prevComments.some((comment) => comment.id === data.id)) {
@@ -1135,7 +1181,7 @@ const Main = () => {
                               })}
 
                             {showReplie && showCmt === comment._id && (
-                              <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100 mt-3">
+                              <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100 mt-3 reply_content">
                                 <button
                                   onClick={handleClick}
                                   type="button"
@@ -1198,12 +1244,16 @@ const Main = () => {
                                 </button>
 
                                 <textarea
-                                  id={`chat}`}
-                                  key={index + 1}
+                                  ref={textareaRef}
                                   rows={1}
                                   className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 dark:bg-white dark:placeholder-gray-400 dark:text-[#333] focus:bg-white outline-none"
-                                  onChange={(e) => handleChange(e)}
-                                  value={`${showName}: ${contentCmt}`}
+                                  onFocus={handleFocus}
+                                  onChange={handleChange}
+                                  onBlur={handleBlur}
+                                  value={contentCmt}
+                                  placeholder={
+                                    isReplyMode ? "" : "Câu phản hồi của"
+                                  }
                                 />
 
                                 <button
