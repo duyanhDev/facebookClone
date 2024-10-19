@@ -42,7 +42,7 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { toast } from "react-toastify";
 import { useOutletContext } from "react-router-dom";
-import sensitiveWordsData from "./../../sensitive-words.json";
+import sensitiveWordsData from "../../sensitive-words.json";
 import { fetchLikesCountReply } from "../../reduxToolKit/likeReply/likesReplySlice";
 
 const Main = () => {

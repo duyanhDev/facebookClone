@@ -319,6 +319,18 @@ const postLikeCommentReply = async (
   );
 };
 
+// likerpy
+
+const fetchLikesReplyFromApi = async (replyId) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8001/v1/api/getlikereply/${replyId}`
+    );
+    return response.data; // This should be an array of likes
+  } catch (error) {
+    throw error;
+  }
+};
 export {
   getUser,
   getAddUser,
@@ -346,4 +358,5 @@ export {
   getCountNotifications,
   postReplyComment,
   postLikeCommentReply,
+  fetchLikesReplyFromApi,
 };

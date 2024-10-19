@@ -4,11 +4,13 @@ import { FaUserFriends, FaAngleDown } from "react-icons/fa";
 import { PiMonitorPlayLight } from "react-icons/pi";
 import { FaBookmark, FaRegClock } from "react-icons/fa6";
 import { MdGroupWork } from "react-icons/md";
-import { Link } from "react-router-dom";
-const SliderLeft = ({ username, isDarkMode, friend }) => {
+import { Link, useNavigate } from "react-router-dom";
+
+const SliderLeft = ({ username, isDarkMode, friend, currentUserId }) => {
   const avatar = localStorage.getItem("avatar");
   const isOnline = localStorage.getItem("isOnline");
 
+  const navigate = useNavigate();
   const onlineFriendsCount = friend
     ? friend.filter((friend) => friend.isOnline).length
     : "";
@@ -16,7 +18,7 @@ const SliderLeft = ({ username, isDarkMode, friend }) => {
     <div className="nav_left">
       <div className="top w-full -mt-7 ">
         <ul className="top-ul">
-          <li>
+          <li onClick={() => navigate(`profile/${currentUserId}`)}>
             <Link>
               <div
                 className={`flex justify-center items-center gap-2 ${

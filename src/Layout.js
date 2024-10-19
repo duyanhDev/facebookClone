@@ -10,6 +10,7 @@ import Register from "./Components/Regsiter/Regsiter.js"; // Corrected spelling 
 import Admin from "./Components/Admin/Admin.js";
 import ForgotPassword from "./Components/ForgotPassword/ForgotPassword.js";
 import ResetPassword from "./Components/ResetPassword/ResetPassword.js";
+import Profile from "./Components/Profile/Profile.js";
 
 const Layout = () => {
   const { isAuthenticated, role } = useContext(AuthContext); // Combine useContext for both values
@@ -33,6 +34,7 @@ const Layout = () => {
       >
         <Route index element={<Main />} />
         <Route path="watch" element={<SliderLeft />} />
+        <Route path="profile/:id" element={<Profile />} />
       </Route>
 
       <Route

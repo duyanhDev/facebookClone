@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Outlet } from "react-router-dom";
+import { matchPath, Outlet, useLocation } from "react-router-dom";
 import Header from "./Components/Header/Header";
 import SiderRight from "./Components/BannerRight/SiderRight";
 import "./App.scss";
@@ -13,6 +13,7 @@ import {
 } from "./service/apiAxios";
 
 function App() {
+  const location = useLocation();
   const username = localStorage.getItem("name");
   const [add, setAdd] = useState([]);
   const [status, setStatus] = useState("");
@@ -159,7 +160,7 @@ function App() {
     );
     return () => clearTimeout(timer);
   }, [searchTerm, friend]);
-
+  const isProfilePage = matchPath("/profile/:id", location.pathname);
   return (
     <div className="App">
       <div
@@ -185,11 +186,16 @@ function App() {
 
       <div className="content flex justify-between">
         <div className="left">
-          <SliderLeft
-            username={username}
-            isDarkMode={isDarkMode}
-            friend={friend}
-          />
+          {!isProfilePage && (
+            <div className="left">
+              <SliderLeft
+                username={username}
+                isDarkMode={isDarkMode}
+                friend={friend}
+                currentUserId={currentUserId}
+              />
+            </div>
+          )}
         </div>
         <div className="main w-auto m-auto flex justify-center items-center min-h-screen">
           <Outlet
@@ -197,15 +203,17 @@ function App() {
           />
         </div>
         <div className="right mt-4">
-          <SiderRight
-            add={add}
-            friend={friend}
-            fetchSeenUserData={fetchSeenUserData}
-            status={status}
-            idFriend={idFriend}
-            fetchAddUserData={fetchAddUserData}
-            isDarkMode={isDarkMode}
-          />
+          {!isProfilePage && (
+            <SiderRight
+              add={add}
+              friend={friend}
+              fetchSeenUserData={fetchSeenUserData}
+              status={status}
+              idFriend={idFriend}
+              fetchAddUserData={fetchAddUserData}
+              isDarkMode={isDarkMode}
+            />
+          )}
         </div>
       </div>
     </div>

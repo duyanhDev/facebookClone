@@ -190,7 +190,7 @@ const Header = ({
       <div className="Tag flex justify-center items-center m-auto cursor-pointer">
         <ul className="flex items-center gap-x-16 justify-center h-full">
           <li className="border-bt">
-            <Link>
+            <Link to="/">
               <CiHome
                 className={`${
                   isDarkMode ? "text-[#fff]" : "text-[#333]"
