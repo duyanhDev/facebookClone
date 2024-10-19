@@ -45,6 +45,7 @@ const {
   getUniqueCommentersWithNamesAPI,
   CreateCommentsFeetBackAPI,
   postLikeRecommentAPI,
+  getLikesForReply,
 } = require("./../controllers/comment");
 const {
   getNotifications,
@@ -213,11 +214,17 @@ routerAPI.post("/reset-password/:token", async (req, res) => {
     res.status(400).json({ message: "Lỗi không xác định" });
   }
 });
+// thông báo
 routerAPI.get("/messFace/:currentUserId", async (req, res) => {});
 routerAPI.get("/nocatifition/:userId", getNotifications);
 routerAPI.get("/nocatifitionCount/:userId", getCountNotifications);
 
+// phản hồi
 routerAPI.post("/commentId/reply", postRelyComment);
+// like trong phản hồi
 routerAPI.post("/commentlikereply/:_id", postLikeRecommentAPI);
+//  get like trong phản hổi
+
+routerAPI.get("/getlikereply/:replyId", getLikesForReply);
 
 module.exports = routerAPI;

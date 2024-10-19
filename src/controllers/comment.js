@@ -12,6 +12,7 @@ const {
 } = require("./../services/Cloudinary");
 
 const Comments = require("./../model/comment");
+const Users = require("../model/users");
 
 // hiển thị bình luận
 const getCommentsAPI = async (req, res) => {
@@ -221,11 +222,28 @@ const getUniqueCommentersWithNamesAPI = async (req, res) => {
 const postLikeRecommentAPI = async (req, res) => {
   try {
     const { authorId, userId, reaction, replyId } = req.body;
-    const { _id } = req.params;
+    const { _id: commentId } = req.params;
+
+    // Validate required fields
+    if (!authorId || !userId || !reaction || !replyId) {
+      return res
+        .status(400)
+        .json({ EC: 1, message: "Missing required fields" });
+    }
+
     console.log(authorId, userId, reaction, replyId);
 
+    // Fetch user with lean to improve performance
+    const user = await Users.findById(userId).select("name").lean();
+    if (!user) {
+      return res.status(404).json({ EC: 1, message: "User not found" });
+    }
+
+    const userName = user.name;
+
+    // Call postLikeRecomment function to handle the business logic
     const data = await postLikeRecomment(
-      _id,
+      commentId, // renamed to 'commentId' for clarity
       authorId,
       userId,
       reaction,
@@ -237,13 +255,70 @@ const postLikeRecommentAPI = async (req, res) => {
       data: data,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error in postLikeRecommentAPI:", error);
     return res.status(500).json({
       EC: 1,
       message: "Server Error",
     });
   }
 };
+
+const getLikesForReply = async (req, res) => {
+  try {
+    const { replyId } = req.params;
+    const idsArray = replyId.split(",");
+
+    if (idsArray.length === 0) {
+      return res.status(400).json({ message: "No reply IDs provided" });
+    }
+
+    // Find the replies by their IDs and populate the likes with user profile data
+    const comments = await Comments.find({
+      "replies._id": { $in: idsArray },
+    }).populate({
+      path: "replies.likes.userId",
+      select: "profile.name", // Only selecting the profile name field
+    });
+
+    if (!comments.length) {
+      return res.status(404).json({ message: "Replies not found" });
+    }
+
+    // Map through the replies and format the response
+    const results = comments.flatMap((comment) =>
+      comment.replies
+        .filter((reply) => idsArray.includes(reply._id.toString()))
+        .map((reply) => ({
+          _id: reply._id,
+          content: reply.content,
+          authorId: reply.authorId,
+          authorName: reply.authorName,
+          avatar: reply.avatar,
+          totalLikes: reply.likes.length,
+          likes: reply.likes.map((like) => ({
+            userId: like.userId
+              ? {
+                  profile: {
+                    name: like.userId.profile.name,
+                  },
+                  _id: like.userId._id,
+                }
+              : null,
+            reaction: like.reaction,
+            _id: like._id,
+          })),
+          createdAt: reply.createdAt,
+          updatedAt: reply.updatedAt,
+        }))
+    );
+
+    return res.status(200).json(results);
+  } catch (error) {
+    console.error("Error fetching replies with likes:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   getCommentsAPI,
   CreateCommentsAPI,
@@ -252,4 +327,5 @@ module.exports = {
   getUniqueCommentersWithNamesAPI,
   CreateCommentsFeetBackAPI,
   postLikeRecommentAPI,
+  getLikesForReply,
 };
