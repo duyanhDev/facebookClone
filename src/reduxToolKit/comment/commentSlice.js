@@ -4,8 +4,9 @@ import { fetchLikesCommentFromApi } from "./../../service/apiAxios";
 // Fetch likes for comments
 export const fetchLikesCountComment = createAsyncThunk(
   "likes/fetchLikesComment",
-  async (postIds) => {
-    const response = await fetchLikesCommentFromApi(postIds);
+  async (commentId) => {
+    const response = await fetchLikesCommentFromApi(commentId);
+
     return response; // Ensure this is the array of like objects
   }
 );
@@ -13,7 +14,7 @@ export const fetchLikesCountComment = createAsyncThunk(
 const likesSliceComment = createSlice({
   name: "likes",
   initialState: {
-    totalLikes: [], // Initial state as an empty array
+    totalComent: [], // Initial state as an empty array
     status: "idle",
     error: null,
   },
@@ -22,7 +23,7 @@ const likesSliceComment = createSlice({
     // This should reference the thunk action, not the slice
     builder.addCase(fetchLikesCountComment.fulfilled, (state, action) => {
       if (Array.isArray(action.payload)) {
-        state.totalLikes = action.payload;
+        state.totalComent = action.payload;
       } else {
         console.error("Unexpected payload format:", action.payload);
       }

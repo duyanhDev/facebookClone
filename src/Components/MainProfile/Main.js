@@ -34,16 +34,18 @@ import {
 import { PiShareFatThin } from "react-icons/pi";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLikesCount } from "../../reduxToolKit/like/likesSlice";
+import { fetchLikesCountComment } from "../../reduxToolKit/comment/commentSlice";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { toast } from "react-toastify";
 import { useOutletContext } from "react-router-dom";
-import sensitiveWordsData from "../../sensitive-words.json";
+import sensitiveWordsData from "./../../sensitive-words.json";
 import { fetchLikesCountReply } from "../../reduxToolKit/likeReply/likesReplySlice";
 
 const Main = () => {
   const userId = localStorage.getItem("id");
   const username = localStorage.getItem("name");
+  const avatar = localStorage.getItem("avatar");
   const sliderRef = useRef(null);
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -51,7 +53,7 @@ const Main = () => {
   const [contents, setContents] = useState(Array(data.length).fill(""));
   const [image, setImage] = useState(null);
   const { isDarkMode, fetchCountNotification } = useOutletContext();
-  const avatar = localStorage.getItem("avatar");
+
   const [showReplie, setShowReplie] = useState(false);
   const [showName, setShowName] = useState("");
   const [showID, setShowID] = useState("");
@@ -64,8 +66,8 @@ const Main = () => {
 
   const dispatch = useDispatch();
   const totalLikes = useSelector((state) => state.likes.totalLikes);
-  const totalLikesComment = useSelector((state) => state.comments.totalLikes);
-  const replyLikes = useSelector((state) => state.replyLikes.items);
+  const totalLikesComment = useSelector((state) => state.comments.totalComent);
+  const replyLikes = useSelector((state) => state.replyLikes.totalReply);
 
   const [countComment, setCountComment] = useState([]);
   const [shouldRefetch, setShouldRefetch] = useState(false);
@@ -135,6 +137,13 @@ const Main = () => {
     }
   }, [data, dispatch]);
 
+  useEffect(() => {
+    const commentId = comments.map((item) => item._id).join(",");
+    if (commentId) {
+      dispatch(fetchLikesCountComment(commentId));
+    }
+  }, [comments, dispatch]);
+
   const flattenedReplies = useMemo(() => {
     return comments.flatMap((item) => {
       // Kiểm tra xem item có phải là mảng không
@@ -160,10 +169,7 @@ const Main = () => {
 
   useEffect(() => {
     if (replyIds) {
-      const fetchData = async () => {
-        await dispatch(fetchLikesCountReply(replyIds));
-      };
-      fetchData();
+      dispatch(fetchLikesCountReply(replyIds));
     }
   }, [replyIds, dispatch]);
 
@@ -174,8 +180,10 @@ const Main = () => {
     }
     return acc;
   }, {});
+
   const likesMapComment = totalLikesComment.reduce((acc, like) => {
     const postId = like._id;
+
     if (postId) {
       acc[postId] = like.totalLikes;
     }
@@ -206,7 +214,6 @@ const Main = () => {
       let res = await postCommentLikes(_id, authorId, userId, reaction);
 
       if (res && res.success) {
-        console.log("Reaction posted successfully");
         FetchGetComment();
       } else {
         setSelectedReaction(null);
@@ -388,8 +395,6 @@ const Main = () => {
   const sensitiveWords = sensitiveWordsData.sensitiveWords;
 
   const checkSensitiveContent = (contents) => {
-    console.log(contents);
-
     // Nếu contents là một mảng, chuyển đổi nó thành chuỗi
     let lowerCaseComment = "";
 
@@ -430,7 +435,6 @@ const Main = () => {
         return;
       }
 
-      console.log("Valid contents before sending:", validContents);
       let data = await CreateCommentsAPI(postId, userId, validContents, image);
       if (data) {
         toast.success("Bình luận thành công");
@@ -453,8 +457,6 @@ const Main = () => {
   }, [handleComment]);
   const handleChangeEnter = (e) => {
     if (e.key === "Enter") {
-      console.log("xx");
-
       e.preventDefault();
       handleComment();
     }
@@ -510,8 +512,6 @@ const Main = () => {
     }
   };
   const hanldeChanleReplie = (authorName, authorId, cmtId, postId) => {
-    console.log(authorName);
-
     setShowName(authorName);
     setShowID(authorId);
     setShowCmt(cmtId);
@@ -589,7 +589,6 @@ const Main = () => {
         reaction,
         replyId
       );
-      console.log(data);
 
       if (data && data.data.EC === 0) {
         setSelectedReaction(reaction);
@@ -606,7 +605,11 @@ const Main = () => {
         } m-auto text-center mt-8 h-32 `}
       >
         <div className="w-full flex items-center gap-4 ml-4  bottom_text mt-5">
-          <img src={avtart} alt="lỗi" className="image_status" />
+          <img
+            src={avatar ? avatar : avtart}
+            alt="lỗi"
+            className="image_status"
+          />
           <Status
             showModal={showModal}
             setShowModal={setShowModal}
@@ -650,775 +653,762 @@ const Main = () => {
           )?.reaction;
 
           return (
-            item.authorId === userId && (
+            <div
+              className={`${
+                isDarkMode
+                  ? "bg-[rgba(16,17,18,1)]"
+                  : "bg-[#ffffff] border border-[#ddd]"
+              } content_status m-auto mt-8 min-h-max p-5`}
+              key={item._id}
+            >
               <div
-                className={`${
-                  isDarkMode
-                    ? "bg-[rgba(16,17,18,1)]"
-                    : "bg-[#ffffff] border border-[#ddd]"
-                } content_status m-auto mt-8 min-h-max p-5`}
+                className="post flex items-center justify-between m-4 -mt-5 pt-2"
                 key={item._id}
               >
-                <div
-                  className="post flex items-center justify-between m-4 -mt-5 pt-2"
-                  key={item._id}
-                >
-                  <div className="flex gap-5 items-center">
-                    <img
-                      className="post_image w-10 h-10 object-cover m-0 border"
-                      src={item.avatar}
-                      alt="anh lỗi"
-                    />
-                    <div>
-                      <p>{item.authorName}</p>
-                      <p className="flex items-center gap-1">
-                        {getTimeAgoInMinutes(item.createdAt)} <IoEarth />
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4 items-center">
-                    <IoEllipsisHorizontal />
-                    <span>X</span>
+                <div className="flex gap-5 items-center">
+                  <img
+                    className="post_image w-10 h-10 object-cover m-0 border"
+                    src={item.avatar}
+                    alt="anh lỗi"
+                  />
+                  <div>
+                    <p>{item.authorName}</p>
+                    <p className="flex items-center gap-1">
+                      {getTimeAgoInMinutes(item.createdAt)} <IoEarth />
+                    </p>
                   </div>
                 </div>
-                <div className="-mt-5 ml-3">
-                  <span className="p-3 block justify-text">{item.content}</span>
+                <div className="flex gap-4 items-center">
+                  <IoEllipsisHorizontal />
+                  <span>X</span>
                 </div>
+              </div>
+              <div className="-mt-5 ml-3">
+                <span className="p-3 block justify-text">{item.content}</span>
+              </div>
 
-                <div className="hight_w flex items-center justify-center m-auto">
-                  <div className="w-full flex items-center justify-center m-auto">
-                    <Zoom>
-                      <picture className="w-full h-full">
-                        {item.image && (
-                          <img
-                            className="image_post"
-                            src={item.image}
-                            alt="ảnh lỗi"
-                          />
-                        )}
-                        {item.video && (
-                          <video className="image_post" controls loop>
-                            <source
-                              src={item.video}
-                              type="video/mp4"
-                              width="500px"
-                              height="500px"
-                            />
-                          </video>
-                        )}
-                      </picture>
-                    </Zoom>
-                  </div>
-                </div>
-                <div className="w-full h-8 like relative top-3  flex items-center">
-                  <div className="flex items-center mt-3">
-                    <span className="flex items-center ">
-                      {" "}
-                      {renderUsersByReaction(item.likes)}
-                    </span>
-                    <div className="-mt-4 ml-2">
-                      {likesMap[item._id] ? `${likesMap[item._id]} ` : null}
-                    </div>
-                  </div>
-                  <div className="w-full flex justify-end items-center -mt-2">
-                    <div className="pr-10 flex items-center g-2  cursor-pointer comment_par">
-                      {countComment && countComment.length > 0 && (
-                        <span>
-                          {
-                            countComment.find(
-                              (count) => count.postId === item._id
-                            )?.totalUniqueCommenters
-                          }
-                        </span>
+              <div className="hight_w flex items-center justify-center m-auto">
+                <div className="w-full flex items-center justify-center m-auto">
+                  <Zoom>
+                    <picture className="w-full h-full">
+                      {item.image && (
+                        <img
+                          className="image_post"
+                          src={item.image}
+                          alt="ảnh lỗi"
+                        />
                       )}
-                      <FaRegComment size={20} color="gray" className="ml-1" />{" "}
-                      {Array.isArray(countComment) &&
-                        countComment.length > 0 &&
-                        countComment
-                          .filter((itemId) => itemId.postId === item._id) // Only filter out matching post IDs
-                          .map((itemId, index) => (
-                            <div
-                              className="mt-20 absolute text-nowrap comment_hover text-white"
-                              key={itemId.postId}
-                            >
-                              {Array.isArray(itemId.commenters) &&
-                                itemId.commenters.map((cmt, index) => (
-                                  <div key={index}>
-                                    <span>{cmt.name}</span>
-                                  </div>
-                                ))}
-                            </div>
-                          ))}
-                    </div>
-                    <span>
-                      {" "}
-                      <PiShareFatThin size={20} color="gray" />
-                    </span>
+                      {item.video && (
+                        <video className="image_post" controls loop>
+                          <source
+                            src={item.video}
+                            type="video/mp4"
+                            width="500px"
+                            height="500px"
+                          />
+                        </video>
+                      )}
+                    </picture>
+                  </Zoom>
+                </div>
+              </div>
+              <div className="w-full h-8 like relative top-3  flex items-center">
+                <div className="flex items-center mt-3">
+                  <span className="flex items-center ">
+                    {" "}
+                    {renderUsersByReaction(item.likes)}
+                  </span>
+                  <div className="-mt-4 ml-2">
+                    {likesMap[item._id] ? `${likesMap[item._id]} ` : null}
                   </div>
                 </div>
-                <div className="w-4/5 m-auto pr-2 flex justify-between items-center  mt-5 cursor-pointer">
-                  <div className=" hover_icon ">
+                <div className="w-full flex justify-end items-center -mt-2">
+                  <div className="pr-10 flex items-center g-2  cursor-pointer comment_par">
+                    {countComment && countComment.length > 0 && (
+                      <span>
+                        {
+                          countComment.find(
+                            (count) => count.postId === item._id
+                          )?.totalUniqueCommenters
+                        }
+                      </span>
+                    )}
+                    <FaRegComment size={20} color="gray" className="ml-1" />{" "}
+                    {Array.isArray(countComment) &&
+                      countComment.length > 0 &&
+                      countComment
+                        .filter((itemId) => itemId.postId === item._id) // Only filter out matching post IDs
+                        .map((itemId, index) => (
+                          <div
+                            className="mt-20 absolute text-nowrap comment_hover text-white"
+                            key={itemId.postId}
+                          >
+                            {Array.isArray(itemId.commenters) &&
+                              itemId.commenters.map((cmt, index) => (
+                                <div key={index}>
+                                  <span>{cmt.name}</span>
+                                </div>
+                              ))}
+                          </div>
+                        ))}
+                  </div>
+                  <span>
+                    {" "}
+                    <PiShareFatThin size={20} color="gray" />
+                  </span>
+                </div>
+              </div>
+              <div className="w-4/5 m-auto pr-2 flex justify-between items-center  mt-5 cursor-pointer">
+                <div className=" hover_icon ">
+                  <span
+                    className="flex gap-1 items-center cursor-pointer"
+                    onClick={() =>
+                      handleClickLike(item._id, item.authorId, "like")
+                    }
+                  >
+                    {userReaction ? (
+                      getReactionIcon(userReaction)
+                    ) : (
+                      <>
+                        <AiOutlineLike className="text-gray-600" />
+                        Thích
+                      </>
+                    )}
+                  </span>
+                  <div className="laugh-icon flex items-center gap-5 absolute ">
+                    <span className="icon-animation">
+                      <AiOutlineLike
+                        size={30}
+                        color="blue"
+                        onClick={() =>
+                          handleClickLike(item._id, item.authorId, "like")
+                        }
+                      />
+                    </span>
                     <span
-                      className="flex gap-1 items-center cursor-pointer"
+                      className="icon-animation"
                       onClick={() =>
-                        handleClickLike(item._id, item.authorId, "like")
+                        handleClickLike(item._id, item.authorId, "love")
                       }
                     >
-                      {userReaction ? (
-                        getReactionIcon(userReaction)
-                      ) : (
-                        <>
-                          <AiOutlineLike className="text-gray-600" />
-                          Thích
-                        </>
-                      )}
+                      <FaHeart size={30} color="red" />
                     </span>
-                    <div className="laugh-icon flex items-center gap-5 absolute ">
-                      <span className="icon-animation">
-                        <AiOutlineLike
-                          size={30}
-                          color="blue"
-                          onClick={() =>
-                            handleClickLike(item._id, item.authorId, "like")
-                          }
-                        />
-                      </span>
-                      <span
-                        className="icon-animation"
+
+                    <span className="icon-animation">
+                      <FaRegFaceGrinHearts
+                        size={30}
+                        color="orange"
                         onClick={() =>
-                          handleClickLike(item._id, item.authorId, "love")
+                          handleClickLike(
+                            item._id,
+                            item.authorId,
+                            "thương thương"
+                          )
                         }
-                      >
-                        <FaHeart size={30} color="red" />
-                      </span>
-
-                      <span className="icon-animation">
-                        <FaRegFaceGrinHearts
-                          size={30}
-                          color="orange"
-                          onClick={() =>
-                            handleClickLike(
-                              item._id,
-                              item.authorId,
-                              "thương thương"
-                            )
-                          }
-                        />
-                      </span>
-                      <span className="icon-animation">
-                        <FaRegLaughSquint
-                          size={30}
-                          color="orange"
-                          onClick={() =>
-                            handleClickLike(item._id, item.authorId, "haha")
-                          }
-                        />
-                      </span>
-                      <span className="icon-animation">
-                        <FaRegFaceSurprise
-                          size={30}
-                          color="orange"
-                          onClick={() =>
-                            handleClickLike(item._id, item.authorId, "wow")
-                          }
-                        />
-                      </span>
-                      <span className="icon-animation">
-                        <FaRegFaceSadTear
-                          size={30}
-                          color="orange"
-                          onClick={() =>
-                            handleClickLike(item._id, item.authorId, "sad")
-                          }
-                        />
-                      </span>
-                      <span className="icon-animation">
-                        <FaRegFaceTired
-                          size={30}
-                          color="orange"
-                          onClick={() =>
-                            handleClickLike(item._id, item.authorId, "angry")
-                          }
-                        />
-                      </span>
-                    </div>
+                      />
+                    </span>
+                    <span className="icon-animation">
+                      <FaRegLaughSquint
+                        size={30}
+                        color="orange"
+                        onClick={() =>
+                          handleClickLike(item._id, item.authorId, "haha")
+                        }
+                      />
+                    </span>
+                    <span className="icon-animation">
+                      <FaRegFaceSurprise
+                        size={30}
+                        color="orange"
+                        onClick={() =>
+                          handleClickLike(item._id, item.authorId, "wow")
+                        }
+                      />
+                    </span>
+                    <span className="icon-animation">
+                      <FaRegFaceSadTear
+                        size={30}
+                        color="orange"
+                        onClick={() =>
+                          handleClickLike(item._id, item.authorId, "sad")
+                        }
+                      />
+                    </span>
+                    <span className="icon-animation">
+                      <FaRegFaceTired
+                        size={30}
+                        color="orange"
+                        onClick={() =>
+                          handleClickLike(item._id, item.authorId, "angry")
+                        }
+                      />
+                    </span>
                   </div>
-
-                  <span className="flex gap-1 items-center cursor-pointer">
-                    {" "}
-                    <FaRegComment />
-                    Bình Luận
-                  </span>
-                  <span className="flex items-center gap-1 cursor-pointer">
-                    <PiShareFatThin />
-                    Chia Sẻ
-                  </span>
                 </div>
 
-                <div className="comment_post">
-                  {comments.length > 0 ? (
-                    comments.map((comment, index) => {
-                      const userReaction1 = comment.likes.find(
-                        (like) => like.userId && like.userId._id === userId
-                      )?.reaction;
+                <span className="flex gap-1 items-center cursor-pointer">
+                  {" "}
+                  <FaRegComment />
+                  Bình Luận
+                </span>
+                <span className="flex items-center gap-1 cursor-pointer">
+                  <PiShareFatThin />
+                  Chia Sẻ
+                </span>
+              </div>
 
-                      if (comment.postId === item._id) {
-                        return (
-                          <>
-                            <div
-                              key={comment._id}
-                              className="flex items-center gap-1"
-                            >
-                              <img
-                                className="w-10 h-10 rounded-full -mt-7"
-                                src={comment.avatar}
-                                alt="avart lỗi"
-                              />
-                              <div className="block ml-1">
-                                <div className=" comment_bg mt-4">
-                                  <span>{comment.authorName}</span>
-                                  <p>{comment.content}</p>
-                                  {comment.image && (
-                                    <img
-                                      className="w-32 h-32 object-cover rounded-lg"
-                                      src={comment.image}
-                                      alt="ảnh bình luận"
-                                    />
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2 mt-1 comments_like">
-                                  <span className="comment_text">
-                                    {getTimeAgoInMinutes(comment.createdAt)}
+              <div className="comment_post">
+                {comments.length > 0 ? (
+                  comments.map((comment, index) => {
+                    const userReaction1 = comment.likes.find(
+                      (like) => like.userId && like.userId._id === userId
+                    )?.reaction;
+
+                    if (comment.postId === item._id) {
+                      return (
+                        <>
+                          <div
+                            key={comment._id}
+                            className="flex items-center gap-1"
+                          >
+                            <img
+                              className="w-10 h-10 rounded-full -mt-7"
+                              src={comment.avatar}
+                              alt="avart lỗi"
+                            />
+                            <div className="block ml-1">
+                              <div className=" comment_bg mt-4">
+                                <span>{comment.authorName}</span>
+                                <p>{comment.content}</p>
+                                {comment.image && (
+                                  <img
+                                    className="w-32 h-32 object-cover rounded-lg"
+                                    src={comment.image}
+                                    alt="ảnh bình luận"
+                                  />
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1 comments_like">
+                                <span className="comment_text">
+                                  {getTimeAgoInMinutes(comment.createdAt)}
+                                </span>
+                                <div className="comment_text like_hover">
+                                  <span
+                                    onClick={() =>
+                                      handleClickCommentLike(
+                                        comment._id,
+                                        comment.authorId,
+                                        "like"
+                                      )
+                                    }
+                                  >
+                                    {userReaction1 ? (
+                                      getReactionIcon1(userReaction1)
+                                    ) : (
+                                      <>Thích</>
+                                    )}
                                   </span>
-                                  <div className="comment_text like_hover">
-                                    <span
-                                      onClick={() =>
-                                        handleClickCommentLike(
-                                          comment._id,
-                                          comment.authorId,
-                                          "like"
-                                        )
-                                      }
-                                    >
-                                      {userReaction1 ? (
-                                        getReactionIcon1(userReaction1)
-                                      ) : (
-                                        <>Thích</>
-                                      )}
-                                    </span>
-                                    <div className="laugh-icon flex items-center gap-5 absolute ">
-                                      <span className="icon-animation">
-                                        <AiOutlineLike
-                                          size={30}
-                                          color="blue"
-                                          onClick={() =>
-                                            handleClickCommentLike(
-                                              comment._id,
-                                              comment.authorId,
-                                              "like"
-                                            )
-                                          }
-                                        />
-                                      </span>
-                                      <span
-                                        className="icon-animation"
+                                  <div className="laugh-icon flex items-center gap-5 absolute ">
+                                    <span className="icon-animation">
+                                      <AiOutlineLike
+                                        size={30}
+                                        color="blue"
                                         onClick={() =>
                                           handleClickCommentLike(
                                             comment._id,
                                             comment.authorId,
-                                            "love"
+                                            "like"
                                           )
                                         }
-                                      >
-                                        <FaHeart size={30} color="red" />
-                                      </span>
+                                      />
+                                    </span>
+                                    <span
+                                      className="icon-animation"
+                                      onClick={() =>
+                                        handleClickCommentLike(
+                                          comment._id,
+                                          comment.authorId,
+                                          "love"
+                                        )
+                                      }
+                                    >
+                                      <FaHeart size={30} color="red" />
+                                    </span>
 
-                                      <span className="icon-animation">
-                                        <FaRegFaceGrinHearts
-                                          size={30}
-                                          color="orange"
-                                          onClick={() =>
-                                            handleClickCommentLike(
-                                              comment._id,
-                                              comment.authorId,
-                                              "thương thương"
-                                            )
-                                          }
-                                        />
-                                      </span>
-                                      <span className="icon-animation">
-                                        <FaRegLaughSquint
-                                          size={30}
-                                          color="orange"
-                                          onClick={() =>
-                                            handleClickCommentLike(
-                                              comment._id,
-                                              comment.authorId,
-                                              "haha"
-                                            )
-                                          }
-                                        />
-                                      </span>
-                                      <span className="icon-animation">
-                                        <FaRegFaceSurprise
-                                          size={30}
-                                          color="orange"
-                                          onClick={() =>
-                                            handleClickCommentLike(
-                                              comment._id,
-                                              comment.authorId,
-                                              "wow"
-                                            )
-                                          }
-                                        />
-                                      </span>
-                                      <span className="icon-animation">
-                                        <FaRegFaceSadTear
-                                          size={30}
-                                          color="orange"
-                                          onClick={() =>
-                                            handleClickCommentLike(
-                                              comment._id,
-                                              comment.authorId,
-                                              "sad"
-                                            )
-                                          }
-                                        />
-                                      </span>
-                                      <span className="icon-animation">
-                                        <FaRegFaceTired
-                                          size={30}
-                                          color="orange"
-                                          onClick={() =>
-                                            handleClickCommentLike(
-                                              comment._id,
-                                              comment.authorId,
-                                              "angry"
-                                            )
-                                          }
-                                        />
-                                      </span>
-                                    </div>
+                                    <span className="icon-animation">
+                                      <FaRegFaceGrinHearts
+                                        size={30}
+                                        color="orange"
+                                        onClick={() =>
+                                          handleClickCommentLike(
+                                            comment._id,
+                                            comment.authorId,
+                                            "thương thương"
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                    <span className="icon-animation">
+                                      <FaRegLaughSquint
+                                        size={30}
+                                        color="orange"
+                                        onClick={() =>
+                                          handleClickCommentLike(
+                                            comment._id,
+                                            comment.authorId,
+                                            "haha"
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                    <span className="icon-animation">
+                                      <FaRegFaceSurprise
+                                        size={30}
+                                        color="orange"
+                                        onClick={() =>
+                                          handleClickCommentLike(
+                                            comment._id,
+                                            comment.authorId,
+                                            "wow"
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                    <span className="icon-animation">
+                                      <FaRegFaceSadTear
+                                        size={30}
+                                        color="orange"
+                                        onClick={() =>
+                                          handleClickCommentLike(
+                                            comment._id,
+                                            comment.authorId,
+                                            "sad"
+                                          )
+                                        }
+                                      />
+                                    </span>
+                                    <span className="icon-animation">
+                                      <FaRegFaceTired
+                                        size={30}
+                                        color="orange"
+                                        onClick={() =>
+                                          handleClickCommentLike(
+                                            comment._id,
+                                            comment.authorId,
+                                            "angry"
+                                          )
+                                        }
+                                      />
+                                    </span>
                                   </div>
-                                  <div
-                                    className="comment_text"
-                                    onClick={() =>
-                                      hanldeChanleReplie(
-                                        comment.authorName,
-                                        comment.authorId,
-                                        comment._id,
-                                        comment.postId
-                                      )
-                                    }
-                                  >
-                                    Phản hồi
-                                  </div>
-                                  <div className="comment_text flex items-center gap-2">
-                                    {renderUsersByReaction(comment.likes)}
-                                    {likesMapComment[comment._id]
-                                      ? `${likesMapComment[comment._id]} `
-                                      : null}
-                                  </div>
+                                </div>
+                                <div
+                                  className="comment_text"
+                                  onClick={() =>
+                                    hanldeChanleReplie(
+                                      comment.authorName,
+                                      comment.authorId,
+                                      comment._id,
+                                      comment.postId
+                                    )
+                                  }
+                                >
+                                  Phản hồi
+                                </div>
+                                <div className="comment_text flex items-center gap-2">
+                                  {renderUsersByReaction(comment.likes)}
+                                  {likesMapComment[comment._id]
+                                    ? `${likesMapComment[comment._id]} `
+                                    : null}
                                 </div>
                               </div>
                             </div>
-                            <div className=" block reply_item">
-                              {comment.replies &&
-                                comment.replies.length > 0 &&
-                                comment.replies.map((replie) => {
-                                  const userReaction2 = replie.likes.find(
-                                    (like) => like.userId._id === userId
-                                  )?.reaction;
+                          </div>
+                          <div className=" block reply_item">
+                            {comment.replies &&
+                              comment.replies.length > 0 &&
+                              comment.replies.map((replie) => {
+                                const userReaction2 = replie.likes.find(
+                                  (like) => like.userId._id === userId
+                                )?.reaction;
 
-                                  return (
-                                    <div
-                                      key={replie._id}
-                                      className="flex items-center gap-1"
-                                    >
-                                      <img
-                                        className="w-10 h-10 rounded-full -mt-7"
-                                        src={replie.avatar}
-                                        alt="avart lỗi"
-                                      />
-                                      <div className="block ml-1">
-                                        <div className=" comment_bg mt-4">
-                                          <span>{replie.authorName}</span>
-                                          <p>{replie.content}</p>
-                                          {replie.image && (
-                                            <img
-                                              className="w-32 h-32 object-cover rounded-lg"
-                                              src={replie.image}
-                                              alt="ảnh bình luận"
-                                            />
+                                return (
+                                  <div
+                                    key={replie._id}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <img
+                                      className="w-10 h-10 rounded-full -mt-7"
+                                      src={replie.avatar}
+                                      alt="avart lỗi"
+                                    />
+                                    <div className="block ml-1">
+                                      <div className=" comment_bg mt-4">
+                                        <span>{replie.authorName}</span>
+                                        <p>{replie.content}</p>
+                                        {replie.image && (
+                                          <img
+                                            className="w-32 h-32 object-cover rounded-lg"
+                                            src={replie.image}
+                                            alt="ảnh bình luận"
+                                          />
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-2 mt-1 comments_like">
+                                        <span className="comment_text">
+                                          {getTimeAgoInMinutes(
+                                            replie.createdAt
                                           )}
-                                        </div>
-                                        <div className="flex items-center gap-2 mt-1 comments_like">
-                                          <span className="comment_text">
-                                            {getTimeAgoInMinutes(
-                                              replie.createdAt
+                                        </span>
+                                        <div className="comment_text like_hover">
+                                          <span
+                                            onClick={() =>
+                                              postLikeCommentReplyAPI(
+                                                comment._id,
+                                                replie.authorId,
+                                                userId,
+                                                "like",
+                                                replie._id
+                                              )
+                                            }
+                                          >
+                                            {userReaction2 ? (
+                                              getReactionIcon1(userReaction2)
+                                            ) : (
+                                              <>Thích</>
                                             )}
                                           </span>
-                                          <div className="comment_text like_hover">
-                                            <span
-                                              onClick={() =>
-                                                postLikeCommentReplyAPI(
-                                                  comment._id,
-                                                  replie.authorId,
-                                                  userId,
-                                                  "like",
-                                                  replie._id
-                                                )
-                                              }
-                                            >
-                                              {userReaction2 ? (
-                                                getReactionIcon1(userReaction2)
-                                              ) : (
-                                                <>Thích</>
-                                              )}
-                                            </span>
-                                            <div className="laugh-icon flex items-center gap-5 absolute ">
-                                              <span className="icon-animation">
-                                                <AiOutlineLike
-                                                  size={30}
-                                                  color="blue"
-                                                  onClick={() =>
-                                                    postLikeCommentReplyAPI(
-                                                      comment._id,
-                                                      replie.authorId,
-                                                      userId,
-                                                      "like",
-                                                      replie._id
-                                                    )
-                                                  }
-                                                />
-                                              </span>
-                                              <span
-                                                className="icon-animation"
+                                          <div className="laugh-icon flex items-center gap-5 absolute ">
+                                            <span className="icon-animation">
+                                              <AiOutlineLike
+                                                size={30}
+                                                color="blue"
                                                 onClick={() =>
                                                   postLikeCommentReplyAPI(
                                                     comment._id,
                                                     replie.authorId,
                                                     userId,
-                                                    "love",
+                                                    "like",
                                                     replie._id
                                                   )
                                                 }
-                                              >
-                                                <FaHeart
-                                                  size={30}
-                                                  color="red"
-                                                />
-                                              </span>
+                                              />
+                                            </span>
+                                            <span
+                                              className="icon-animation"
+                                              onClick={() =>
+                                                postLikeCommentReplyAPI(
+                                                  comment._id,
+                                                  replie.authorId,
+                                                  userId,
+                                                  "love",
+                                                  replie._id
+                                                )
+                                              }
+                                            >
+                                              <FaHeart size={30} color="red" />
+                                            </span>
 
-                                              <span className="icon-animation">
-                                                <FaRegFaceGrinHearts
-                                                  size={30}
-                                                  color="orange"
-                                                  onClick={() =>
-                                                    postLikeCommentReplyAPI(
-                                                      comment._id,
-                                                      replie.authorId,
-                                                      userId,
-                                                      "thương thương",
-                                                      replie._id
-                                                    )
-                                                  }
-                                                />
-                                              </span>
-                                              <span className="icon-animation">
-                                                <FaRegLaughSquint
-                                                  size={30}
-                                                  color="orange"
-                                                  onClick={() =>
-                                                    postLikeCommentReplyAPI(
-                                                      comment._id,
-                                                      replie.authorId,
-                                                      userId,
-                                                      "haha",
-                                                      replie._id
-                                                    )
-                                                  }
-                                                />
-                                              </span>
-                                              <span className="icon-animation">
-                                                <FaRegFaceSurprise
-                                                  size={30}
-                                                  color="orange"
-                                                  onClick={() =>
-                                                    postLikeCommentReplyAPI(
-                                                      comment._id,
-                                                      replie.authorId,
-                                                      userId,
-                                                      "wow",
-                                                      replie._id
-                                                    )
-                                                  }
-                                                />
-                                              </span>
-                                              <span className="icon-animation">
-                                                <FaRegFaceSadTear
-                                                  size={30}
-                                                  color="orange"
-                                                  onClick={() =>
-                                                    postLikeCommentReplyAPI(
-                                                      comment._id,
-                                                      replie.authorId,
-                                                      userId,
-                                                      "sad",
-                                                      replie._id
-                                                    )
-                                                  }
-                                                />
-                                              </span>
-                                              <span className="icon-animation">
-                                                <FaRegFaceTired
-                                                  size={30}
-                                                  color="orange"
-                                                  onClick={() =>
-                                                    postLikeCommentReplyAPI(
-                                                      comment._id,
-                                                      replie.authorId,
-                                                      userId,
-                                                      "angry",
-                                                      replie._id
-                                                    )
-                                                  }
-                                                />
-                                              </span>
-                                            </div>
+                                            <span className="icon-animation">
+                                              <FaRegFaceGrinHearts
+                                                size={30}
+                                                color="orange"
+                                                onClick={() =>
+                                                  postLikeCommentReplyAPI(
+                                                    comment._id,
+                                                    replie.authorId,
+                                                    userId,
+                                                    "thương thương",
+                                                    replie._id
+                                                  )
+                                                }
+                                              />
+                                            </span>
+                                            <span className="icon-animation">
+                                              <FaRegLaughSquint
+                                                size={30}
+                                                color="orange"
+                                                onClick={() =>
+                                                  postLikeCommentReplyAPI(
+                                                    comment._id,
+                                                    replie.authorId,
+                                                    userId,
+                                                    "haha",
+                                                    replie._id
+                                                  )
+                                                }
+                                              />
+                                            </span>
+                                            <span className="icon-animation">
+                                              <FaRegFaceSurprise
+                                                size={30}
+                                                color="orange"
+                                                onClick={() =>
+                                                  postLikeCommentReplyAPI(
+                                                    comment._id,
+                                                    replie.authorId,
+                                                    userId,
+                                                    "wow",
+                                                    replie._id
+                                                  )
+                                                }
+                                              />
+                                            </span>
+                                            <span className="icon-animation">
+                                              <FaRegFaceSadTear
+                                                size={30}
+                                                color="orange"
+                                                onClick={() =>
+                                                  postLikeCommentReplyAPI(
+                                                    comment._id,
+                                                    replie.authorId,
+                                                    userId,
+                                                    "sad",
+                                                    replie._id
+                                                  )
+                                                }
+                                              />
+                                            </span>
+                                            <span className="icon-animation">
+                                              <FaRegFaceTired
+                                                size={30}
+                                                color="orange"
+                                                onClick={() =>
+                                                  postLikeCommentReplyAPI(
+                                                    comment._id,
+                                                    replie.authorId,
+                                                    userId,
+                                                    "angry",
+                                                    replie._id
+                                                  )
+                                                }
+                                              />
+                                            </span>
                                           </div>
-                                          <div
-                                            className="comment_text"
-                                            onClick={() =>
-                                              hanldeChanleReplie(
-                                                replie.authorName,
-                                                replie.authorId,
-                                                comment._id,
-                                                comment.postId
-                                              )
-                                            }
-                                          >
-                                            Phản hồi
-                                          </div>
-                                          <div className="comment_text flex items-center gap-2">
-                                            {renderUsersByReaction(
-                                              replie.likes
-                                            )}
-                                            {/* {likeMapReply[replie._id]
-                                          ? `${likeMapReply[replie._id]} `
-                                          : null} */}
-                                          </div>
+                                        </div>
+                                        <div
+                                          className="comment_text"
+                                          onClick={() =>
+                                            hanldeChanleReplie(
+                                              replie.authorName,
+                                              replie.authorId,
+                                              comment._id,
+                                              comment.postId
+                                            )
+                                          }
+                                        >
+                                          Phản hồi
+                                        </div>
+                                        <div className="comment_text flex items-center gap-2">
+                                          {renderUsersByReaction(replie.likes)}
+                                          {likeMapReply[replie._id]
+                                            ? `${likeMapReply[replie._id]} `
+                                            : null}
                                         </div>
                                       </div>
                                     </div>
-                                  );
-                                })}
+                                  </div>
+                                );
+                              })}
 
-                              {showReplie && showCmt === comment._id && (
-                                <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100 mt-3 reply_content">
-                                  <button
-                                    onClick={handleClick}
-                                    type="button"
-                                    className="inline-flex justify-center p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
+                            {showReplie && showCmt === comment._id && (
+                              <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100 mt-3 reply_content">
+                                <button
+                                  onClick={handleClick}
+                                  type="button"
+                                  className="inline-flex justify-center p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
+                                >
+                                  <svg
+                                    className="w-5 h-5"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 20 18"
                                   >
-                                    <svg
-                                      className="w-5 h-5"
-                                      aria-hidden="true"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      fill="none"
-                                      viewBox="0 0 20 18"
-                                    >
-                                      <path
-                                        fill="currentColor"
-                                        d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z"
-                                      />
-                                      <path
-                                        stroke="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M18 1H2a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z"
-                                      />
-                                      <path
-                                        stroke="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z"
-                                      />
-                                    </svg>
-                                    <span className="sr-only">
-                                      Upload image
-                                    </span>
-                                  </button>
-                                  <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    onChange={handleFileChange}
-                                    style={{ display: "none" }} // Ẩn input
-                                  />
-                                  <button
-                                    type="button"
-                                    className="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
-                                  >
-                                    <svg
-                                      className="w-5 h-5"
-                                      aria-hidden="true"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      fill="none"
-                                      viewBox="0 0 20 20"
-                                    >
-                                      <path
-                                        stroke="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M13.408 7.5h.01m-6.876 0h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM4.6 11a5.5 5.5 0 0 0 10.81 0H4.6Z"
-                                      />
-                                    </svg>
-                                    <span className="sr-only">Add emoji</span>
-                                  </button>
-
-                                  <textarea
-                                    ref={textareaRef}
-                                    rows={1}
-                                    className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 dark:bg-white dark:placeholder-gray-400 dark:text-[#333] focus:bg-white outline-none"
-                                    onFocus={handleFocus}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={contentCmt}
-                                    placeholder={
-                                      isReplyMode ? "" : "Câu phản hồi của"
-                                    }
-                                  />
-
-                                  <button
-                                    onClick={() => handleReplieCmt(showPostID)}
-                                    className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
-                                  >
-                                    <svg
-                                      className="w-5 h-5 rotate-90 rtl:-rotate-90"
-                                      aria-hidden="true"
-                                      xmlns="http://www.w3.org/2000/svg"
+                                    <path
                                       fill="currentColor"
-                                      viewBox="0 0 18 20"
-                                    >
-                                      <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
-                                    </svg>
-                                    <span className="sr-only">
-                                      Send message
-                                    </span>
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </>
-                        );
-                      } else {
-                        return null;
-                      }
-                    })
-                  ) : (
-                    <p>Không có bình luận</p>
-                  )}
+                                      d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z"
+                                    />
+                                    <path
+                                      stroke="currentColor"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M18 1H2a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z"
+                                    />
+                                    <path
+                                      stroke="currentColor"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z"
+                                    />
+                                  </svg>
+                                  <span className="sr-only">Upload image</span>
+                                </button>
+                                <input
+                                  type="file"
+                                  ref={fileInputRef}
+                                  onChange={handleFileChange}
+                                  style={{ display: "none" }} // Ẩn input
+                                />
+                                <button
+                                  type="button"
+                                  className="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
+                                >
+                                  <svg
+                                    className="w-5 h-5"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      stroke="currentColor"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M13.408 7.5h.01m-6.876 0h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM4.6 11a5.5 5.5 0 0 0 10.81 0H4.6Z"
+                                    />
+                                  </svg>
+                                  <span className="sr-only">Add emoji</span>
+                                </button>
 
-                  <label htmlFor="chat" className="sr-only">
-                    Your message
-                  </label>
-                  <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100 mt-3">
-                    <button
-                      onClick={handleClick}
-                      type="button"
-                      className="inline-flex justify-center p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 20 18"
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z"
-                        />
-                        <path
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M18 1H2a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z"
-                        />
-                        <path
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z"
-                        />
-                      </svg>
-                      <span className="sr-only">Upload image</span>
-                    </button>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      style={{ display: "none" }} // Ẩn input
-                    />
-                    <button
-                      type="button"
-                      className="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13.408 7.5h.01m-6.876 0h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM4.6 11a5.5 5.5 0 0 0 10.81 0H4.6Z"
-                        />
-                      </svg>
-                      <span className="sr-only">Add emoji</span>
-                    </button>
+                                <textarea
+                                  ref={textareaRef}
+                                  rows={1}
+                                  className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 dark:bg-white dark:placeholder-gray-400 dark:text-[#333] focus:bg-white outline-none"
+                                  onFocus={handleFocus}
+                                  onChange={handleChange}
+                                  onBlur={handleBlur}
+                                  value={contentCmt}
+                                  placeholder={
+                                    isReplyMode ? "" : "Câu phản hồi của"
+                                  }
+                                />
 
-                    <textarea
-                      id={`chat-${index}`}
-                      key={index + 1}
-                      rows={1}
-                      className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 dark:bg-white dark:placeholder-gray-400 dark:text-[#333] focus:bg-white outline-none"
-                      placeholder={`Bình luận dưới tên là ${username}`}
-                      onChange={(e) =>
-                        handleContentChange(index, e.target.value)
-                      }
-                      value={contents[index]}
-                      onKeyDown={handleChangeEnter}
-                    />
+                                <button
+                                  onClick={() => handleReplieCmt(showPostID)}
+                                  className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
+                                >
+                                  <svg
+                                    className="w-5 h-5 rotate-90 rtl:-rotate-90"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="currentColor"
+                                    viewBox="0 0 18 20"
+                                  >
+                                    <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
+                                  </svg>
+                                  <span className="sr-only">Send message</span>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      );
+                    } else {
+                      return null;
+                    }
+                  })
+                ) : (
+                  <p>Không có bình luận</p>
+                )}
 
-                    <button
-                      onClick={() => handleComment(item._id)}
-                      className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
+                <label htmlFor="chat" className="sr-only">
+                  Your message
+                </label>
+                <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100 mt-3">
+                  <button
+                    onClick={handleClick}
+                    type="button"
+                    className="inline-flex justify-center p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 20 18"
                     >
-                      <svg
-                        className="w-5 h-5 rotate-90 rtl:-rotate-90"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <path
                         fill="currentColor"
-                        viewBox="0 0 18 20"
-                      >
-                        <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
-                      </svg>
-                      <span className="sr-only">Send message</span>
-                    </button>
-                  </div>
+                        d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z"
+                      />
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M18 1H2a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z"
+                      />
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0ZM7.565 7.423 4.5 14h11.518l-2.516-3.71L11 13 7.565 7.423Z"
+                      />
+                    </svg>
+                    <span className="sr-only">Upload image</span>
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: "none" }} // Ẩn input
+                  />
+                  <button
+                    type="button"
+                    className="p-2 text-gray-500 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.408 7.5h.01m-6.876 0h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM4.6 11a5.5 5.5 0 0 0 10.81 0H4.6Z"
+                      />
+                    </svg>
+                    <span className="sr-only">Add emoji</span>
+                  </button>
+
+                  <textarea
+                    id={`chat-${index}`}
+                    key={index + 1}
+                    rows={1}
+                    className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 dark:bg-white dark:placeholder-gray-400 dark:text-[#333] focus:bg-white outline-none"
+                    placeholder={`Bình luận dưới tên là ${username}`}
+                    onChange={(e) => handleContentChange(index, e.target.value)}
+                    value={contents[index]}
+                    onKeyDown={handleChangeEnter}
+                  />
+
+                  <button
+                    onClick={() => handleComment(item._id)}
+                    className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
+                  >
+                    <svg
+                      className="w-5 h-5 rotate-90 rtl:-rotate-90"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 18 20"
+                    >
+                      <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
+                    </svg>
+                    <span className="sr-only">Send message</span>
+                  </button>
                 </div>
               </div>
-            )
+            </div>
           );
         })}
     </div>

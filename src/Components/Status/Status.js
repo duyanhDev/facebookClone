@@ -3,6 +3,7 @@ import "./Status.scss";
 import { PostCreateNew } from "../../service/apiAxios";
 import { toast } from "react-toastify";
 import ClipLoader from "react-spinners/ClipLoader";
+
 export default function Status({
   showModal,
   setShowModal,
@@ -13,27 +14,33 @@ export default function Status({
   const authorId = localStorage.getItem("id");
 
   let [content, setContent] = useState("");
-  let [image, setImage] = useState(null);
+  let [image, setImage] = useState([]);
   let [video, setVideo] = useState(null);
-  const [previewImage, setPreviewImage] = useState("");
+  const [previewImage, setPreviewImage] = useState([]);
   const [previewVideo, setPreviewVideo] = useState("");
   const [isCheckVideo, seIsCheckVideo] = useState(false);
   const [isCheckImage, seIsCheckImage] = useState(false);
   const [isLoading, setLoading] = useState(false);
-  const handleChanFile = (e) => {
-    if (e.target && e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
 
-      if (file.type.startsWith("image/")) {
-        setImage(file);
-        setPreviewImage(URL.createObjectURL(file));
+  const handleChanFile = (e) => {
+    if (e.target && e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      const imageFiles = files.filter((file) => file.type.startsWith("image/"));
+      const videoFiles = files.filter((file) => file.type.startsWith("video/"));
+
+      if (imageFiles.length > 0) {
+        setImage((prevImages) => [...prevImages, ...imageFiles]); // Add new image files to the array
+        setPreviewImage((prevImages) => [
+          ...prevImages,
+          ...imageFiles.map((file) => URL.createObjectURL(file)),
+        ]); // Add preview URLs for images
         seIsCheckImage(true);
-        setVideo(null); // Reset video nếu trước đó đã chọn
-      } else if (file.type.startsWith("video/")) {
-        setVideo(file);
-        setPreviewVideo(URL.createObjectURL(file));
-        setImage(null); // Reset ảnh nếu trước đó đã chọn
-        seIsCheckVideo(true); // Hiển thị preview cho video
+        setVideo(null); // Reset video if an image is selected
+      } else if (videoFiles.length > 0) {
+        setVideo(videoFiles[0]);
+        setPreviewVideo(URL.createObjectURL(videoFiles[0]));
+        setImage([]); // Clear images if a video is selected
+        seIsCheckVideo(true);
       } else {
         toast.error("Chỉ hỗ trợ định dạng ảnh hoặc video!");
       }
@@ -51,8 +58,8 @@ export default function Status({
           toast.error("Lỗi đăng bài");
         }
         setContent("");
-        setImage("");
-        setPreviewImage();
+        setImage([]);
+        setPreviewImage([]);
         setLoading(false);
       }, 2000);
     } catch (error) {
@@ -63,15 +70,17 @@ export default function Status({
   const handleHidenModel = () => {
     setShowModal(false);
     setContent("");
-    setImage("");
-    setPreviewImage();
-    setPreviewVideo();
+    setImage([]);
+    setPreviewImage([]);
+    setPreviewVideo("");
     seIsCheckVideo(false);
     seIsCheckImage(false);
   };
+
   useEffect(() => {
     getPostAPI();
   }, [APICreatePost]);
+
   return (
     <>
       <button
@@ -87,10 +96,8 @@ export default function Status({
       {showModal ? (
         <>
           <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none  ">
-            <div className="relative  my-6 mx-auto max-w-md w-4/5">
-              {/*content*/}
+            <div className="relative my-6 mx-auto max-w-md w-4/5">
               <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none w">
-                {/*header*/}
                 <div className="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t ">
                   <h3 className="text-3xl font-semibold text-center">
                     Tạo Bài Viết
@@ -102,7 +109,6 @@ export default function Status({
                     X
                   </button>
                 </div>
-                {/*body*/}
                 <div className="p-2 flex-auto w-full h-2/3 m-auto">
                   <textarea
                     className="w-2/4 h-auto resize-none text-center placeholder:text-center placeholder-align"
@@ -115,7 +121,7 @@ export default function Status({
                   <div className="flex items-center justify-center w-full">
                     <label
                       htmlFor="dropzone-file"
-                      className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer   "
+                      className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer"
                     >
                       {isCheckVideo && previewVideo && (
                         <video className="check_video" autoPlay muted loop>
@@ -127,18 +133,21 @@ export default function Status({
                           />
                         </video>
                       )}
-                      {isCheckImage && previewImage && (
-                        <img
-                          src={previewImage}
-                          className="w-full h-full object-cover"
-                          alt="anh loi"
-                        />
-                      )}
+                      {isCheckImage &&
+                        previewImage.map((imageSrc, index) => (
+                          <img
+                            key={index}
+                            src={imageSrc}
+                            className="w-full h-full object-cover"
+                            alt={`preview-${index}`}
+                          />
+                        ))}
                       <input
                         id="dropzone-file"
                         type="file"
                         className="hidden"
                         onChange={(e) => handleChanFile(e)}
+                        multiple // Allow multiple file selection
                       />
                       {isCheckVideo === false && isCheckImage === false && (
                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -171,19 +180,10 @@ export default function Status({
                     </label>
                   </div>
                 </div>
-                {/*footer*/}
-                <div className="flex items-center  p-6 border-t border-solid border-blueGray-200 rounded-b">
-                  {/* <button
-                    className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Close
-                  </button> */}
+                <div className="flex items-center p-6 border-t border-solid border-blueGray-200 rounded-b">
                   <button
-                    className=" w-full bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                    className="w-full bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     type="button"
-                    // onClick={() => setShowModal(false)}
                     onClick={() => APICreatePost()}
                   >
                     {isLoading ? (

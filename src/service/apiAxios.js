@@ -119,14 +119,17 @@ const postLogOut = async (userId) => {
 const PostCreateNew = async (
   authorId,
   content,
-  image,
+  images = [],
   video,
   taggedFriends
 ) => {
   const data = new FormData();
   data.append("authorId", authorId);
   data.append("content", content);
-  data.append("image", image);
+  images.forEach((file) => {
+    data.append("image", file);
+  });
+
   data.append("video", video || null);
   data.append("taggedFriend", taggedFriends || JSON.stringify([]));
 

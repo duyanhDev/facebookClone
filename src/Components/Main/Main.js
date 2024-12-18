@@ -68,8 +68,8 @@ const Main = () => {
 
   const dispatch = useDispatch();
   const totalLikes = useSelector((state) => state.likes.totalLikes);
-  const totalLikesComment = useSelector((state) => state.comments.totalLikes);
-  const replyLikes = useSelector((state) => state.replyLikes.items);
+  const totalLikesComment = useSelector((state) => state.comments.totalComent);
+  const replyLikes = useSelector((state) => state.replyLikes.totalReply);
 
   const [countComment, setCountComment] = useState([]);
   const [shouldRefetch, setShouldRefetch] = useState(false);
@@ -139,37 +139,27 @@ const Main = () => {
     }
   }, [data, dispatch]);
 
-  const flattenedReplies = useMemo(() => {
-    return comments.flatMap((item) => {
-      // Kiểm tra xem item có phải là mảng không
-      if (Array.isArray(item)) {
-        return item.flatMap((comment) =>
-          comment.replies ? comment.replies : []
-        );
-      }
-      // Nếu item không phải mảng, kiểm tra xem nó có thuộc tính replies không
-      if (item && item.replies) {
-        return item.replies;
-      }
-      return [];
-    });
-  }, [comments]);
-
-  const replyIds = useMemo(() => {
-    return flattenedReplies
-      .filter((reply) => reply && reply._id) // Lọc ra các replies có _id
-      .map((reply) => reply._id)
-      .join(",");
-  }, [flattenedReplies]);
+  useEffect(() => {
+    const commentId = comments.map((item) => item._id).join(",");
+    if (commentId) {
+      dispatch(fetchLikesCountComment(commentId));
+    }
+  }, [comments, dispatch]);
 
   useEffect(() => {
+    const replyIds = comments
+      .map((item) => {
+        const repliesOne = item.replies;
+        return repliesOne.map((reply) => reply._id);
+      })
+      .flat() // Gộp tất cả mảng con thành một mảng duy nhất
+      .filter((replyId) => replyId !== undefined) // Lọc bỏ những phần tử undefined
+      .join(","); // Gộp lại thành một chuỗi, các phần tử ngăn cách bằng dấu phẩy
+
     if (replyIds) {
-      const fetchData = async () => {
-        await dispatch(fetchLikesCountReply(replyIds));
-      };
-      fetchData();
+      dispatch(fetchLikesCountReply(replyIds));
     }
-  }, [replyIds, dispatch]);
+  }, [comments, dispatch]);
 
   const likesMap = totalLikes.reduce((acc, like) => {
     const postId = like._id;
@@ -178,23 +168,24 @@ const Main = () => {
     }
     return acc;
   }, {});
+
   const likesMapComment = totalLikesComment.reduce((acc, like) => {
     const postId = like._id;
+
     if (postId) {
       acc[postId] = like.totalLikes;
     }
     return acc;
   }, {});
 
-  const likeMapReply = useMemo(() => {
-    return replyLikes.reduce((acc, like) => {
-      const replyId = like._id;
-      if (replyId) {
-        acc[replyId] = like.totalLikes;
-      }
-      return acc;
-    }, {});
-  }, [replyLikes]);
+  const likeMapReply = replyLikes.reduce((acc, like) => {
+    const replyId = like._id;
+
+    if (replyId) {
+      acc[replyId] = like.totalLikes;
+    }
+    return acc;
+  }, {});
 
   const [selectedReaction, setSelectedReaction] = useState("like");
   const handleClickLike = async (_id, authorId, reaction) => {
@@ -210,7 +201,6 @@ const Main = () => {
       let res = await postCommentLikes(_id, authorId, userId, reaction);
 
       if (res && res.success) {
-        console.log("Reaction posted successfully");
         FetchGetComment();
       } else {
         setSelectedReaction(null);
@@ -392,8 +382,6 @@ const Main = () => {
   const sensitiveWords = sensitiveWordsData.sensitiveWords;
 
   const checkSensitiveContent = (contents) => {
-    console.log(contents);
-
     // Nếu contents là một mảng, chuyển đổi nó thành chuỗi
     let lowerCaseComment = "";
 
@@ -434,12 +422,12 @@ const Main = () => {
         return;
       }
 
-      console.log("Valid contents before sending:", validContents);
       let data = await CreateCommentsAPI(postId, userId, validContents, image);
       if (data) {
         toast.success("Bình luận thành công");
         setContents(Array(data.length).fill("")); // Reset contents
         setImage(null);
+        setContents("");
 
         // Cập nhật comments và counts...
       } else {
@@ -514,8 +502,6 @@ const Main = () => {
     }
   };
   const hanldeChanleReplie = (authorName, authorId, cmtId, postId) => {
-    console.log(authorName);
-
     setShowName(authorName);
     setShowID(authorId);
     setShowCmt(cmtId);
@@ -593,7 +579,6 @@ const Main = () => {
         reaction,
         replyId
       );
-      console.log(data);
 
       if (data && data.data.EC === 0) {
         setSelectedReaction(reaction);
@@ -665,7 +650,11 @@ const Main = () => {
         } m-auto text-center mt-8 h-32 `}
       >
         <div className="w-full flex items-center gap-4 ml-4  bottom_text mt-5">
-          <img src={avtart} alt="lỗi" className="image_status" />
+          <img
+            src={avatar ? avatar : avtart}
+            alt="lỗi"
+            className="image_status"
+          />
           <Status
             showModal={showModal}
             setShowModal={setShowModal}
@@ -747,13 +736,18 @@ const Main = () => {
                 <div className="w-full flex items-center justify-center m-auto">
                   <Zoom>
                     <picture className="w-full h-full">
-                      {item.image && (
-                        <img
-                          className="image_post"
-                          src={item.image}
-                          alt="ảnh lỗi"
-                        />
-                      )}
+                      {item.image &&
+                        item.image.length > 0 &&
+                        item.image.map((url) => {
+                          console.log(url);
+                          return (
+                            <img
+                              className="image_post"
+                              src={url}
+                              alt="ảnh lỗi"
+                            />
+                          );
+                        })}
                       {item.video && (
                         <video className="image_post" controls loop>
                           <source
@@ -1257,9 +1251,9 @@ const Main = () => {
                                         </div>
                                         <div className="comment_text flex items-center gap-2">
                                           {renderUsersByReaction(replie.likes)}
-                                          {/* {likeMapReply[replie._id]
+                                          {likeMapReply[replie._id]
                                             ? `${likeMapReply[replie._id]} `
-                                            : null} */}
+                                            : null}
                                         </div>
                                       </div>
                                     </div>
