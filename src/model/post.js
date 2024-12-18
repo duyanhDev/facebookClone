@@ -11,7 +11,7 @@ const PostSchema = new Schema(
     authorName: { type: String },
     avatar: { type: String }, // Add this field to store the author's name
     content: { type: String, required: true },
-    image: { type: String },
+    image: [{ type: String }],
     video: { type: String },
     likes: [
       {

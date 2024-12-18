@@ -14,23 +14,22 @@ const Users = require("../model/users");
 const createNewPostUser = async (req, res) => {
   const { authorId, content, taggedFriends } = req.body;
   let videoUrl = "";
-  let imageUrl = "";
+  let imageUrls = []; // Khởi tạo mảng để lưu URL ảnh
 
   // Validate required fields
   if (!authorId || !content) {
     return res.status(400).json({ success: false, message: "Missing fields" });
   }
-  console.log("gg", req.files);
 
-  // Handle video upload if provided
-  console.log("Uploaded files:", req.files);
+  console.log("Received files:", req.files);
 
   // Handle video upload if provided
   if (req.files && req.files.video) {
     const videoFile = req.files.video;
     try {
-      videoUrl = await uploadVideoToCloudinary(videoFile); // Upload video and get the URL
-      console.log("Video URL:", videoUrl);
+      const resultVideo = await uploadVideoToCloudinary(videoFile); // Upload video
+      videoUrl = resultVideo.secure_url;
+      console.log("Uploaded video URL:", videoUrl);
     } catch (error) {
       console.error("Error uploading video:", error.message);
       return res
@@ -38,34 +37,43 @@ const createNewPostUser = async (req, res) => {
         .json({ success: false, message: "Error uploading video" });
     }
   }
+
   // Handle image upload if provided
   if (req.files && req.files.image) {
     try {
-      const resultImage = await uploadFileToCloudinary(req.files.image); // Upload image và lấy URL
-      imageUrl = resultImage.secure_url; // Gán link image sau khi upload thành công
-      console.log("Image URL:", imageUrl);
+      const files = Array.isArray(req.files.image)
+        ? req.files.image
+        : [req.files.image]; // Đảm bảo files là một mảng
+
+      // Upload từng ảnh và lưu URL
+      for (const file of files) {
+        const resultImage = await uploadFileToCloudinary(file); // Upload ảnh
+        imageUrls.push(resultImage.secure_url); // Lưu URL vào mảng
+      }
+
+      console.log("Uploaded image URLs:", imageUrls);
     } catch (uploadError) {
-      console.error("Error uploading image:", uploadError.message);
+      console.error("Error uploading images:", uploadError.message);
       return res
         .status(500)
-        .json({ success: false, message: "Error uploading image" });
+        .json({ success: false, message: "Error uploading images" });
     }
   }
 
   try {
-    // Prepare data for post creation
+    // Chuẩn bị dữ liệu tạo bài viết
     const data = {
       authorId,
       content,
-      image: imageUrl || null, // Lưu URL ảnh hoặc null nếu không có
-      video: videoUrl || null, // Lưu URL video hoặc null nếu không có
-      taggedFriends: taggedFriends || [], // Danh sách bạn bè tag
+      image: imageUrls.length > 0 ? imageUrls : null, // Lưu mảng URL ảnh hoặc null
+      video: videoUrl || null, // Lưu URL video hoặc null
+      taggedFriends: taggedFriends || [], // Danh sách bạn bè được tag
     };
 
     console.log("Data to create post:", data);
 
     // Tạo bài viết mới
-    const newPost = await CreateNewPost(data);
+    const newPost = await CreateNewPost(data); // Hàm này bạn cần định nghĩa trước
     return res.status(201).json({
       success: true,
       data: newPost,
