@@ -1,11 +1,5 @@
 import "./Main.scss";
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Slider from "react-slick";
 import lin from "./../../asset/images/9k30do0bqc18mwiah22809g28a5n.png";
 import avtart from "./../../asset/images/2.png";
@@ -24,6 +18,7 @@ import {
   getCountComments,
   postReplyComment,
   postLikeCommentReply,
+  GetAllStoriesAPIFB,
 } from "../../service/apiAxios";
 import { IoEllipsisHorizontal, IoEarth } from "react-icons/io5";
 import { AiOutlineLike } from "react-icons/ai";
@@ -41,7 +36,7 @@ import { fetchLikesCountComment } from "../../reduxToolKit/comment/commentSlice"
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { toast } from "react-toastify";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import sensitiveWordsData from "./../../sensitive-words.json";
 import { fetchLikesCountReply } from "../../reduxToolKit/likeReply/likesReplySlice";
 
@@ -74,6 +69,9 @@ const Main = () => {
   const [countComment, setCountComment] = useState([]);
   const [shouldRefetch, setShouldRefetch] = useState(false);
   const [isLoading, setLoading] = useState(false);
+
+  const [Stories, setStories] = useState([]);
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -585,6 +583,21 @@ const Main = () => {
       }
     } catch (error) {}
   };
+
+  const fetchAPIStories = async () => {
+    try {
+      let res = await GetAllStoriesAPIFB();
+      if (res && res.data && res.data.EC === 0) {
+        setStories(res.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAPIStories();
+  }, []);
   return (
     <div className="slider-container">
       <Slider
@@ -592,7 +605,10 @@ const Main = () => {
         ref={sliderRef}
         className="w_slider flex gap-1  cursor-pointer"
       >
-        <div className="flex items-center  ">
+        <div
+          className="flex items-center  "
+          onClick={() => navigate("/stories/create")}
+        >
           {avatar ? (
             <img className="slider-image" src={avatar} alt="ảnh lỗi" />
           ) : (
@@ -605,36 +621,37 @@ const Main = () => {
             <span>Tạo Tin</span>
           </div>
         </div>
-        <div className="flex items-center ">
-          <img className="slider-image" src={lin} alt="ảnh lỗi" />
-          <div className="news_name">
-            <span>Duy Anh</span>
-          </div>
-        </div>
-        <div className="flex items-center ">
-          <img className="slider-image" src={lin} alt="ảnh lỗi" />
-          <div className="news_name">
-            <span>Nguyễn Thị Thảo</span>
-          </div>
-        </div>
-        <div className="flex items-center ">
-          <img className="slider-image" src={lin} alt="ảnh lỗi" />
-          <div className="news_name">
-            <span>Đào Thị Như Băng</span>
-          </div>
-        </div>
-        <div className="flex items-center ">
-          <img className="slider-image" src={lin} alt="ảnh lỗi" />
-          <div className="news_name">
-            <span>Đào Thị Như Băng</span>
-          </div>
-        </div>
-        <div className="flex items-center ">
-          <img className="slider-image" src={lin} alt="ảnh lỗi" />
-          <div className="news_name">
-            <span>Đào Thị Như Băng</span>
-          </div>
-        </div>
+        {Stories &&
+          Stories.length > 0 &&
+          Stories.map((storie, index) => {
+            return (
+              <div
+                className="flex items-center relative"
+                key={index + 1}
+                style={{ height: "300px" }}
+              >
+                {storie.images ? (
+                  <img
+                    className="slider-image"
+                    src={storie.images}
+                    alt="ảnh lỗi"
+                  />
+                ) : (
+                  <div className="content_bg"></div>
+                )}
+                {storie.content && (
+                  <div className="absolute w-full h-full flex justify-center items-center top-0">
+                    <span className="span_titles text-center">
+                      {storie.content}
+                    </span>
+                  </div>
+                )}
+                <div className="news_name text-center">
+                  <span className="text-center">Duy Anh</span>
+                </div>
+              </div>
+            );
+          })}
       </Slider>
       <button className="custom-prev" onClick={handlePrevClick}>
         &lt;
@@ -739,7 +756,6 @@ const Main = () => {
                       {item.image &&
                         item.image.length > 0 &&
                         item.image.map((url) => {
-                          console.log(url);
                           return (
                             <img
                               className="image_post"

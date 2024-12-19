@@ -334,6 +334,33 @@ const fetchLikesReplyFromApi = async (replyId) => {
     throw error;
   }
 };
+
+// stories
+
+const CreateStoriesApiFB = async (
+  authorId,
+  content,
+  images,
+  video,
+  visibility
+) => {
+  const data = new FormData();
+  data.append("authorId", authorId);
+  data.append("content", content);
+  data.append("images", images);
+  data.append("video", video);
+  data.append("visibility", visibility);
+  return await axios.post("http://localhost:8001/v1/api/stories", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+const GetAllStoriesAPIFB = async () => {
+  return await axios.get("http://localhost:8001/v1/api/stories");
+};
+
 export {
   getUser,
   getAddUser,
@@ -362,4 +389,6 @@ export {
   postReplyComment,
   postLikeCommentReply,
   fetchLikesReplyFromApi,
+  CreateStoriesApiFB,
+  GetAllStoriesAPIFB,
 };

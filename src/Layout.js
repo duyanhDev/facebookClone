@@ -11,6 +11,7 @@ import Admin from "./Components/Admin/Admin.js";
 import ForgotPassword from "./Components/ForgotPassword/ForgotPassword.js";
 import ResetPassword from "./Components/ResetPassword/ResetPassword.js";
 import Profile from "./Components/Profile/Profile.js";
+import Stories from "./Components/stories/stories.js";
 
 const Layout = () => {
   const { isAuthenticated, role } = useContext(AuthContext); // Combine useContext for both values
@@ -21,7 +22,7 @@ const Layout = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/forgotPassword" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
-
+      <Route path="/stories/create" element={<Stories />} />
       <Route
         path="/"
         element={
