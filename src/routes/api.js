@@ -54,6 +54,10 @@ const {
 const Messages = require("../model/message");
 const Comment = require("../model/comment");
 const { postRelyComment } = require("../services/comment");
+const {
+  CreateStoriesAPI,
+  GetAllStoriesAPI,
+} = require("../controllers/stories");
 
 // crud users
 routerAPI.get("/users", getReadUserFB);
@@ -227,4 +231,8 @@ routerAPI.post("/commentlikereply/:_id", postLikeRecommentAPI);
 
 routerAPI.get("/getlikereply/:replyId", getLikesForReply);
 
+// storie
+
+routerAPI.post("/stories", CreateStoriesAPI);
+routerAPI.get("/stories", GetAllStoriesAPI);
 module.exports = routerAPI;

@@ -29,7 +29,6 @@ const createNewPostUser = async (req, res) => {
     try {
       const resultVideo = await uploadVideoToCloudinary(videoFile); // Upload video
       videoUrl = resultVideo.secure_url;
-      console.log("Uploaded video URL:", videoUrl);
     } catch (error) {
       console.error("Error uploading video:", error.message);
       return res
@@ -50,8 +49,6 @@ const createNewPostUser = async (req, res) => {
         const resultImage = await uploadFileToCloudinary(file); // Upload ảnh
         imageUrls.push(resultImage.secure_url); // Lưu URL vào mảng
       }
-
-      console.log("Uploaded image URLs:", imageUrls);
     } catch (uploadError) {
       console.error("Error uploading images:", uploadError.message);
       return res
@@ -69,8 +66,6 @@ const createNewPostUser = async (req, res) => {
       video: videoUrl || null, // Lưu URL video hoặc null
       taggedFriends: taggedFriends || [], // Danh sách bạn bè được tag
     };
-
-    console.log("Data to create post:", data);
 
     // Tạo bài viết mới
     const newPost = await CreateNewPost(data); // Hàm này bạn cần định nghĩa trước
