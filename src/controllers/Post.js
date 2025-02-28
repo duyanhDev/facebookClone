@@ -158,9 +158,42 @@ const getLikesForPost = async (req, res) => {
   }
 };
 
+const getPostIdUsers = async (req, res) => {
+  try {
+    let { authorId } = req.params;
+
+    const data = await Posts.find({ authorId })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "likes.userId",
+        select: "profile.name",
+      })
+      .exec();
+
+    if (!data) {
+      return res.status(404).json({
+        EC: 1,
+        message: "Post not found",
+      });
+    }
+
+    return res.status(200).json({
+      EC: 0,
+      data: data,
+    });
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    return res.status(500).json({
+      EC: -1,
+      message: "Internal Server Error",
+    });
+  }
+};
+
 module.exports = {
   createNewPostUser,
   getNewPostUsers,
   postLikeUser,
   getLikesForPost,
+  getPostIdUsers,
 };

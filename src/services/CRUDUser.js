@@ -17,6 +17,11 @@ const getReadUser = async () => {
 
 const postCreateUser = async (data) => {
   try {
+    let user = await Users.findOne({ email: data.email });
+
+    if (user) {
+      throw new Error("Email đã tồn tại");
+    }
     // Hash mật khẩu trước khi lưu
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
@@ -32,11 +37,11 @@ const postCreateUser = async (data) => {
 // cập nhật profile
 const putUserAPI = async (id, username, password, role, avatar) => {
   try {
-    let updateFields = {
-      username: username,
-      role: role,
-      "profile.avatar": avatar,
-    };
+    let updateFields = {};
+
+    if (username) updateFields.username = username;
+    if (role) updateFields.role = role;
+    if (avatar) updateFields["profile.avatar"] = avatar;
 
     // Chỉ băm mật khẩu nếu nó tồn tại và không rỗng
     if (password) {
@@ -44,17 +49,11 @@ const putUserAPI = async (id, username, password, role, avatar) => {
       updateFields.password = hashedPassword;
     }
 
-    // Cập nhật thông tin người dùng
-    let data = await Users.updateOne(
-      { _id: id }, // Query theo _id
-      {
-        $set: updateFields,
-      }
-    );
-
-    if (data.nModified === 0) {
+    if (Object.keys(updateFields).length === 0) {
       return { success: false, message: "No changes made" };
     }
+
+    let data = await Users.updateOne({ _id: id }, { $set: updateFields });
 
     return data;
   } catch (error) {
@@ -74,7 +73,6 @@ const postLoginJWT = async (email, password) => {
 
     // Compare provided password with stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
-    // console.log(password, user.password); // For debugging purposes; remove in production
 
     if (!isMatch) {
       return { success: false, message: "Sai mật khẩu" }; // Invalid password

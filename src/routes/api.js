@@ -8,7 +8,6 @@ require("dotenv").config(); // Ensure this is at the top of your file
 const {
   getReadUserFB,
   postUpdateUserFB,
-
   postAddFriends,
   putAddFriends,
   getListFriendSAdd,
@@ -35,6 +34,7 @@ const {
   getNewPostUsers,
   postLikeUser,
   getLikesForPost,
+  getPostIdUsers,
 } = require("./../controllers/Post");
 
 const {
@@ -158,6 +158,7 @@ routerAPI.post("/like", postLikeUser);
 routerAPI.get("/like/:postIds", getLikesForPost);
 routerAPI.post("/post", createNewPostUser);
 routerAPI.get("/post", getNewPostUsers);
+routerAPI.get("/post-user/:authorId", getPostIdUsers);
 
 // comment
 routerAPI.get("/comment", getCommentsAPI);

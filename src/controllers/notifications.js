@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const Notification = require("../model/notification");
 const Users = require("../model/users");
 
@@ -46,8 +47,25 @@ const getNotifications = async (req, res) => {
 const getCountNotifications = async (req, res) => {
   try {
     const userId = req.params.userId;
+
+    // Kiểm tra userId có hợp lệ không trước khi truy vấn
+    if (
+      !userId ||
+      userId === "null" ||
+      !mongoose.Types.ObjectId.isValid(userId)
+    ) {
+      return res.status(400).json({
+        EC: 1,
+        EM: "UserId không hợp lệ",
+      });
+    }
+
+    // Chuyển userId thành ObjectId
+    const objectIdUserId = new mongoose.Types.ObjectId(userId);
+
+    // Truy vấn dữ liệu
     const data = await Notification.countDocuments({
-      receiverId: userId,
+      receiverId: objectIdUserId,
       seen: false,
     }).exec();
 
@@ -56,7 +74,11 @@ const getCountNotifications = async (req, res) => {
       data: data,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Lỗi getCountNotifications:", error);
+    return res.status(500).json({
+      EC: 1,
+      EM: "Lỗi server",
+    });
   }
 };
 

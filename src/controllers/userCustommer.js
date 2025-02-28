@@ -113,23 +113,39 @@ const putProfileUser = async (req, res) => {
   let { id } = req.params;
   let { username, password, role } = req.body;
 
-  let imageUrl = "";
-  if (req.files && req.files.avatar) {
-    try {
-      const result = await uploadFileToCloudinary(req.files.avatar);
-      imageUrl = result.secure_url; // Sử dụng secure_url để lấy URL của ảnh đã tải lên
-      console.log("Image URL:", imageUrl);
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      return res.status(500).json({
+  try {
+    let user = await Users.findById(id); // Lấy dữ liệu người dùng hiện tại
+
+    if (!user) {
+      return res.status(404).json({
         EC: 0,
-        message: "Failed to upload image.",
+        message: "User not found.",
       });
     }
-  }
 
-  try {
-    let result = await putUserAPI(id, username, password, role, imageUrl);
+    let imageUrl = user.profile.avatar; // Giữ ảnh cũ nếu không có ảnh mới
+
+    if (req.files && req.files.avatar) {
+      try {
+        const result = await uploadFileToCloudinary(req.files.avatar);
+        imageUrl = result.secure_url; // Cập nhật nếu có ảnh mới
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        return res.status(500).json({
+          EC: 0,
+          message: "Failed to upload image.",
+        });
+      }
+    }
+
+    let result = await putUserAPI(
+      id,
+      username || user.username, // Giữ lại username cũ nếu không có giá trị mới
+      password,
+      role || user.role, // Giữ lại role cũ nếu không có giá trị mới
+      imageUrl
+    );
+
     return res.status(200).json({
       EC: 1,
       data: result,
@@ -146,9 +162,9 @@ const putProfileUser = async (req, res) => {
 // gửi lời mời kb
 const postAddFriends = async (req, res) => {
   let { senderId, receiverId } = req.body;
-  console.log(senderId, receiverId);
+  const io = req.app.get("io");
 
-  let result = await sendFriendRequest(senderId, receiverId);
+  let result = await sendFriendRequest(senderId, receiverId, io);
 
   return res.status(200).json({
     EC: 0,

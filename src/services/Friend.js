@@ -1,6 +1,6 @@
 const Users = require("./../model/users");
 const mongoose = require("mongoose");
-const sendFriendRequest = async (senderId, receiverId) => {
+const sendFriendRequest = async (senderId, receiverId, io) => {
   try {
     // Kiểm tra nếu senderId và receiverId trùng nhau
     if (senderId.toString() === receiverId.toString()) {
@@ -67,6 +67,22 @@ const sendFriendRequest = async (senderId, receiverId) => {
           addedAt: new Date(),
         },
       },
+    });
+    const updatedSender = await Users.findById(senderId).populate(
+      "friends.friendId",
+      "name avatar"
+    );
+    const pendingFriends = updatedSender.friends.filter(
+      (friend) => friend.status === "pending"
+    );
+
+    // Gửi socket cập nhật danh sách bạn bè đang chờ xác nhận
+    io.to(senderId.toString()).emit("update-pending-friends", pendingFriends);
+
+    // Gửi socket thông báo lời mời kết bạn đến người nhận
+    io.to(receiverId.toString()).emit("new-friend-request", {
+      senderId,
+      senderName: sender.name,
     });
   } catch (error) {
     console.error("Error sending friend request:", error.message);
