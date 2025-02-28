@@ -10,97 +10,108 @@ import {
   getBestfriend,
   getCountNotifications,
   getNotificationsAPI,
+  getUser,
 } from "./service/apiAxios";
+import io from "socket.io-client";
+
+const socket = io("http://localhost:8001");
 
 function App() {
   const location = useLocation();
   const username = localStorage.getItem("name");
+  const currentUserId = localStorage.getItem("id");
+
+  // State variables
   const [add, setAdd] = useState([]);
   const [status, setStatus] = useState("");
   const [idFriend, setIdFriend] = useState("");
   const [friend, setFriend] = useState([]);
-  const currentUserId = localStorage.getItem("id");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [countNotifications, setcountNotifications] = useState(0);
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [friendsToShow, setFriendsToShow] = useState([]);
   const [isLoading, setLoading] = useState(false);
-  // Memoize hàm feachBestFriend
-  const feachBestFriend = useCallback(async () => {
-    let res = await getBestfriend(currentUserId);
-    if (res && res.data) {
-      let data = res.data.map((item) => {
-        return item.friendId;
-      });
-      setFriend(data);
+  const [AllFriends, SetAllFriends] = useState([]);
+
+  // Socket.io event handlers
+  useEffect(() => {
+    const handlePendingFriends = (pendingFriends) => {
+      setAdd(pendingFriends);
+    };
+
+    const handleFriendRequest = (data) => {
+      alert(`Bạn có lời mời kết bạn từ ${data.senderName}`);
+    };
+
+    socket.on("update-pending-friends", handlePendingFriends);
+    socket.on("new-friend-request", handleFriendRequest);
+
+    return () => {
+      socket.off("update-pending-friends", handlePendingFriends);
+      socket.off("new-friend-request", handleFriendRequest);
+    };
+  }, []);
+
+  // Fetch best friends
+  const fetchBestFriend = useCallback(async () => {
+    try {
+      const res = await getBestfriend(currentUserId);
+      if (res && res.data) {
+        const data = res.data.map((item) => item.friendId);
+        setFriend(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch best friends:", error);
     }
   }, [currentUserId]);
 
-  const fetchAddUserData = async () => {
+  // Fetch all users
+  const fetchAllUsers = useCallback(async () => {
+    try {
+      const res = await getUser();
+      if (res && res.EC === 0) {
+        SetAllFriends(res.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch all users:", error);
+    }
+  }, []);
+
+  // Fetch add user data
+  const fetchAddUserData = useCallback(async () => {
     try {
       const data = await getAddUser(currentUserId);
       if (data.data && data.status === 200) {
-        const result = data.data.map((item) => item.friendId.profile.name);
-
         const idResult = data.data.map((item) => item.friendId._id);
-
-        setIdFriend(idResult[0]);
-
-        setAdd(result);
+        setIdFriend(idResult[0] || "");
+        setAdd(data.data);
       }
     } catch (error) {
       console.error("Failed to fetch add user data:", error);
-      // Optionally, you can use toast notifications to show errors
     }
-  };
-  useEffect(() => {
-    fetchAddUserData();
   }, [currentUserId]);
 
-  const fetchSeenUserData = async () => {
+  // Fetch seen user data
+  const fetchSeenUserData = useCallback(async () => {
     try {
       const response = await getSeenUser(currentUserId);
       if (response && response.data && response.data.data) {
         const unreadCount = response.data.data;
         setStatus(unreadCount);
-        return unreadCount; //
+        return unreadCount;
       } else {
         setStatus(0);
         return 0;
       }
     } catch (error) {
+      console.error("Failed to fetch seen user data:", error);
       setStatus(0);
       return 0;
     }
-  };
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      fetchSeenUserData();
-    }, 2000); // Thay đổi thời gian (5000ms = 5 giây) tùy thuộc vào nhu cầu của bạn
+  }, [currentUserId]);
 
-    return () => clearInterval(intervalId); // Dọn dẹp interval khi component unmount
-  }, [currentUserId]); // Đảm bảo rằng useEffect được gọi lại khi currentUserId thay đổi
-
-  // Gọi feachBestFriend trong useEffect và thêm feachBestFriend vào mảng phụ thuộc
-  useEffect(() => {
-    feachBestFriend();
-  }, [feachBestFriend]);
-
-  const HandleTogleBtn = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.body.classList.add("dark-mode");
-      document.body.classList.remove("light-mode");
-    } else {
-      document.body.classList.add("light-mode");
-      document.body.classList.remove("dark-mode");
-    }
-  }, [isDarkMode]);
-
+  // Fetch notification count
   const fetchCountNotification = useCallback(async () => {
     try {
       const res = await getCountNotifications(currentUserId);
@@ -112,55 +123,90 @@ function App() {
     }
   }, [currentUserId]);
 
-  useEffect(() => {
-    fetchCountNotification();
-
-    const intervalId = setInterval(fetchCountNotification, 3000);
-
-    // Clean up the interval on component unmount
-    return () => clearInterval(intervalId);
-  }, [fetchCountNotification]);
-
-  const getNotifications = async () => {
+  // Fetch notifications
+  const getNotifications = useCallback(async () => {
     try {
       const res = await getNotificationsAPI(currentUserId);
       if (res && res.data) {
         setData(res.data.notifications);
       }
     } catch (error) {
-      console.log("Error fetching notification :", error);
+      console.error("Error fetching notifications:", error);
     }
-  };
+  }, [currentUserId]);
+
+  // Initial data fetching
   useEffect(() => {
+    fetchAddUserData();
+    fetchBestFriend();
+    fetchAllUsers();
+  }, [fetchAddUserData, fetchBestFriend, fetchAllUsers]);
+
+  // Set up polling intervals for real-time data
+  useEffect(() => {
+    // Initial calls
+    fetchSeenUserData();
+    fetchCountNotification();
     getNotifications();
 
-    const intervalId = setInterval(getNotifications, 3000);
-    return () => clearInterval(intervalId);
-  }, [getNotifications]);
+    // Set up polling intervals
+    const seenInterval = setInterval(fetchSeenUserData, 5000);
+    const notificationCountInterval = setInterval(fetchCountNotification, 5000);
+    const notificationsInterval = setInterval(getNotifications, 5000);
 
+    // Clean up intervals on component unmount
+    return () => {
+      clearInterval(seenInterval);
+      clearInterval(notificationCountInterval);
+      clearInterval(notificationsInterval);
+    };
+  }, [fetchSeenUserData, fetchCountNotification, getNotifications]);
+
+  // Dark mode toggle
+  const handleToggleBtn = useCallback(() => {
+    setIsDarkMode((prevMode) => !prevMode);
+  }, []);
+
+  // Apply dark mode class to body
   useEffect(() => {
-    // Set initial friends to show (first 4)
-    setFriendsToShow(friend.slice(0, 4));
-  }, [friend]);
+    if (isDarkMode) {
+      document.body.classList.add("dark-mode");
+      document.body.classList.remove("light-mode");
+    } else {
+      document.body.classList.add("light-mode");
+      document.body.classList.remove("dark-mode");
+    }
+  }, [isDarkMode]);
+
+  // Initialize friendsToShow
+  useEffect(() => {
+    setFriendsToShow(AllFriends.slice(0, 4));
+  }, [AllFriends]);
+
+  // Handle search functionality
   useEffect(() => {
     setLoading(true);
     const timer = setTimeout(
       () => {
-        if (searchTerm) {
-          const filteredFriends = friend.filter((item) =>
-            item.profile.name.toLowerCase().includes(searchTerm.toLowerCase())
+        if (searchTerm.trim()) {
+          const lowerCaseSearch = searchTerm.trim().toLowerCase();
+          const filteredFriends = AllFriends.filter((item) =>
+            item.profile.name.toLowerCase().includes(lowerCaseSearch)
           );
           setFriendsToShow(filteredFriends);
         } else {
-          setFriendsToShow(friend.slice(0, 4));
+          setFriendsToShow(AllFriends.slice(0, 4));
         }
         setLoading(false);
       },
-      searchTerm ? 1000 : 0
+      searchTerm.trim() ? 1000 : 0
     );
+
     return () => clearTimeout(timer);
-  }, [searchTerm, friend]);
+  }, [searchTerm, AllFriends]);
+
   const isProfilePage = matchPath("/profile/:id", location.pathname);
+
   return (
     <div className="App">
       <div
@@ -171,7 +217,7 @@ function App() {
         <Header
           status={status}
           username={username}
-          HandleTogleBtn={HandleTogleBtn}
+          HandleTogleBtn={handleToggleBtn}
           isDarkMode={isDarkMode}
           setIsDarkMode={setIsDarkMode}
           fetchSeenUserData={fetchSeenUserData}

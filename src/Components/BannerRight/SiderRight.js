@@ -82,9 +82,14 @@ const SiderRight = ({
     let res = await putAddFriend(currentUserId, idFriend);
     console.log("check", res);
     if (res && res.data) {
-      console.log("thanh cong ", res);
     }
   };
+
+  const Friends =
+    add.length > 0 ? add.map((friend) => friend.friendId.profile) : [];
+
+  const firstName = Friends.length > 0 ? Friends[0].name : null;
+  const avart = Friends.length > 0 ? Friends[0].avatar : "";
 
   return (
     <>
@@ -173,11 +178,11 @@ const SiderRight = ({
             <div className="flex items-center">
               <img
                 className="img_avtart "
-                src={lin}
+                src={avart}
                 alt="ảnh kết bạn bị lỗi "
               />
               <div className="pt-3 -mt-5 ml-5">
-                <span>{add[0]}</span>
+                <span>{firstName}</span>
                 <div className="pt-1 flex items-center ">
                   <img className="img_friends" src={lin} alt="lỗi" />
                   <span

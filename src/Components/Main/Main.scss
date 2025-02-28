@@ -80,6 +80,17 @@
       border-radius: 50%;
     }
   }
+  .slick-prev {
+    left: 30px;
+    z-index: 999;
+  }
+  .slick-next {
+    right: 2px;
+  }
+  .slick-prev:before,
+  .slick-next:before {
+    font-size: 40px;
+  }
   .news_name {
     position: absolute;
     width: 150px;
@@ -118,19 +129,7 @@
         border-radius: 50%;
       }
     }
-    .hight_w {
-      width: 480px;
-      margin-left: -20px;
-      img.image_post {
-        width: 480px;
-        height: 500px;
-        object-fit: cover;
-      }
-      video.image_post {
-        width: 500px;
-        height: 500px;
-      }
-    }
+
     .like {
       border-bottom: 1px solid rgba(220, 220, 220, 1); /* Màu đậm hơn so với 240, 240, 240 */
     }
@@ -344,3 +343,9 @@
   word-wrap: break-word;
   color: #fff;
 }
+
+// @media (min-width: 1024px) {
+//   .image-container {
+//     grid-template-columns: repeat(3, 1fr); /* 3 cột khi màn hình >= 1024px */
+//   }
+// }

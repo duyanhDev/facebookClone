@@ -13,13 +13,13 @@ export default function Status({
 }) {
   const authorId = localStorage.getItem("id");
 
-  let [content, setContent] = useState("");
-  let [image, setImage] = useState([]);
-  let [video, setVideo] = useState(null);
+  const [content, setContent] = useState("");
+  const [image, setImage] = useState([]);
+  const [video, setVideo] = useState(null);
   const [previewImage, setPreviewImage] = useState([]);
   const [previewVideo, setPreviewVideo] = useState("");
-  const [isCheckVideo, seIsCheckVideo] = useState(false);
-  const [isCheckImage, seIsCheckImage] = useState(false);
+  const [isCheckVideo, setIsCheckVideo] = useState(false);
+  const [isCheckImage, setIsCheckImage] = useState(false);
   const [isLoading, setLoading] = useState(false);
 
   const handleChanFile = (e) => {
@@ -29,18 +29,18 @@ export default function Status({
       const videoFiles = files.filter((file) => file.type.startsWith("video/"));
 
       if (imageFiles.length > 0) {
-        setImage((prevImages) => [...prevImages, ...imageFiles]); // Add new image files to the array
+        setImage((prevImages) => [...prevImages, ...imageFiles]); // Add new image files
         setPreviewImage((prevImages) => [
           ...prevImages,
           ...imageFiles.map((file) => URL.createObjectURL(file)),
-        ]); // Add preview URLs for images
-        seIsCheckImage(true);
+        ]);
+        setIsCheckImage(true);
         setVideo(null); // Reset video if an image is selected
       } else if (videoFiles.length > 0) {
         setVideo(videoFiles[0]);
         setPreviewVideo(URL.createObjectURL(videoFiles[0]));
         setImage([]); // Clear images if a video is selected
-        seIsCheckVideo(true);
+        setIsCheckVideo(true);
       } else {
         toast.error("Chỉ hỗ trợ định dạng ảnh hoặc video!");
       }
@@ -67,14 +67,14 @@ export default function Status({
     }
   };
 
-  const handleHidenModel = () => {
+  const handleHideModal = () => {
     setShowModal(false);
     setContent("");
     setImage([]);
     setPreviewImage([]);
     setPreviewVideo("");
-    seIsCheckVideo(false);
-    seIsCheckImage(false);
+    setIsCheckVideo(false);
+    setIsCheckImage(false);
   };
 
   useEffect(() => {
@@ -95,16 +95,16 @@ export default function Status({
 
       {showModal ? (
         <>
-          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none  ">
+          <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
             <div className="relative my-6 mx-auto max-w-md w-4/5">
-              <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none w">
-                <div className="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t ">
+              <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+                <div className="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
                   <h3 className="text-3xl font-semibold text-center">
                     Tạo Bài Viết
                   </h3>
                   <button
-                    className="my-circle p-2 ml-auto border-0 text-gray-700 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                    onClick={() => handleHidenModel()}
+                    className="p-2 ml-auto border-0 text-gray-700 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
+                    onClick={() => handleHideModal()}
                   >
                     X
                   </button>
@@ -118,65 +118,42 @@ export default function Status({
                     value={content}
                   ></textarea>
 
-                  <div className="flex items-center justify-center w-full">
+                  <div className="flex flex-col items-center w-full height_scroll overflow-y-scroll p-2">
+                    {isCheckVideo && previewVideo && (
+                      <video className="check_video" autoPlay muted loop>
+                        <source
+                          width="350x"
+                          height="350px"
+                          src={previewVideo}
+                          type="video/mp4"
+                        />
+                      </video>
+                    )}
+
+                    {isCheckImage &&
+                      previewImage.map((imageSrc, index) => (
+                        <img
+                          key={index}
+                          src={imageSrc}
+                          className="check_image"
+                          alt={`preview-${index}`}
+                        />
+                      ))}
+
                     <label
                       htmlFor="dropzone-file"
-                      className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer"
+                      className="flex items-center justify-center w-full h-12 bg-gray-200 rounded-md cursor-pointer mt-2"
                     >
-                      {isCheckVideo && previewVideo && (
-                        <video className="check_video" autoPlay muted loop>
-                          <source
-                            width="350x"
-                            height="350px"
-                            src={previewVideo}
-                            type="video/mp4"
-                          />
-                        </video>
-                      )}
-                      {isCheckImage &&
-                        previewImage.map((imageSrc, index) => (
-                          <img
-                            key={index}
-                            src={imageSrc}
-                            className="w-full h-full object-cover"
-                            alt={`preview-${index}`}
-                          />
-                        ))}
+                      <span className="text-gray-700 font-semibold">
+                        + Thêm ảnh
+                      </span>
                       <input
                         id="dropzone-file"
                         type="file"
                         className="hidden"
                         onChange={(e) => handleChanFile(e)}
-                        multiple // Allow multiple file selection
+                        multiple
                       />
-                      {isCheckVideo === false && isCheckImage === false && (
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                          <svg
-                            className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 20 16"
-                          >
-                            <path
-                              stroke="currentColor"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                            />
-                          </svg>
-                          <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                            <span className="font-semibold">
-                              Thêm ảnh hoặc kéo thẻ
-                            </span>{" "}
-                            or drag and drop
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            SVG, PNG, JPG or GIF (MAX. 800x400px)
-                          </p>
-                        </div>
-                      )}
                     </label>
                   </div>
                 </div>

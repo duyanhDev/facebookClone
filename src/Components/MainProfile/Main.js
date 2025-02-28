@@ -1,19 +1,16 @@
 import "./Main.scss";
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import Slider from "react-slick";
+import lin from "./../../asset/images/9k30do0bqc18mwiah22809g28a5n.png";
 import avtart from "./../../asset/images/2.png";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { AiFillPlusCircle } from "react-icons/ai";
 import { MdVideoCameraFront, MdInsertEmoticon } from "react-icons/md";
 import { BsFillFileImageFill } from "react-icons/bs";
 import Status from "../Status/Status";
 import {
-  getPostNewUsers,
+  getPostOneUsers,
   postLikeFromAPI,
   getCommentsAPI,
   CreateCommentsAPI,
@@ -21,6 +18,7 @@ import {
   getCountComments,
   postReplyComment,
   postLikeCommentReply,
+  GetAllStoriesAPIFB,
 } from "../../service/apiAxios";
 import { IoEllipsisHorizontal, IoEarth } from "react-icons/io5";
 import { AiOutlineLike } from "react-icons/ai";
@@ -38,14 +36,13 @@ import { fetchLikesCountComment } from "../../reduxToolKit/comment/commentSlice"
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { toast } from "react-toastify";
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import sensitiveWordsData from "./../../sensitive-words.json";
 import { fetchLikesCountReply } from "../../reduxToolKit/likeReply/likesReplySlice";
 
 const Main = () => {
   const userId = localStorage.getItem("id");
   const username = localStorage.getItem("name");
-  const avatar = localStorage.getItem("avatar");
   const sliderRef = useRef(null);
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -53,12 +50,14 @@ const Main = () => {
   const [contents, setContents] = useState(Array(data.length).fill(""));
   const [image, setImage] = useState(null);
   const { isDarkMode, fetchCountNotification } = useOutletContext();
-
+  const avatar = localStorage.getItem("avatar");
   const [showReplie, setShowReplie] = useState(false);
   const [showName, setShowName] = useState("");
   const [showID, setShowID] = useState("");
   const [showCmt, setShowCmt] = useState("");
   const [showPostID, setShowPostID] = useState("");
+
+  const params = useParams();
 
   const [contentCmt, setContentCmt] = useState("");
   const [isReplyMode, setIsReplyMode] = useState(false);
@@ -73,18 +72,36 @@ const Main = () => {
   const [shouldRefetch, setShouldRefetch] = useState(false);
   const [isLoading, setLoading] = useState(false);
 
+  const [Stories, setStories] = useState([]);
+  const navigate = useNavigate();
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [fileName, setFileName] = useState("");
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
+      const file = e.target.files[0];
+
+      // Lấy tên file
+      const fileName = file.name;
+
+      // Tạo URL preview cho ảnh
+      const previewUrl = URL.createObjectURL(file);
+
+      setImage(file);
+      setFileName(fileName); // Nếu bạn cần lưu tên file
+      setPreviewUrl(previewUrl); // Lưu URL preview
+
+      // Log ra để kiểm tra
+
+      // Đừng quên cleanup URL khi component unmount
+      return () => URL.revokeObjectURL(previewUrl);
     }
   };
   let settings = {
     dots: false,
-    infinite: true,
+    infinite: false,
     speed: 500,
     slidesToShow: 4,
-    slidesToScroll: 1,
-    arrows: false, // Ẩn mũi tên mặc định
+    slidesToScroll: 4,
   };
   // const defaultImage = "https://via.placeholder.com/150";
 
@@ -100,7 +117,7 @@ const Main = () => {
     }
   };
   const getPostAPI = useCallback(async () => {
-    let res = await getPostNewUsers();
+    let res = await getPostOneUsers(params.id);
     if (res && res.data && res.data.data && res.status === 200) {
       setData(res.data.data);
     }
@@ -144,34 +161,20 @@ const Main = () => {
     }
   }, [comments, dispatch]);
 
-  const flattenedReplies = useMemo(() => {
-    return comments.flatMap((item) => {
-      // Kiểm tra xem item có phải là mảng không
-      if (Array.isArray(item)) {
-        return item.flatMap((comment) =>
-          comment.replies ? comment.replies : []
-        );
-      }
-      // Nếu item không phải mảng, kiểm tra xem nó có thuộc tính replies không
-      if (item && item.replies) {
-        return item.replies;
-      }
-      return [];
-    });
-  }, [comments]);
-
-  const replyIds = useMemo(() => {
-    return flattenedReplies
-      .filter((reply) => reply && reply._id) // Lọc ra các replies có _id
-      .map((reply) => reply._id)
-      .join(",");
-  }, [flattenedReplies]);
-
   useEffect(() => {
+    const replyIds = comments
+      .map((item) => {
+        const repliesOne = item.replies;
+        return repliesOne.map((reply) => reply._id);
+      })
+      .flat() // Gộp tất cả mảng con thành một mảng duy nhất
+      .filter((replyId) => replyId !== undefined) // Lọc bỏ những phần tử undefined
+      .join(","); // Gộp lại thành một chuỗi, các phần tử ngăn cách bằng dấu phẩy
+
     if (replyIds) {
       dispatch(fetchLikesCountReply(replyIds));
     }
-  }, [replyIds, dispatch]);
+  }, [comments, dispatch]);
 
   const likesMap = totalLikes.reduce((acc, like) => {
     const postId = like._id;
@@ -190,15 +193,14 @@ const Main = () => {
     return acc;
   }, {});
 
-  const likeMapReply = useMemo(() => {
-    return replyLikes.reduce((acc, like) => {
-      const replyId = like._id;
-      if (replyId) {
-        acc[replyId] = like.totalLikes;
-      }
-      return acc;
-    }, {});
-  }, [replyLikes]);
+  const likeMapReply = replyLikes.reduce((acc, like) => {
+    const replyId = like._id;
+
+    if (replyId) {
+      acc[replyId] = like.totalLikes;
+    }
+    return acc;
+  }, {});
 
   const [selectedReaction, setSelectedReaction] = useState("like");
   const handleClickLike = async (_id, authorId, reaction) => {
@@ -440,6 +442,7 @@ const Main = () => {
         toast.success("Bình luận thành công");
         setContents(Array(data.length).fill("")); // Reset contents
         setImage(null);
+        setContents("");
 
         // Cập nhật comments và counts...
       } else {
@@ -595,6 +598,34 @@ const Main = () => {
       }
     } catch (error) {}
   };
+
+  const fetchAPIStories = async () => {
+    try {
+      let res = await GetAllStoriesAPIFB();
+      if (res && res.data && res.data.EC === 0) {
+        setStories(res.data.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAPIStories();
+  }, []);
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const updatedSettings = {
+    ...settings,
+    beforeChange: (current, next) => {
+      setCurrentSlide(next);
+      if (settings.beforeChange) {
+        settings.beforeChange(current, next);
+      }
+    },
+  };
+
   return (
     <div className="slider-container">
       <div
@@ -686,32 +717,38 @@ const Main = () => {
               <div className="-mt-5 ml-3">
                 <span className="p-3 block justify-text">{item.content}</span>
               </div>
-
-              <div className="hight_w flex items-center justify-center m-auto">
-                <div className="w-full flex items-center justify-center m-auto">
-                  <Zoom>
-                    <picture className="w-full h-full">
-                      {item.image && (
-                        <img
-                          className="image_post"
-                          src={item.image}
-                          alt="ảnh lỗi"
-                        />
-                      )}
-                      {item.video && (
-                        <video className="image_post" controls loop>
-                          <source
-                            src={item.video}
-                            type="video/mp4"
-                            width="500px"
-                            height="500px"
-                          />
-                        </video>
-                      )}
-                    </picture>
-                  </Zoom>
-                </div>
+              <div className="grid gap-2 w-full">
+                {item.image && (
+                  <div
+                    className={`grid ${
+                      item.image.length === 1 ? "" : "grid-cols-2"
+                    } gap-2`}
+                  >
+                    {item.image.map((url, index) => (
+                      <img
+                        key={index}
+                        src={url}
+                        alt={`Ảnh ${index + 1}`}
+                        className={`w-full h-full object-cover rounded-lg ${
+                          item.image.length === 1 ? "col-span-2" : ""
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+                {item.video && (
+                  <video
+                    controls
+                    loop
+                    className={`w-full rounded-lg ${
+                      item.image?.length === 1 ? "h-full" : "h-64"
+                    }`}
+                  >
+                    <source src={item.video} type="video/mp4" />
+                  </video>
+                )}
               </div>
+
               <div className="w-full h-8 like relative top-3  flex items-center">
                 <div className="flex items-center mt-3">
                   <span className="flex items-center ">
@@ -856,7 +893,6 @@ const Main = () => {
                   Chia Sẻ
                 </span>
               </div>
-
               <div className="comment_post">
                 {comments.length > 0 ? (
                   comments.map((comment, index) => {
@@ -1318,7 +1354,7 @@ const Main = () => {
                 <label htmlFor="chat" className="sr-only">
                   Your message
                 </label>
-                <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100 mt-3">
+                <div className="relative flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100 mt-3 min-h-14 flex-wrap">
                   <button
                     onClick={handleClick}
                     type="button"
@@ -1380,32 +1416,47 @@ const Main = () => {
                     <span className="sr-only">Add emoji</span>
                   </button>
 
-                  <textarea
-                    id={`chat-${index}`}
-                    key={index + 1}
-                    rows={1}
-                    className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 dark:bg-white dark:placeholder-gray-400 dark:text-[#333] focus:bg-white outline-none"
-                    placeholder={`Bình luận dưới tên là ${username}`}
-                    onChange={(e) => handleContentChange(index, e.target.value)}
-                    value={contents[index]}
-                    onKeyDown={handleChangeEnter}
-                  />
-
-                  <button
-                    onClick={() => handleComment(item._id)}
-                    className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
-                  >
-                    <svg
-                      className="w-5 h-5 rotate-90 rtl:-rotate-90"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 18 20"
+                  <div className="flex-1 flex items-center">
+                    {" "}
+                    {/* Thêm div wrapper */}
+                    <textarea
+                      id={`chat-${index}`}
+                      key={index + 1}
+                      rows={1}
+                      className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 dark:bg-white dark:placeholder-gray-400 dark:text-[#333] focus:bg-white outline-none"
+                      placeholder={`Bình luận dưới tên là ${username}`}
+                      onChange={(e) =>
+                        handleContentChange(index, e.target.value)
+                      }
+                      value={contents[index]}
+                      onKeyDown={handleChangeEnter}
+                    />
+                    <button
+                      onClick={() => handleComment(item._id)}
+                      className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
                     >
-                      <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
-                    </svg>
-                    <span className="sr-only">Send message</span>
-                  </button>
+                      <svg
+                        className="w-5 h-5 rotate-90 rtl:-rotate-90"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 18 20"
+                      >
+                        <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
+                      </svg>
+                      <span className="sr-only">Send message</span>
+                    </button>
+                  </div>
+                  <div className="img_post flex items-center w-full mt-2">
+                    {previewUrl && (
+                      <img
+                        className="rounded-lg object-cover"
+                        style={{ width: "100px", height: "100px" }}
+                        src={previewUrl}
+                        alt={fileName}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

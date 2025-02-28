@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { getBestfriend, postLoginUser } from "../../service/apiAxios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -14,9 +14,14 @@ const Login = () => {
   const [showEye, setShowEye] = useState(false);
   const navigate = useNavigate();
   // Handle login
-  const { setIsAuthenticated } = useContext(AuthContext);
+  const { setIsAuthenticated, isAuthenticated } = useContext(AuthContext);
   const { setRole } = useContext(AuthContext);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
   const handleLogin = async () => {
     setLoading(true);
     try {

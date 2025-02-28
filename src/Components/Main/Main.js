@@ -72,19 +72,39 @@ const Main = () => {
 
   const [Stories, setStories] = useState([]);
   const navigate = useNavigate();
-
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [fileName, setFileName] = useState("");
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
+      const file = e.target.files[0];
+
+      // Lấy tên file
+      const fileName = file.name;
+
+      // Tạo URL preview cho ảnh
+      const previewUrl = URL.createObjectURL(file);
+
+      setImage(file);
+      setFileName(fileName); // Nếu bạn cần lưu tên file
+      setPreviewUrl(previewUrl); // Lưu URL preview
+
+      // Log ra để kiểm tra
+      console.log({
+        file: file,
+        name: fileName,
+        preview: previewUrl,
+      });
+
+      // Đừng quên cleanup URL khi component unmount
+      return () => URL.revokeObjectURL(previewUrl);
     }
   };
   let settings = {
     dots: false,
-    infinite: true,
+    infinite: false,
     speed: 500,
     slidesToShow: 4,
-    slidesToScroll: 1,
-    arrows: false, // Ẩn mũi tên mặc định
+    slidesToScroll: 4,
   };
   // const defaultImage = "https://via.placeholder.com/150";
 
@@ -598,15 +618,28 @@ const Main = () => {
   useEffect(() => {
     fetchAPIStories();
   }, []);
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const updatedSettings = {
+    ...settings,
+    beforeChange: (current, next) => {
+      setCurrentSlide(next);
+      if (settings.beforeChange) {
+        settings.beforeChange(current, next);
+      }
+    },
+  };
+
   return (
     <div className="slider-container">
       <Slider
         {...settings}
         ref={sliderRef}
-        className="w_slider flex gap-1  cursor-pointer"
+        className="w_slider flex gap-1 cursor-pointer"
       >
         <div
-          className="flex items-center  "
+          className="flex items-center"
           onClick={() => navigate("/stories/create")}
         >
           {avatar ? (
@@ -614,51 +647,61 @@ const Main = () => {
           ) : (
             <img className="slider-image" src={avtart} alt="ảnh lỗi" />
           )}
-          <div className="news ">
+          <div className="news">
             <div className="icon">
               <AiFillPlusCircle className="size-9 text-[#0866ff]" />
             </div>
             <span>Tạo Tin</span>
           </div>
         </div>
+
         {Stories &&
           Stories.length > 0 &&
-          Stories.map((storie, index) => {
-            return (
-              <div
-                className="flex items-center relative"
-                key={index + 1}
-                style={{ height: "300px" }}
-              >
-                {storie.images ? (
-                  <img
-                    className="slider-image"
-                    src={storie.images}
-                    alt="ảnh lỗi"
-                  />
-                ) : (
-                  <div className="content_bg"></div>
-                )}
-                {storie.content && (
-                  <div className="absolute w-full h-full flex justify-center items-center top-0">
-                    <span className="span_titles text-center">
-                      {storie.content}
-                    </span>
-                  </div>
-                )}
-                <div className="news_name text-center">
-                  <span className="text-center">Duy Anh</span>
+          Stories.map((storie, index) => (
+            <div
+              className="flex items-center relative"
+              key={index + 1}
+              style={{ height: "300px" }}
+            >
+              {storie.images ? (
+                <img
+                  className="slider-image"
+                  src={storie.images}
+                  alt="ảnh lỗi"
+                />
+              ) : (
+                <div className="content_bg"></div>
+              )}
+              {storie.content && (
+                <div className="absolute w-full h-full flex justify-center items-center top-0">
+                  <span className="span_titles text-center">
+                    {storie.content}
+                  </span>
                 </div>
+              )}
+              <div className="news_name text-center">
+                <span className="text-center">Duy Anh</span>
               </div>
-            );
-          })}
+            </div>
+          ))}
       </Slider>
-      <button className="custom-prev" onClick={handlePrevClick}>
-        &lt;
-      </button>
-      <button className="custom-next" onClick={handleNextClick}>
-        &gt;
-      </button>
+      {currentSlide > 0 && (
+        <button
+          className="custom-prev absolute left-0 z-10 bg-white shadow-lg p-2 rounded-full flex justify-center items-center transform -translate-y-1/2 top-1/2"
+          onClick={handlePrevClick}
+        >
+          &lt;
+        </button>
+      )}
+
+      {currentSlide < Stories.length - 3 && (
+        <button
+          className="custom-next absolute right-0 z-10 bg-black shadow-lg p-2 rounded-full flex justify-center items-center transform -translate-y-1/2 top-1/2"
+          onClick={handleNextClick}
+        >
+          &gt;
+        </button>
+      )}
       <div
         className={`content_status ${
           isDarkMode
@@ -748,36 +791,38 @@ const Main = () => {
               <div className="-mt-5 ml-3">
                 <span className="p-3 block justify-text">{item.content}</span>
               </div>
-
-              <div className="hight_w flex items-center justify-center m-auto">
-                <div className="w-full flex items-center justify-center m-auto">
-                  <Zoom>
-                    <picture className="w-full h-full">
-                      {item.image &&
-                        item.image.length > 0 &&
-                        item.image.map((url) => {
-                          return (
-                            <img
-                              className="image_post"
-                              src={url}
-                              alt="ảnh lỗi"
-                            />
-                          );
-                        })}
-                      {item.video && (
-                        <video className="image_post" controls loop>
-                          <source
-                            src={item.video}
-                            type="video/mp4"
-                            width="500px"
-                            height="500px"
-                          />
-                        </video>
-                      )}
-                    </picture>
-                  </Zoom>
-                </div>
+              <div className="grid gap-2 w-full">
+                {item.image && (
+                  <div
+                    className={`grid ${
+                      item.image.length === 1 ? "" : "grid-cols-2"
+                    } gap-2`}
+                  >
+                    {item.image.map((url, index) => (
+                      <img
+                        key={index}
+                        src={url}
+                        alt={`Ảnh ${index + 1}`}
+                        className={`w-full h-full object-cover rounded-lg ${
+                          item.image.length === 1 ? "col-span-2" : ""
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+                {item.video && (
+                  <video
+                    controls
+                    loop
+                    className={`w-full rounded-lg ${
+                      item.image?.length === 1 ? "h-full" : "h-64"
+                    }`}
+                  >
+                    <source src={item.video} type="video/mp4" />
+                  </video>
+                )}
               </div>
+
               <div className="w-full h-8 like relative top-3  flex items-center">
                 <div className="flex items-center mt-3">
                   <span className="flex items-center ">
@@ -922,7 +967,6 @@ const Main = () => {
                   Chia Sẻ
                 </span>
               </div>
-
               <div className="comment_post">
                 {comments.length > 0 ? (
                   comments.map((comment, index) => {
@@ -1384,7 +1428,7 @@ const Main = () => {
                 <label htmlFor="chat" className="sr-only">
                   Your message
                 </label>
-                <div className="flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100 mt-3">
+                <div className="relative flex items-center px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-100 mt-3 min-h-14 flex-wrap">
                   <button
                     onClick={handleClick}
                     type="button"
@@ -1446,32 +1490,47 @@ const Main = () => {
                     <span className="sr-only">Add emoji</span>
                   </button>
 
-                  <textarea
-                    id={`chat-${index}`}
-                    key={index + 1}
-                    rows={1}
-                    className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 dark:bg-white dark:placeholder-gray-400 dark:text-[#333] focus:bg-white outline-none"
-                    placeholder={`Bình luận dưới tên là ${username}`}
-                    onChange={(e) => handleContentChange(index, e.target.value)}
-                    value={contents[index]}
-                    onKeyDown={handleChangeEnter}
-                  />
-
-                  <button
-                    onClick={() => handleComment(item._id)}
-                    className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
-                  >
-                    <svg
-                      className="w-5 h-5 rotate-90 rtl:-rotate-90"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 18 20"
+                  <div className="flex-1 flex items-center">
+                    {" "}
+                    {/* Thêm div wrapper */}
+                    <textarea
+                      id={`chat-${index}`}
+                      key={index + 1}
+                      rows={1}
+                      className="block mx-4 p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 dark:bg-white dark:placeholder-gray-400 dark:text-[#333] focus:bg-white outline-none"
+                      placeholder={`Bình luận dưới tên là ${username}`}
+                      onChange={(e) =>
+                        handleContentChange(index, e.target.value)
+                      }
+                      value={contents[index]}
+                      onKeyDown={handleChangeEnter}
+                    />
+                    <button
+                      onClick={() => handleComment(item._id)}
+                      className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
                     >
-                      <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
-                    </svg>
-                    <span className="sr-only">Send message</span>
-                  </button>
+                      <svg
+                        className="w-5 h-5 rotate-90 rtl:-rotate-90"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 18 20"
+                      >
+                        <path d="m17.914 18.594-8-18a1 1 0 0 0-1.828 0l-8 18a1 1 0 0 0 1.157 1.376L8 18.281V9a1 1 0 0 1 2 0v9.281l6.758 1.689a1 1 0 0 0 1.156-1.376Z" />
+                      </svg>
+                      <span className="sr-only">Send message</span>
+                    </button>
+                  </div>
+                  <div className="img_post flex items-center w-full mt-2">
+                    {previewUrl && (
+                      <img
+                        className="rounded-lg object-cover"
+                        style={{ width: "100px", height: "100px" }}
+                        src={previewUrl}
+                        alt={fileName}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 
 const PrivateRoute = ({ element, isAuthenticated, role }) => {
   console.log("Current role in PrivateRoute:", role);
+  console.log(isAuthenticated, element, role);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

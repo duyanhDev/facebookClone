@@ -2,7 +2,7 @@ import axios from "./../untils/axios";
 // list Users
 const getUser = async () => {
   try {
-    const response = await axios.get("http://localhost:8001/v1/v1/api/users");
+    const response = await axios.get("http://localhost:8001/v1/api/users");
     return response.data; // Return the data directly
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -144,6 +144,11 @@ const getPostNewUsers = async () => {
   return await axios.get("http://localhost:8001/v1/api/post");
 };
 
+// lay bai post theo user
+
+const getPostOneUsers = async (authorId) => {
+  return await axios.get(`http://localhost:8001/v1/api/post-user/${authorId}`);
+};
 // like
 const fetchLikesFromApi = async (postId) => {
   try {
@@ -391,4 +396,5 @@ export {
   fetchLikesReplyFromApi,
   CreateStoriesApiFB,
   GetAllStoriesAPIFB,
+  getPostOneUsers,
 };

@@ -1,7 +1,9 @@
 import "./SearchFriends.scss";
 import avtart from "./../../asset/images/2.png";
 import ClipLoader from "react-spinners/ClipLoader";
+import { useNavigate } from "react-router-dom";
 const SearchFriends = ({ friends, hiddenSearch, isLoading }) => {
+  const navigate = useNavigate();
   return (
     <>
       {isLoading ? (
@@ -23,6 +25,7 @@ const SearchFriends = ({ friends, hiddenSearch, isLoading }) => {
                     <div
                       className="flex items-center gap-4 mt-3 mx-3 cursor-pointer"
                       key={item._id}
+                      onClick={() => navigate(`/profile/${item._id}`)}
                     >
                       <img
                         className="w-12 h-12 rounded-full object-cover"
