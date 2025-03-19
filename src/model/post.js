@@ -13,6 +13,7 @@ const PostSchema = new Schema(
     content: { type: String, required: true },
     image: [{ type: String }],
     video: { type: String },
+    checkImage: { type: Boolean, default: false },
     likes: [
       {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
@@ -33,6 +34,11 @@ const PostSchema = new Schema(
     ],
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comments" }],
     taggedFriends: [{ type: mongoose.Schema.Types.ObjectId, ref: "Users" }],
+    privacy: {
+      type: String,
+      enum: ["public", "friends", "only me"],
+      default: "public",
+    }, // Quyền riêng tư của bài viết
   },
   { timestamps: true }
 );

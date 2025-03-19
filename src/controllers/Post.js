@@ -12,7 +12,7 @@ const Posts = require("./../model/post");
 const Users = require("../model/users");
 
 const createNewPostUser = async (req, res) => {
-  const { authorId, content, taggedFriends } = req.body;
+  const { authorId, content, taggedFriends, privacy } = req.body;
   let videoUrl = "";
   let imageUrls = []; // Khởi tạo mảng để lưu URL ảnh
 
@@ -64,11 +64,17 @@ const createNewPostUser = async (req, res) => {
       content,
       image: imageUrls.length > 0 ? imageUrls : null, // Lưu mảng URL ảnh hoặc null
       video: videoUrl || null, // Lưu URL video hoặc null
-      taggedFriends: taggedFriends || [], // Danh sách bạn bè được tag
+      taggedFriends: taggedFriends || [],
+      checkImage: imageUrls.length > 0 || videoUrl ? true : false,
+      privacy: privacy || "public", // Danh sách bạn bè được tag
     };
 
     // Tạo bài viết mới
-    const newPost = await CreateNewPost(data); // Hàm này bạn cần định nghĩa trước
+    const newPost = await CreateNewPost(data);
+
+    await Users.findByIdAndUpdate(authorId, {
+      $push: { posts: newPost._id },
+    }); // Hàm này bạn cần định nghĩa trước
     return res.status(201).json({
       success: true,
       data: newPost,

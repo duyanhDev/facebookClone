@@ -35,27 +35,56 @@ const postCreateUser = async (data) => {
 };
 
 // cập nhật profile
-const putUserAPI = async (id, username, password, role, avatar) => {
+
+const putUserAPI = async (id, updateData) => {
   try {
     let updateFields = {};
 
-    if (username) updateFields.username = username;
-    if (role) updateFields.role = role;
-    if (avatar) updateFields["profile.avatar"] = avatar;
+    if (updateData.email) updateFields.email = updateData.email;
+    if (updateData.username) updateFields.username = updateData.username;
+    if (updateData.role) updateFields.role = updateData.role;
 
-    // Chỉ băm mật khẩu nếu nó tồn tại và không rỗng
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      updateFields.password = hashedPassword;
+    // Xử lý password (chỉ cập nhật nếu có giá trị hợp lệ)
+    if (updateData.password && updateData.password.trim() !== "") {
+      updateFields.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    if (updateData.profile && Object.keys(updateData.profile).length > 0) {
+      Object.keys(updateData.profile).forEach((key) => {
+        if (updateData.profile[key] !== undefined) {
+          updateFields[`profile.${key}`] = updateData.profile[key];
+        }
+      });
+
+      // Cập nhật toàn bộ education nếu là mảng
+      if (Array.isArray(updateData.profile.education)) {
+        updateFields["profile.education"] = updateData.profile.education;
+      }
+
+      // Cập nhật toàn bộ work nếu là mảng
+      if (Array.isArray(updateData.profile.work)) {
+        updateFields["profile.work"] = updateData.profile.work;
+      }
     }
 
     if (Object.keys(updateFields).length === 0) {
       return { success: false, message: "No changes made" };
     }
 
-    let data = await Users.updateOne({ _id: id }, { $set: updateFields });
+    let data = await Users.findOneAndUpdate(
+      { _id: id },
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    );
 
-    return data;
+    if (!data) {
+      return {
+        success: false,
+        message: "User not found or no changes applied",
+      };
+    }
+
+    return { success: true, data };
   } catch (error) {
     console.error("Error updating user:", error);
     return { success: false, message: "Error updating user" };
@@ -63,16 +92,23 @@ const putUserAPI = async (id, username, password, role, avatar) => {
 };
 
 // Đăng nhập
-const postLoginJWT = async (email, password) => {
+const postLoginJWT = async (email, username, password) => {
   try {
-    // Find the user by email
-    const user = await Users.findOne({ email });
+    // Find the user by email OR username
+    const user = await Users.findOne({
+      $or: [
+        { email: email }, // Tìm theo email
+        { username: username }, // Tìm theo username
+      ],
+    });
+
     if (!user) {
       return { success: false, message: "Người dùng không tồn tại" }; // User does not exist
     }
 
     // Compare provided password with stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log(isMatch);
 
     if (!isMatch) {
       return { success: false, message: "Sai mật khẩu" }; // Invalid password
@@ -84,6 +120,7 @@ const postLoginJWT = async (email, password) => {
       expiresIn: "7d",
     }); // Refresh token
 
+    // Update user status
     user.lastActive = new Date();
     user.isOnline = true;
     await user.save();
@@ -92,7 +129,6 @@ const postLoginJWT = async (email, password) => {
       success: true,
       token,
       refreshToken,
-
       user: {
         name: user.profile.name,
         avatar: user.profile.avatar,
@@ -106,7 +142,6 @@ const postLoginJWT = async (email, password) => {
     return { success: false, message: "Có lỗi xảy ra. Vui lòng thử lại." }; // Generic error message
   }
 };
-
 const checkTokenExpiration = (token) => {
   try {
     const decoded = jwt.verify(token, jwtSecret); // Sử dụng secret key để xác thực

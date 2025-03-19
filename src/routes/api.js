@@ -14,6 +14,13 @@ const {
   getListFriendUser,
   postLogin,
   putProfileUser,
+  getProfileUser,
+  updateIntroduce,
+  UpdateWorkByConditions,
+  APICreateWorkUser,
+  createEducationAPI,
+  DeleteWorkId,
+  DeleteEducationkId,
 } = require("./../controllers/userCustommer");
 const {
   postMessages,
@@ -63,7 +70,13 @@ const {
 routerAPI.get("/users", getReadUserFB);
 routerAPI.post("/users", postUpdateUserFB);
 routerAPI.put("/users/:id", putProfileUser);
-
+routerAPI.get("/get-proflile-users/:id", getProfileUser);
+routerAPI.put("/put-introduce", updateIntroduce);
+routerAPI.put("/update-word", UpdateWorkByConditions);
+routerAPI.post("/create-word/:id", APICreateWorkUser);
+routerAPI.post("/create-education/:id", createEducationAPI);
+routerAPI.put("/delete-work/:id", DeleteWorkId);
+routerAPI.put("/delete-education/:id", DeleteEducationkId);
 // tính năng thêm bạn bè
 routerAPI.post("/addfriend", postAddFriends);
 routerAPI.put("/addfriend/:userId/:friendId", putAddFriends);
