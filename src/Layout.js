@@ -12,6 +12,7 @@ import ForgotPassword from "./Components/ForgotPassword/ForgotPassword.js";
 import ResetPassword from "./Components/ResetPassword/ResetPassword.js";
 import Profile from "./Components/Profile/Profile.js";
 import Stories from "./Components/stories/stories.js";
+import AdminUsers from "./Components/AdminUsers/AdminUsers.js";
 
 const Layout = () => {
   const { isAuthenticated, role } = useContext(AuthContext); // Combine useContext for both values
@@ -47,7 +48,9 @@ const Layout = () => {
             role={role}
           />
         }
-      />
+      >
+        <Route index element={<AdminUsers />} />
+      </Route>
     </Routes>
   );
 };

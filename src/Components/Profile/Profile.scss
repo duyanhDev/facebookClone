@@ -1,0 +1,42 @@
+.profile_user_main {
+  background-image: linear-gradient(
+    to top,
+    #fff,
+    rgba(255, 255, 255.9),
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0)
+  );
+  height: 510px;
+}
+
+.profile_banner {
+  width: 800px;
+  margin: 0 auto;
+  height: 350px;
+}
+.main_stack {
+  width: 800px;
+  margin-top: 34%;
+}
+
+.friend_follows {
+  border-radius: 10px;
+  border: solid 1px #ccc;
+  width: 350px;
+  min-height: 300px;
+}
+
+.cart_bag {
+  filter: opacity(0.5);
+}
+.icon_fitter {
+  span {
+    font-size: 14px;
+  }
+}
+.main_left_stack {
+  position: sticky;
+  top: 0; // Giữ cố định khi cuộn
+  height: fit-content; // Để tránh ăn theo chiều cao của thằng cha
+}

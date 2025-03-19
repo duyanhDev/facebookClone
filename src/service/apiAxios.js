@@ -14,6 +14,9 @@ const getAddUser = async (id) => {
   return axios.get(`http://localhost:8001/v1/api/addfriend/${id}`);
 };
 
+const getProfileUserAPI = async (id) => {
+  return axios.get(`http://localhost:8001/v1/api/get-proflile-users/${id}`);
+};
 // xác nhận kết bạn (chấp nhận kb)
 
 const putAddFriend = async (userId, friendId) => {
@@ -85,10 +88,11 @@ const postRegisterUser = async (email, username, password, name, avatar) => {
 
 // đăng nhập
 
-const postLoginUser = async (email, password) => {
+const postLoginUser = async (email, username, password) => {
   try {
     const response = await axios.post("http://localhost:8001/v1/api/login", {
       email,
+      username,
       password,
     });
     return response.data;
@@ -366,6 +370,78 @@ const GetAllStoriesAPIFB = async () => {
   return await axios.get("http://localhost:8001/v1/api/stories");
 };
 
+const updateIntroduce = async (userId, introduce) => {
+  return await axios.put(
+    "v1/api/put-introduce",
+    { introduce },
+    { params: { userId } } // ✅ Đúng: Truyền `userId` trong query params
+    // Dữ liệu cần cập nhật (body)
+  );
+};
+
+const putProfileIntroduce = async (id, formData) => {
+  // Không cần destructuring trực tiếp, xử lý formData đã được chuẩn bị từ frontend
+  return await axios.put(`v1/api/users/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+const APIUpdateWorkByConditions = async (userId, workId, position, company) => {
+  return await axios.put("v1/api//update-word", {
+    userId,
+    workId,
+    position,
+    company,
+  });
+};
+
+// thêm công việc
+
+const HanldeAPICreateWorkUser = async (
+  id,
+  company,
+  position,
+  startDate,
+  endDate
+) => {
+  return await axios.post(`/v1/api/create-word/${id}`, {
+    company,
+    position,
+    startDate,
+    endDate,
+  });
+};
+
+const HanldeAPICreateEductionkUser = async (
+  id,
+  school,
+  degree,
+  fieldOfStudy,
+  startDate,
+  endDate
+) => {
+  return await axios.post(`/v1/api/create-education/${id}`, {
+    school,
+    degree,
+    fieldOfStudy,
+    startDate,
+    endDate,
+  });
+};
+
+const HanldeAPIDeleteWord = async (id, workId) => {
+  return await axios.put(`/v1/api/delete-work/${id}`, {
+    workId,
+  });
+};
+
+const HanldeAPIDeleteEducation = async (id, educationId) => {
+  return await axios.put(`/v1/api/delete-education/${id}`, {
+    educationId,
+  });
+};
 export {
   getUser,
   getAddUser,
@@ -397,4 +473,12 @@ export {
   CreateStoriesApiFB,
   GetAllStoriesAPIFB,
   getPostOneUsers,
+  getProfileUserAPI,
+  updateIntroduce,
+  putProfileIntroduce,
+  APIUpdateWorkByConditions,
+  HanldeAPICreateWorkUser,
+  HanldeAPICreateEductionkUser,
+  HanldeAPIDeleteWord,
+  HanldeAPIDeleteEducation,
 };

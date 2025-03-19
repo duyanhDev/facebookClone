@@ -1,0 +1,84 @@
+/* Reset mặc định và kiểu chung */
+.containner_admin {
+  height: 100vh; /* Chiều cao full màn hình */
+  overflow: hidden;
+}
+
+/* Thanh sidebar trái */
+.main_letf {
+  background: #fff;
+  border-right: 1px solid #f0f0f0;
+  padding: 20px 10px;
+  transition: all 0.3sease;
+  margin-top: -18px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 999;
+  overflow-y: auto;
+}
+
+/* Nội dung bên phải */
+.main_right {
+  background: #f5f5f5; /* Màu nền nhẹ */
+  overflow-y: auto; /* Cuộn nếu nội dung dài */
+}
+
+/* Tùy chỉnh Switch */
+.ant-switch {
+  margin-bottom: 20px; /* Khoảng cách dưới */
+}
+
+/* Tùy chỉnh Menu cho đẹp hơn */
+.ant-menu {
+  border: none !important;
+  font-size: 16px; /* Cỡ chữ lớn hơn một chút */
+}
+
+.ant-menu-item,
+.ant-menu-submenu-title {
+  border-radius: 4px !important; /* Bo góc nhẹ */
+  margin: 4px 0 !important; /* Khoảng cách giữa các mục */
+}
+
+.ant-menu-item:hover,
+.ant-menu-submenu-title:hover {
+  background-color: #e6f7ff !important; /* Màu hover nhẹ */
+  color: #1890ff !important; /* Màu chữ khi hover */
+}
+
+/* Tùy chỉnh cho dark theme */
+.main_letf .ant-menu-dark {
+  background: #001529 !important; /* Màu nền tối */
+}
+
+.ant-menu-dark .ant-menu-item,
+.ant-menu-dark .ant-menu-submenu-title {
+  color: rgba(255, 255, 255, 0.85) !important; /* Màu chữ trắng nhạt */
+}
+
+.ant-menu-dark .ant-menu-item:hover,
+.ant-menu-dark .ant-menu-submenu-title:hover {
+  background-color: #1890ff !important; /* Màu hover xanh */
+  color: #fff !important;
+}
+
+/* Đảm bảo layout responsive */
+@media (max-width: 768px) {
+  .main_letf {
+    width: 100% !important; /* Full width trên mobile */
+    min-height: auto !important;
+    border-right: none;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .main_right {
+    width: 100% !important;
+  }
+
+  .containner_admin {
+    flex-direction: column; /* Chuyển sang dạng cột */
+  }
+}

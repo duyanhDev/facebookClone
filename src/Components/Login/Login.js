@@ -1,46 +1,55 @@
 import React, { useState, useContext, useEffect } from "react";
-import { getBestfriend, postLoginUser } from "../../service/apiAxios";
+import { postLoginUser } from "../../service/apiAxios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../AuthContext ";
+import { AuthContext } from "./../../AuthContext ";
 import BeatLoader from "react-spinners/BeatLoader";
-
 import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import "./Login.scss";
+
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // Thay email bằng identifier để dùng chung cho email/username
   const [password, setPassword] = useState("");
   const [isLoading, setLoading] = useState(false);
   const [showEye, setShowEye] = useState(false);
   const navigate = useNavigate();
-  // Handle login
-  const { setIsAuthenticated, isAuthenticated } = useContext(AuthContext);
-  const { setRole } = useContext(AuthContext);
+  const { setIsAuthenticated, isAuthenticated, setRole } =
+    useContext(AuthContext);
 
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/", { replace: true });
     }
   }, [isAuthenticated, navigate]);
+
   const handleLogin = async () => {
     setLoading(true);
     try {
-      let InVaild =
-        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      if (!InVaild.test(email)) {
-        toast.error("Vui lòng nhập đúng email");
+      // Kiểm tra xem identifier có giá trị không
+      if (!identifier) {
+        toast.error("Vui lòng nhập email hoặc tên người dùng");
         setLoading(false);
         return;
       }
 
-      let res = await postLoginUser(email, password);
-      console.log("API response:", res);
+      // Regex để kiểm tra định dạng email
+      const emailRegex =
+        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      const isEmail = emailRegex.test(identifier);
 
+      // Gọi API với email hoặc username
+      const res = await postLoginUser(
+        isEmail ? identifier : null, // Nếu là email thì truyền vào email, không thì null
+        !isEmail ? identifier : null, // Nếu không là email thì truyền vào username, không thì null
+        password
+      );
+
+      // Giả định cấu trúc phản hồi từ backend giống postLoginJWT
       if (res && res.EC === 0) {
         const { name, id, avatar, role, isOnline } = res.data;
         const { token, refreshToken } = res;
-        console.log(res);
 
+        // Lưu thông tin vào localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("name", name);
         localStorage.setItem("avatar", avatar);
@@ -60,7 +69,7 @@ const Login = () => {
           navigate("/");
         }
       } else {
-        toast.error(res.error || "Đăng nhập thất bại");
+        toast.error(res.message || "Đăng nhập thất bại");
       }
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
@@ -73,6 +82,7 @@ const Login = () => {
   const HandleShowEye = () => {
     setShowEye(!showEye);
   };
+
   const handleResgin = () => {
     navigate("/register");
   };
@@ -80,11 +90,12 @@ const Login = () => {
   const handleForgotPassword = () => {
     navigate("/forgotPassword");
   };
+
   return (
     <>
       {isLoading && (
         <>
-          <div className="background-overlay"></div> {/* Nền mờ */}
+          <div className="background-overlay"></div>
           <div className="icon-login">
             <BeatLoader color="#ffffff" />
           </div>
@@ -97,10 +108,10 @@ const Login = () => {
             <div className="w-full">
               <div className="block rounded-lg bg-white shadow-lg dark:bg-neutral-800">
                 <div className="g-0 lg:flex lg:flex-wrap">
-                  {/* <!-- Left column container--> */}
+                  {/* Left column container */}
                   <div className="px-4 md:px-0 lg:w-6/12">
                     <div className="md:mx-6 md:p-12">
-                      {/* <!--Logo--> */}
+                      {/* Logo */}
                       <div className="text-center">
                         <img
                           className="mx-auto w-48"
@@ -115,21 +126,21 @@ const Login = () => {
                       <p className="mb-4">
                         Vui lòng đăng nhập vào tài khoản của bạn
                       </p>
-                      {/* <!--Username input--> */}
+                      {/* Input cho email hoặc username */}
                       <input
                         type="text"
                         className="mb-4 w-full p-2 border rounded text-black"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email hoặc Tên người dùng"
+                        value={identifier}
+                        onChange={(e) => setIdentifier(e.target.value)}
                       />
 
-                      {/* <!--Password input--> */}
+                      {/* Password input */}
                       <div className="relative flex items-center w-full">
                         <input
                           type={showEye ? "text" : "password"}
                           className="mb-4 w-full p-2 border rounded text-black"
-                          placeholder="Password"
+                          placeholder="Mật khẩu"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                         />
@@ -146,10 +157,10 @@ const Login = () => {
                         )}
                       </div>
 
-                      {/* <!--Submit button--> */}
+                      {/* Submit button */}
                       <div className="mb-12 pb-1 pt-1 text-center">
                         <button
-                          onClick={() => handleLogin()}
+                          onClick={handleLogin}
                           className="mb-3 inline-block w-full rounded px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_rgba(0,0,0,0.2)] transition duration-150 ease-in-out hover:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)] focus:outline-none focus:ring-0 active:shadow-[0_8px_9px_-4px_rgba(0,0,0,0.1),0_4px_18px_0_rgba(0,0,0,0.2)]"
                           type="button"
                           style={{
@@ -157,10 +168,10 @@ const Login = () => {
                               "linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593)",
                           }}
                         >
-                          Log in
+                          Đăng nhập
                         </button>
 
-                        {/* <!--Forgot password link--> */}
+                        {/* Forgot password link */}
                         <p
                           onClick={handleForgotPassword}
                           className="cursor-pointer"
@@ -169,10 +180,10 @@ const Login = () => {
                         </p>
                       </div>
 
-                      {/* <!--Register button--> */}
+                      {/* Register button */}
                       <div className="flex items-center justify-between pb-6">
                         <p className="mb-0 mr-2">Bạn chưa có tài khoản?</p>
-                        <div className="">
+                        <div>
                           <button
                             type="button"
                             className="cursor-pointer inline-block rounded border-2 border-danger px-6 pb-[6px] pt-2 text-xs font-medium uppercase leading-normal text-danger transition duration-150 ease-in-out hover:border-danger-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-danger-600 focus:border-danger-600 focus:text-danger-600 focus:outline-none focus:ring-0 active:border-danger-700 active:text-danger-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
@@ -185,7 +196,7 @@ const Login = () => {
                     </div>
                   </div>
 
-                  {/* <!-- Right column container with background and description--> */}
+                  {/* Right column container with background and description */}
                   <div
                     className="flex items-center rounded-b-lg lg:w-6/12 lg:rounded-r-lg lg:rounded-bl-none"
                     style={{

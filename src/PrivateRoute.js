@@ -1,25 +1,25 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 const PrivateRoute = ({ element, isAuthenticated, role }) => {
-  console.log("Current role in PrivateRoute:", role);
-  console.log(isAuthenticated, element, role);
+  const location = useLocation(); // Lấy thông tin đường dẫn hiện tại
+  console.log("Current path:", location.pathname);
+  console.log("IsAuthenticated:", isAuthenticated, "Role:", role);
 
+  // Nếu chưa xác thực, chuyển hướng về login
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  // Kiểm tra nếu đang truy cập vào route /admin
-  if (window.location.pathname === "/admin") {
-    // Chỉ cho phép admin truy cập
+  // Nếu truy cập /admin, chỉ cho phép role admin
+  if (location.pathname === "/admin") {
     if (role === "admin") {
       return element;
     } else {
-      // Chuyển hướng người dùng không phải admin về trang chính
       return <Navigate to="/" replace />;
     }
   }
 
-  // Cho các route khác, cho phép truy cập nếu đã xác thực
+  // Cho phép truy cập các route khác nếu đã xác thực
   return element;
 };
 

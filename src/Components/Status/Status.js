@@ -10,6 +10,8 @@ export default function Status({
   getPostAPI,
   fetchCountNotification,
   isDarkMode,
+  params,
+  usernameFriends,
 }) {
   const authorId = localStorage.getItem("id");
 
@@ -90,7 +92,11 @@ export default function Status({
         type="button"
         onClick={() => setShowModal(true)}
       >
-        <span className="mt-2">Anh bạn đang nghĩ gì thế?</span>
+        <span className="mt-2">
+          {params
+            ? `Viết một cái gì đó cho ${localStorage.getItem("name_friend")} `
+            : "Anh bạn đang nghĩ gì thế"}
+        </span>
       </button>
 
       {showModal ? (
@@ -113,7 +119,13 @@ export default function Status({
                   <textarea
                     className="w-2/4 h-auto resize-none text-center placeholder:text-center placeholder-align"
                     rows="4"
-                    placeholder="Anh ơi, bạn đang nghĩ gì thế?"
+                    placeholder={
+                      params
+                        ? `Viết một cái gì đó cho ${localStorage.getItem(
+                            "name_friend"
+                          )} `
+                        : "Anh bạn đang nghĩ gì thế"
+                    }
                     onChange={(e) => setContent(e.target.value)}
                     value={content}
                   ></textarea>

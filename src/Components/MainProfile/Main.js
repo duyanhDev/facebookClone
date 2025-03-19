@@ -33,14 +33,14 @@ import { PiShareFatThin } from "react-icons/pi";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLikesCount } from "../../reduxToolKit/like/likesSlice";
 import { fetchLikesCountComment } from "../../reduxToolKit/comment/commentSlice";
-import Zoom from "react-medium-image-zoom";
+
 import "react-medium-image-zoom/dist/styles.css";
 import { toast } from "react-toastify";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import sensitiveWordsData from "./../../sensitive-words.json";
 import { fetchLikesCountReply } from "../../reduxToolKit/likeReply/likesReplySlice";
 
-const Main = () => {
+const Main = ({ profile }) => {
   const userId = localStorage.getItem("id");
   const username = localStorage.getItem("name");
   const sliderRef = useRef(null);
@@ -76,26 +76,21 @@ const Main = () => {
   const navigate = useNavigate();
   const [previewUrl, setPreviewUrl] = useState("");
   const [fileName, setFileName] = useState("");
+
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-
-      // Lấy tên file
       const fileName = file.name;
-
-      // Tạo URL preview cho ảnh
       const previewUrl = URL.createObjectURL(file);
 
       setImage(file);
-      setFileName(fileName); // Nếu bạn cần lưu tên file
-      setPreviewUrl(previewUrl); // Lưu URL preview
+      setFileName(fileName);
+      setPreviewUrl(previewUrl);
 
-      // Log ra để kiểm tra
-
-      // Đừng quên cleanup URL khi component unmount
       return () => URL.revokeObjectURL(previewUrl);
     }
   };
+
   let settings = {
     dots: false,
     infinite: false,
@@ -103,7 +98,6 @@ const Main = () => {
     slidesToShow: 4,
     slidesToScroll: 4,
   };
-  // const defaultImage = "https://via.placeholder.com/150";
 
   const handlePrevClick = () => {
     if (sliderRef.current) {
@@ -116,23 +110,32 @@ const Main = () => {
       sliderRef.current.slickNext();
     }
   };
+
   const getPostAPI = useCallback(async () => {
-    let res = await getPostOneUsers(params.id);
-    if (res && res.data && res.data.data && res.status === 200) {
-      setData(res.data.data);
+    try {
+      let res = await getPostOneUsers(params.id);
+      if (res && res.data && res.data.data && res.status === 200) {
+        setData(res.data.data);
+      } else {
+        setData([]);
+        console.warn("Không có bài viết nào được trả về từ API");
+      }
+    } catch (error) {
+      console.error("Lỗi khi gọi API getPostOneUsers:", error);
+      setData([]);
+      toast.error("Không thể tải bài viết. Vui lòng thử lại sau!");
     }
-  }, []);
+  }, [params.id]);
 
   useEffect(() => {
     getPostAPI();
   }, [getPostAPI]);
 
   const getTimeAgoInMinutes = (postTime) => {
-    const now = new Date(); // Current time
-    const postDate = new Date(postTime); // Convert postTime to Date object
-
+    const now = new Date();
+    const postDate = new Date(postTime);
     const diffInMilliseconds = now - postDate;
-    const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60)); // Convert milliseconds to minutes
+    const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
 
     if (diffInMinutes === 0) {
       return `vừa xong`;
@@ -149,29 +152,25 @@ const Main = () => {
 
   useEffect(() => {
     const postIds = data.map((item) => item._id).join(",");
-    if (postIds) {
+    if (postIds && data.length > 0) {
       dispatch(fetchLikesCount(postIds));
     }
   }, [data, dispatch]);
 
   useEffect(() => {
     const commentId = comments.map((item) => item._id).join(",");
-    if (commentId) {
+    if (commentId && comments.length > 0) {
       dispatch(fetchLikesCountComment(commentId));
     }
   }, [comments, dispatch]);
 
   useEffect(() => {
     const replyIds = comments
-      .map((item) => {
-        const repliesOne = item.replies;
-        return repliesOne.map((reply) => reply._id);
-      })
-      .flat() // Gộp tất cả mảng con thành một mảng duy nhất
-      .filter((replyId) => replyId !== undefined) // Lọc bỏ những phần tử undefined
-      .join(","); // Gộp lại thành một chuỗi, các phần tử ngăn cách bằng dấu phẩy
-
-    if (replyIds) {
+      .map((item) => item.replies?.map((reply) => reply._id) || [])
+      .flat()
+      .filter((replyId) => replyId !== undefined)
+      .join(",");
+    if (replyIds && comments.length > 0) {
       dispatch(fetchLikesCountReply(replyIds));
     }
   }, [comments, dispatch]);
@@ -186,7 +185,6 @@ const Main = () => {
 
   const likesMapComment = totalLikesComment.reduce((acc, like) => {
     const postId = like._id;
-
     if (postId) {
       acc[postId] = like.totalLikes;
     }
@@ -195,7 +193,6 @@ const Main = () => {
 
   const likeMapReply = replyLikes.reduce((acc, like) => {
     const replyId = like._id;
-
     if (replyId) {
       acc[replyId] = like.totalLikes;
     }
@@ -203,18 +200,16 @@ const Main = () => {
   }, {});
 
   const [selectedReaction, setSelectedReaction] = useState("like");
+
   const handleClickLike = async (_id, authorId, reaction) => {
     let res = await postLikeFromAPI(_id, authorId, userId, reaction);
     setSelectedReaction(reaction);
-    if (res) {
-    }
   };
+
   const handleClickCommentLike = async (_id, authorId, reaction) => {
     try {
       setSelectedReaction(reaction);
-
       let res = await postCommentLikes(_id, authorId, userId, reaction);
-
       if (res && res.success) {
         FetchGetComment();
       } else {
@@ -222,7 +217,6 @@ const Main = () => {
         console.error("Failed to post reaction");
       }
     } catch (error) {
-      // Handle error during the request
       console.error("An error occurred:", error);
       setSelectedReaction(null);
     }
@@ -231,9 +225,9 @@ const Main = () => {
   const getReactionIcon = (reaction) => {
     switch (reaction) {
       case "like":
-        return <AiOutlineLike size={20} height={20} color="#4267B2" />; // Màu xanh của nút Like Facebook
+        return <AiOutlineLike size={20} height={20} color="#4267B2" />;
       case "love":
-        return <FaHeart size={20} className="text-[#F33E58] font-bold" />; // Màu đỏ của Love
+        return <FaHeart size={20} className="text-[#F33E58] font-bold" />;
       case "thương thương":
         return (
           <FaRegFaceGrinHearts
@@ -241,7 +235,7 @@ const Main = () => {
             height={20}
             className="text-[rgb(247,177,37)] font-bold"
           />
-        ); // Màu vàng của "Thương thương"
+        );
       case "haha":
         return (
           <FaRegLaughSquint
@@ -249,7 +243,7 @@ const Main = () => {
             height={20}
             className="text-[rgb(247,177,37)] font-bold"
           />
-        ); // Màu vàng của Haha
+        );
       case "wow":
         return (
           <FaRegFaceSurprise
@@ -257,7 +251,7 @@ const Main = () => {
             height={20}
             className="text-[rgb(247,177,37)] font-bold"
           />
-        ); // Màu vàng của Wow
+        );
       case "sad":
         return (
           <FaRegFaceSadTear
@@ -265,7 +259,7 @@ const Main = () => {
             height={20}
             className="text-[rgb(247,177,37)] font-bold"
           />
-        ); // Màu cam nhạt của Sad
+        );
       case "angry":
         return (
           <FaRegFaceTired
@@ -273,9 +267,9 @@ const Main = () => {
             height={20}
             className="text-[rgb(233,113,15)] font-bold"
           />
-        ); // Màu đỏ của Angry
+        );
       default:
-        return <AiOutlineLike size={20} className="text-gray-600" />; // Mặc định là màu xám
+        return <AiOutlineLike size={20} className="text-gray-600" />;
     }
   };
 
@@ -328,6 +322,7 @@ const Main = () => {
         return "Khác";
     }
   };
+
   const renderUsersByReaction = (likes) => {
     const reactionsGrouped = groupUsersByReaction(likes);
 
@@ -354,20 +349,16 @@ const Main = () => {
     const grouped = likes.reduce((acc, like) => {
       if (like.userId && like.userId.profile) {
         const userName = like.userId.profile.name;
-
         const reaction = like.reaction || "Unknown";
-
         if (!acc[reaction]) {
           acc[reaction] = [];
         }
-
         if (!acc[reaction].some((user) => user.name === userName)) {
           acc[reaction].push({ name: userName });
         }
       }
       return acc;
     }, {});
-    // For debugging
     return grouped;
   };
 
@@ -380,7 +371,6 @@ const Main = () => {
   const FetchGetComment = useCallback(async () => {
     try {
       let res = await getCommentsAPI();
-
       if (res && res.status === 200) {
         setComments(res.data.data);
       }
@@ -388,6 +378,7 @@ const Main = () => {
       console.log(error);
     }
   }, []);
+
   const handleContentChange = (index, value) => {
     const newContents = [...contents];
     newContents[index] = value;
@@ -397,54 +388,43 @@ const Main = () => {
   const sensitiveWords = sensitiveWordsData.sensitiveWords;
 
   const checkSensitiveContent = (contents) => {
-    // Nếu contents là một mảng, chuyển đổi nó thành chuỗi
     let lowerCaseComment = "";
-
     if (Array.isArray(contents)) {
-      lowerCaseComment = contents.join(" ").toLowerCase(); // Ghép các phần tử thành chuỗi và biến đổi thành chữ thường
+      lowerCaseComment = contents.join(" ").toLowerCase();
     } else if (typeof contents === "string") {
-      lowerCaseComment = contents.toLowerCase(); // Nếu contents là chuỗi, chỉ cần chuyển thành chữ thường
+      lowerCaseComment = contents.toLowerCase();
     } else {
       return false;
     }
-
-    // Kiểm tra xem nội dung có chứa từ nhạy cảm không
     for (let word of sensitiveWords) {
       if (lowerCaseComment.includes(word.toLowerCase())) {
-        return true; // Có chứa từ nhạy cảm
+        return true;
       }
     }
-
-    return false; // Không chứa từ nhạy cảm
+    return false;
   };
 
   const handleComment = async (postId) => {
     if (checkSensitiveContent(contents)) {
       setContents(Array(data.length).fill(""));
-      toast.error("Bình luận của bạn chứa nội dùng không phù hợp !");
+      toast.error("Bình luận của bạn chứa nội dung không phù hợp!");
       return;
     }
     setLoading(true);
     try {
-      // Lọc các bình luận hợp lệ (không phải null và không rỗng)
       const validContents = contents.filter(
         (content) => content && content.trim() !== ""
       );
-
-      // Kiểm tra xem có bình luận hợp lệ không
       if (validContents.length === 0) {
         toast.error("Vui lòng nhập bình luận hợp lệ");
         return;
       }
-
       let data = await CreateCommentsAPI(postId, userId, validContents, image);
       if (data) {
-        toast.success("Bình luận thành công");
-        setContents(Array(data.length).fill("")); // Reset contents
+        setContents(Array(data.length).fill(""));
         setImage(null);
-        setContents("");
-
-        // Cập nhật comments và counts...
+        setPreviewUrl("");
+        FetchGetComment();
       } else {
         toast.error("Bình luận bị lỗi");
       }
@@ -457,7 +437,8 @@ const Main = () => {
 
   useEffect(() => {
     FetchGetComment();
-  }, [handleComment]);
+  }, [FetchGetComment]);
+
   const handleChangeEnter = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -480,14 +461,14 @@ const Main = () => {
 
   useEffect(() => {
     if (shouldRefetch) {
-      FetchGetComment(); // Refetch comments
-      getCountComment(); // Refetch comment counts
-      setShouldRefetch(false); // Reset refetch flag
+      FetchGetComment();
+      getCountComment();
+      setShouldRefetch(false);
     }
   }, [shouldRefetch, FetchGetComment, getCountComment]);
 
   useEffect(() => {
-    getCountComment(); // Fetch comment counts on mount
+    getCountComment();
   }, [getCountComment]);
 
   useEffect(() => {
@@ -514,6 +495,7 @@ const Main = () => {
       setContentCmt("");
     }
   };
+
   const hanldeChanleReplie = (authorName, authorId, cmtId, postId) => {
     setShowName(authorName);
     setShowID(authorId);
@@ -521,10 +503,11 @@ const Main = () => {
     setShowPostID(postId);
     setShowReplie(true);
   };
+
   const handleReplieCmt = async (showPostID) => {
     if (checkSensitiveContent(contentCmt)) {
       setContentCmt("");
-      toast.error("Bình luận của bạn chứa nội dùng không phù hợp !");
+      toast.error("Bình luận của bạn chứa nội dung không phù hợp!");
       return;
     }
     setLoading(true);
@@ -541,31 +524,11 @@ const Main = () => {
         userId
       );
       if (data) {
-        toast.success("phản hồi thành công");
+        toast.success("Phản hồi thành công");
         setContentCmt("");
-        // Update comments immediately
-        setComments((prevComments) => {
-          if (!prevComments.some((comment) => comment.id === data.id)) {
-            return [...prevComments, data];
-          }
-          return prevComments;
-        });
-
-        // Update comment count immediately
-        setCountComment((prevCount) => {
-          const updatedCount = [...prevCount];
-          const index = updatedCount.findIndex(
-            (item) => item.showPostID === showPostID
-          );
-          if (index !== -1) {
-            updatedCount[index].count += 1;
-          } else {
-            updatedCount.push({ showPostID, count: 1 });
-          }
-          return updatedCount;
-        });
+        setImage(null);
+        setPreviewUrl("");
         FetchGetComment();
-        // Mark for refetch
         setShouldRefetch(true);
       } else {
         toast.error("Bình luận bị lỗi");
@@ -592,11 +555,12 @@ const Main = () => {
         reaction,
         replyId
       );
-
       if (data && data.data.EC === 0) {
         setSelectedReaction(reaction);
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const fetchAPIStories = async () => {
@@ -626,58 +590,110 @@ const Main = () => {
     },
   };
 
-  return (
-    <div className="slider-container">
-      <div
-        className={`content_status ${
-          isDarkMode
-            ? "bg-[rgba(16,17,18,1)]"
-            : "bg-[#ffffff] border border-[#ddd]"
-        } m-auto text-center mt-8 h-32 `}
-      >
-        <div className="w-full flex items-center gap-4 ml-4  bottom_text mt-5">
-          <img
-            src={avatar ? avatar : avtart}
-            alt="lỗi"
-            className="image_status"
-          />
-          <Status
-            showModal={showModal}
-            setShowModal={setShowModal}
-            getPostAPI={getPostAPI}
-            data={data}
-            setData={setData}
-            fetchCountNotification={fetchCountNotification}
-            isDarkMode={isDarkMode}
-          />
-        </div>
+  const usernameFriends = profile?.profile?.name;
+  localStorage.setItem("name_friend", usernameFriends);
 
-        <div className={`live flex justify-between pt-12 ml-3 `}>
-          <div className="w-full flex justify-between items-center -mt-10 cursor-pointer ">
-            <div className="flex items-center justify-center gap-2">
-              <MdVideoCameraFront className="size-8 text-red-800 " />
-              <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
-                Video Trực Tiếp
-              </span>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <BsFillFileImageFill className="size-8 text-green-800" />
-              <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
-                Ảnh/Video
-              </span>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <MdInsertEmoticon className="size-8 text-yellow-400 " />
-              <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
-                Cảm xúc hoạt động
-              </span>
+  return (
+    <div className="slider-container_profile">
+      {userId === params.id ? (
+        <div
+          className={`content_status ${
+            isDarkMode
+              ? "bg-[rgba(16,17,18,1)]"
+              : "bg-[#ffffff] border border-[#ddd]"
+          } m-auto text-center h-32`}
+        >
+          <div className="w-full flex items-center gap-4 ml-4 bottom_text mt-5">
+            <img
+              src={avatar ? avatar : avtart}
+              alt="lỗi"
+              className="image_status"
+            />
+            <Status
+              showModal={showModal}
+              setShowModal={setShowModal}
+              getPostAPI={getPostAPI}
+              data={data}
+              setData={setData}
+              fetchCountNotification={fetchCountNotification}
+              isDarkMode={isDarkMode}
+              usernameFriends={usernameFriends}
+            />
+          </div>
+          <div className={`live flex justify-between pt-12 ml-3`}>
+            <div className="w-full flex justify-between items-center -mt-10 cursor-pointer">
+              <div className="flex items-center justify-center gap-2">
+                <MdVideoCameraFront className="size-8 text-red-800" />
+                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
+                  Video Trực Tiếp
+                </span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <BsFillFileImageFill className="size-8 text-green-800" />
+                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
+                  Ảnh/Video
+                </span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <MdInsertEmoticon className="size-8 text-yellow-400" />
+                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
+                  Cảm xúc hoạt động
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div
+          className={`content_status ${
+            isDarkMode
+              ? "bg-[rgba(16,17,18,1)]"
+              : "bg-[#ffffff] border border-[#ddd]"
+          } m-auto text-center h-32`}
+        >
+          <div className="w-full flex items-center gap-4 ml-4 bottom_text mt-5">
+            <img
+              src={avatar ? avatar : avtart}
+              alt="lỗi"
+              className="image_status"
+            />
+            <Status
+              showModal={showModal}
+              setShowModal={setShowModal}
+              getPostAPI={getPostAPI}
+              data={data}
+              setData={setData}
+              fetchCountNotification={fetchCountNotification}
+              isDarkMode={isDarkMode}
+              params={params}
+            />
+          </div>
+          <div className={`live flex justify-between pt-12 ml-3`}>
+            <div className="w-full flex justify-between items-center -mt-10 cursor-pointer">
+              <div className="flex items-center justify-center gap-2">
+                <MdVideoCameraFront className="size-8 text-red-800" />
+                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
+                  Video Trực Tiếp
+                </span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <BsFillFileImageFill className="size-8 text-green-800" />
+                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
+                  Ảnh/Video
+                </span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <MdInsertEmoticon className="size-8 text-yellow-400" />
+                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
+                  Cảm xúc hoạt động
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {data &&
-        data.length > 0 &&
+      {data && data.length > 0 ? (
         data.map((item, index) => {
           const userReaction = item.likes.find(
             (like) => like.userId && like.userId._id === userId
@@ -689,13 +705,10 @@ const Main = () => {
                 isDarkMode
                   ? "bg-[rgba(16,17,18,1)]"
                   : "bg-[#ffffff] border border-[#ddd]"
-              } content_status m-auto mt-8 min-h-max p-5`}
+              } content_status m-auto mt-5 min-h-max p-5`}
               key={item._id}
             >
-              <div
-                className="post flex items-center justify-between m-4 -mt-5 pt-2"
-                key={item._id}
-              >
+              <div className="post flex items-center justify-between m-4 -mt-5 pt-2">
                 <div className="flex gap-5 items-center">
                   <img
                     className="post_image w-10 h-10 object-cover m-0 border"
@@ -749,18 +762,17 @@ const Main = () => {
                 )}
               </div>
 
-              <div className="w-full h-8 like relative top-3  flex items-center">
+              <div className="w-full h-8 like relative top-3 flex items-center">
                 <div className="flex items-center mt-3">
-                  <span className="flex items-center ">
-                    {" "}
+                  <span className="flex items-center">
                     {renderUsersByReaction(item.likes)}
                   </span>
                   <div className="-mt-4 ml-2">
-                    {likesMap[item._id] ? `${likesMap[item._id]} ` : null}
+                    {likesMap[item._id] ? `${likesMap[item._id]} ` : "0"}
                   </div>
                 </div>
                 <div className="w-full flex justify-end items-center -mt-2">
-                  <div className="pr-10 flex items-center g-2  cursor-pointer comment_par">
+                  <div className="pr-10 flex items-center g-2 cursor-pointer comment_par">
                     {countComment && countComment.length > 0 && (
                       <span>
                         {
@@ -770,11 +782,11 @@ const Main = () => {
                         }
                       </span>
                     )}
-                    <FaRegComment size={20} color="gray" className="ml-1" />{" "}
+                    <FaRegComment size={20} color="gray" className="ml-1" />
                     {Array.isArray(countComment) &&
                       countComment.length > 0 &&
                       countComment
-                        .filter((itemId) => itemId.postId === item._id) // Only filter out matching post IDs
+                        .filter((itemId) => itemId.postId === item._id)
                         .map((itemId, index) => (
                           <div
                             className="mt-20 absolute text-nowrap comment_hover text-white"
@@ -790,13 +802,12 @@ const Main = () => {
                         ))}
                   </div>
                   <span>
-                    {" "}
                     <PiShareFatThin size={20} color="gray" />
                   </span>
                 </div>
               </div>
-              <div className="w-4/5 m-auto pr-2 flex justify-between items-center  mt-5 cursor-pointer">
-                <div className=" hover_icon ">
+              <div className="w-4/5 m-auto pr-2 flex justify-between items-center mt-5 cursor-pointer">
+                <div className="hover_icon">
                   <span
                     className="flex gap-1 items-center cursor-pointer"
                     onClick={() =>
@@ -812,7 +823,7 @@ const Main = () => {
                       </>
                     )}
                   </span>
-                  <div className="laugh-icon flex items-center gap-5 absolute ">
+                  <div className="laugh-icon flex items-center gap-5 absolute">
                     <span className="icon-animation">
                       <AiOutlineLike
                         size={30}
@@ -830,7 +841,6 @@ const Main = () => {
                     >
                       <FaHeart size={30} color="red" />
                     </span>
-
                     <span className="icon-animation">
                       <FaRegFaceGrinHearts
                         size={30}
@@ -882,9 +892,7 @@ const Main = () => {
                     </span>
                   </div>
                 </div>
-
                 <span className="flex gap-1 items-center cursor-pointer">
-                  {" "}
                   <FaRegComment />
                   Bình Luận
                 </span>
@@ -913,7 +921,7 @@ const Main = () => {
                               alt="avart lỗi"
                             />
                             <div className="block ml-1">
-                              <div className=" comment_bg mt-4">
+                              <div className="comment_bg mt-4">
                                 <span>{comment.authorName}</span>
                                 <p>{comment.content}</p>
                                 {comment.image && (
@@ -944,7 +952,7 @@ const Main = () => {
                                       <>Thích</>
                                     )}
                                   </span>
-                                  <div className="laugh-icon flex items-center gap-5 absolute ">
+                                  <div className="laugh-icon flex items-center gap-5 absolute">
                                     <span className="icon-animation">
                                       <AiOutlineLike
                                         size={30}
@@ -970,7 +978,6 @@ const Main = () => {
                                     >
                                       <FaHeart size={30} color="red" />
                                     </span>
-
                                     <span className="icon-animation">
                                       <FaRegFaceGrinHearts
                                         size={30}
@@ -1055,12 +1062,12 @@ const Main = () => {
                                   {renderUsersByReaction(comment.likes)}
                                   {likesMapComment[comment._id]
                                     ? `${likesMapComment[comment._id]} `
-                                    : null}
+                                    : "0"}
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className=" block reply_item">
+                          <div className="block reply_item">
                             {comment.replies &&
                               comment.replies.length > 0 &&
                               comment.replies.map((replie) => {
@@ -1079,7 +1086,7 @@ const Main = () => {
                                       alt="avart lỗi"
                                     />
                                     <div className="block ml-1">
-                                      <div className=" comment_bg mt-4">
+                                      <div className="comment_bg mt-4">
                                         <span>{replie.authorName}</span>
                                         <p>{replie.content}</p>
                                         {replie.image && (
@@ -1114,7 +1121,7 @@ const Main = () => {
                                               <>Thích</>
                                             )}
                                           </span>
-                                          <div className="laugh-icon flex items-center gap-5 absolute ">
+                                          <div className="laugh-icon flex items-center gap-5 absolute">
                                             <span className="icon-animation">
                                               <AiOutlineLike
                                                 size={30}
@@ -1144,7 +1151,6 @@ const Main = () => {
                                             >
                                               <FaHeart size={30} color="red" />
                                             </span>
-
                                             <span className="icon-animation">
                                               <FaRegFaceGrinHearts
                                                 size={30}
@@ -1239,7 +1245,7 @@ const Main = () => {
                                           {renderUsersByReaction(replie.likes)}
                                           {likeMapReply[replie._id]
                                             ? `${likeMapReply[replie._id]} `
-                                            : null}
+                                            : "0"}
                                         </div>
                                       </div>
                                     </div>
@@ -1286,7 +1292,7 @@ const Main = () => {
                                   type="file"
                                   ref={fileInputRef}
                                   onChange={handleFileChange}
-                                  style={{ display: "none" }} // Ẩn input
+                                  style={{ display: "none" }}
                                 />
                                 <button
                                   type="button"
@@ -1309,7 +1315,6 @@ const Main = () => {
                                   </svg>
                                   <span className="sr-only">Add emoji</span>
                                 </button>
-
                                 <textarea
                                   ref={textareaRef}
                                   rows={1}
@@ -1322,7 +1327,6 @@ const Main = () => {
                                     isReplyMode ? "" : "Câu phản hồi của"
                                   }
                                 />
-
                                 <button
                                   onClick={() => handleReplieCmt(showPostID)}
                                   className="inline-flex justify-center p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
@@ -1392,7 +1396,7 @@ const Main = () => {
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileChange}
-                    style={{ display: "none" }} // Ẩn input
+                    style={{ display: "none" }}
                   />
                   <button
                     type="button"
@@ -1415,10 +1419,7 @@ const Main = () => {
                     </svg>
                     <span className="sr-only">Add emoji</span>
                   </button>
-
                   <div className="flex-1 flex items-center">
-                    {" "}
-                    {/* Thêm div wrapper */}
                     <textarea
                       id={`chat-${index}`}
                       key={index + 1}
@@ -1461,7 +1462,10 @@ const Main = () => {
               </div>
             </div>
           );
-        })}
+        })
+      ) : (
+        <p className="text-center mt-5">Không có bài viết nào để hiển thị.</p>
+      )}
     </div>
   );
 };
