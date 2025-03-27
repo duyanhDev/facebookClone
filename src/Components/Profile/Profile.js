@@ -16,6 +16,7 @@ const Profile = () => {
   const [TextIntroduce, setTextIntroduce] = useState("");
 
   const [open, setOpen] = useState(false);
+  const [open10, setOpen10] = useState(false);
   const [loading, setLoading] = useState(true);
   const showLoading = () => {
     setOpen(true);
@@ -323,6 +324,7 @@ const Profile = () => {
                             src={item}
                             className="w-40 h-32 rounded-md"
                             alt={`img-${index}`}
+                            onClick={() => Navigate(`/photo/${post._id}`)}
                           />
                         ))
                       );
@@ -371,6 +373,8 @@ const Profile = () => {
           loading={loading}
           profile={profile}
           listProfileUser={listProfileUser}
+          open10={open10}
+          setOpen10={setOpen10}
         />
       </div>
     </div>

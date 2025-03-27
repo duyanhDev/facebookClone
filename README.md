@@ -68,3 +68,53 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+### 2. Chức năng chính
+
+#### Bài viết
+
+![Bài viết](./images/baipost.png)
+
+#### CRUD User
+
+![CRUD User](./images//crudUser.png)
+
+#### Giao diện chat
+
+![Giao diện chat](./images//giaodienchat.png)
+
+#### Đăng nhập
+
+![Đăng nhập](./images//login.png)
+
+#### Ảnh bài viết
+
+![Ảnh bài viết](./images/photobaiviet.png)
+
+#### Bài viết chi tiết
+
+![Bài viết chi tiết](./images/post.png)
+
+#### Quên mật khẩu
+
+![Quên mật khẩu](./images/quenmatkhau.png)
+
+#### Tìm kiếm
+
+![Tìm kiếm](./images/timkiem.png)
+
+#### Trang cá nhân
+
+![Trang cá nhân](./images/trangcanhan.png)
+
+#### Cập nhật người dùng
+
+![Cập nhật người dùng](./images/updateUser.png)
+
+#### Xem người dùng
+
+![Xem người dùng](./images/viewUser.png)
+
+#### Đăng ký
+
+![Đăng ký](./images/dangky.png)

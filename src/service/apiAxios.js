@@ -153,6 +153,12 @@ const getPostNewUsers = async () => {
 const getPostOneUsers = async (authorId) => {
   return await axios.get(`http://localhost:8001/v1/api/post-user/${authorId}`);
 };
+
+// lay bai viet theo id
+
+const getOnePostId = async (id) => {
+  return await axios.get(`http://localhost:8001/v1/api/post-id/${id}`);
+};
 // like
 const fetchLikesFromApi = async (postId) => {
   try {
@@ -420,7 +426,8 @@ const HanldeAPICreateEductionkUser = async (
   degree,
   fieldOfStudy,
   startDate,
-  endDate
+  endDate,
+  current
 ) => {
   return await axios.post(`/v1/api/create-education/${id}`, {
     school,
@@ -428,6 +435,7 @@ const HanldeAPICreateEductionkUser = async (
     fieldOfStudy,
     startDate,
     endDate,
+    current,
   });
 };
 
@@ -481,4 +489,5 @@ export {
   HanldeAPICreateEductionkUser,
   HanldeAPIDeleteWord,
   HanldeAPIDeleteEducation,
+  getOnePostId,
 };

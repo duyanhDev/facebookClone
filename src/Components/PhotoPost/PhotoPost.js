@@ -1,4 +1,4 @@
-import "./Main.scss";
+import "./Photo.scss";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import avtart from "./../../asset/images/2.png";
 import "slick-carousel/slick/slick.css";
@@ -16,6 +16,7 @@ import {
   postReplyComment,
   postLikeCommentReply,
   GetAllStoriesAPIFB,
+  getOnePostId,
 } from "../../service/apiAxios";
 import { IoEllipsisHorizontal, IoEarth } from "react-icons/io5";
 import { AiOutlineLike } from "react-icons/ai";
@@ -34,10 +35,10 @@ import { fetchLikesCountComment } from "../../reduxToolKit/comment/commentSlice"
 import "react-medium-image-zoom/dist/styles.css";
 import { toast } from "react-toastify";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import sensitiveWordsData from "./../../sensitive-words.json";
+import sensitiveWordsData from "../../sensitive-words.json";
 import { fetchLikesCountReply } from "../../reduxToolKit/likeReply/likesReplySlice";
 
-const Main = ({ profile }) => {
+const PhotoPost = ({}) => {
   const userId = localStorage.getItem("id");
   const username = localStorage.getItem("name");
   const sliderRef = useRef(null);
@@ -88,29 +89,9 @@ const Main = ({ profile }) => {
     }
   };
 
-  let settings = {
-    dots: false,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 4,
-  };
-
-  const handlePrevClick = () => {
-    if (sliderRef.current) {
-      sliderRef.current.slickPrev();
-    }
-  };
-
-  const handleNextClick = () => {
-    if (sliderRef.current) {
-      sliderRef.current.slickNext();
-    }
-  };
-
   const getPostAPI = useCallback(async () => {
     try {
-      let res = await getPostOneUsers(params.id);
+      let res = await getOnePostId(params.id);
       if (res && res.data && res.data.data && res.status === 200) {
         setData(res.data.data);
       } else {
@@ -562,119 +543,8 @@ const Main = ({ profile }) => {
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const updatedSettings = {
-    ...settings,
-    beforeChange: (current, next) => {
-      setCurrentSlide(next);
-      if (settings.beforeChange) {
-        settings.beforeChange(current, next);
-      }
-    },
-  };
-
-  const usernameFriends = profile?.profile?.name;
-  localStorage.setItem("name_friend", usernameFriends);
-
   return (
-    <div className="slider-container_profile">
-      {userId === params.id ? (
-        <div
-          className={`content_status ${
-            isDarkMode
-              ? "bg-[rgba(16,17,18,1)]"
-              : "bg-[#ffffff] border border-[#ddd]"
-          } m-auto text-center h-32`}
-        >
-          <div className="w-full flex items-center gap-4 ml-4 bottom_text mt-5">
-            <img
-              src={avatar ? avatar : avtart}
-              alt="lỗi"
-              className="image_status"
-            />
-            <Status
-              showModal={showModal}
-              setShowModal={setShowModal}
-              getPostAPI={getPostAPI}
-              data={data}
-              setData={setData}
-              fetchCountNotification={fetchCountNotification}
-              isDarkMode={isDarkMode}
-              usernameFriends={usernameFriends}
-            />
-          </div>
-          <div className={`live flex justify-between pt-12 ml-3`}>
-            <div className="w-full flex justify-between items-center -mt-10 cursor-pointer">
-              <div className="flex items-center justify-center gap-2">
-                <MdVideoCameraFront className="size-8 text-red-800" />
-                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
-                  Video Trực Tiếp
-                </span>
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <BsFillFileImageFill className="size-8 text-green-800" />
-                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
-                  Ảnh/Video
-                </span>
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <MdInsertEmoticon className="size-8 text-yellow-400" />
-                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
-                  Cảm xúc hoạt động
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div
-          className={`content_status ${
-            isDarkMode
-              ? "bg-[rgba(16,17,18,1)]"
-              : "bg-[#ffffff] border border-[#ddd]"
-          } m-auto text-center h-32`}
-        >
-          <div className="w-full flex items-center gap-4 ml-4 bottom_text mt-5">
-            <img
-              src={avatar ? avatar : avtart}
-              alt="lỗi"
-              className="image_status"
-            />
-            <Status
-              showModal={showModal}
-              setShowModal={setShowModal}
-              getPostAPI={getPostAPI}
-              data={data}
-              setData={setData}
-              fetchCountNotification={fetchCountNotification}
-              isDarkMode={isDarkMode}
-              params={params}
-            />
-          </div>
-          <div className={`live flex justify-between pt-12 ml-3`}>
-            <div className="w-full flex justify-between items-center -mt-10 cursor-pointer">
-              <div className="flex items-center justify-center gap-2">
-                <MdVideoCameraFront className="size-8 text-red-800" />
-                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
-                  Video Trực Tiếp
-                </span>
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <BsFillFileImageFill className="size-8 text-green-800" />
-                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
-                  Ảnh/Video
-                </span>
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <MdInsertEmoticon className="size-8 text-yellow-400" />
-                <span className={isDarkMode ? "text-[#fff]" : "text-[#333]"}>
-                  Cảm xúc hoạt động
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
+    <div className="slider-container_profile_1">
       {data && data.length > 0 ? (
         data.map((item, index) => {
           const userReaction = item.likes.find(
@@ -712,7 +582,7 @@ const Main = ({ profile }) => {
               <div className="-mt-5 ml-3">
                 <span className="p-3 block justify-text">{item.content}</span>
               </div>
-              <div className="grid gap-2 w-full">
+              <div className="grid  gap-2 w-full">
                 {item.image && (
                   <div
                     className={`grid ${
@@ -724,7 +594,6 @@ const Main = ({ profile }) => {
                         key={index}
                         src={url}
                         alt={`Ảnh ${index + 1}`}
-                        onClick={() => navigate(`/photo/${item._id}`)}
                         className={`w-full h-full object-cover rounded-lg ${
                           item.image.length === 1 ? "col-span-2" : ""
                         }`}
@@ -1453,4 +1322,4 @@ const Main = ({ profile }) => {
   );
 };
 
-export default Main;
+export default PhotoPost;

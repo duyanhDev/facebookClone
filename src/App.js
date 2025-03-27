@@ -206,7 +206,7 @@ function App() {
   }, [searchTerm, AllFriends]);
 
   const isProfilePage = matchPath("/profile/:id", location.pathname);
-
+  const isPhotoPage = matchPath("/photo/:id", location.pathname);
   return (
     <div className="App">
       <div
@@ -231,35 +231,40 @@ function App() {
       </div>
 
       <div className="content flex justify-between">
-        <div className="left">
-          {!isProfilePage && (
-            <div className="left">
+        <div className={` left`}>
+          <div className="left">
+            {!isProfilePage && (
               <SliderLeft
                 username={username}
                 isDarkMode={isDarkMode}
                 friend={friend}
                 currentUserId={currentUserId}
+                isProfilePage={isProfilePage}
+                isPhotoPage={isPhotoPage}
               />
-            </div>
-          )}
+            )}
+          </div>
         </div>
+
         <div className="main w-auto m-auto flex justify-center items-center min-h-screen">
           <Outlet
             context={{ isDarkMode, fetchCountNotification, getNotifications }}
           />
         </div>
-        <div className="right mt-4">
-          {!isProfilePage && (
-            <SiderRight
-              add={add}
-              friend={friend}
-              fetchSeenUserData={fetchSeenUserData}
-              status={status}
-              idFriend={idFriend}
-              fetchAddUserData={fetchAddUserData}
-              isDarkMode={isDarkMode}
-            />
-          )}
+        <div className={` right mt-4`}>
+          <div className="right mt-4">
+            {!isProfilePage && (
+              <SiderRight
+                add={add}
+                friend={friend}
+                fetchSeenUserData={fetchSeenUserData}
+                status={status}
+                idFriend={idFriend}
+                fetchAddUserData={fetchAddUserData}
+                isDarkMode={isDarkMode}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import TextArea from "antd/es/input/TextArea";
 import {
   APIUpdateWorkByConditions,
+  HanldeAPICreateEductionkUser,
   HanldeAPICreateWorkUser,
   putProfileIntroduce,
 } from "../../service/apiAxios";
@@ -33,7 +34,7 @@ const SettingProfile = ({
   const [endDate, setEndDate] = useState(dayjs().format("DD-MM-YYYY"));
   const [startDate1, setStartDate1] = useState(dayjs().format("DD-MM-YYYY"));
   const [endDate1, setEndDate1] = useState(dayjs().format("DD-MM-YYYY"));
-  const [current, setCurrent] = useState("");
+  const [current, setCurrent] = useState(false);
   const [educationIndex, seteducationIndex] = useState("");
 
   const [position, setposition] = useState("");
@@ -42,6 +43,8 @@ const SettingProfile = ({
 
   const [isWork, setIsWork] = useState(false);
   const [isCreateWork, setIsCreateWork] = useState(false);
+
+  const [open10, setOpen10] = useState(false);
   const dateFormatList = ["DD/MM/YYYY"];
 
   const [profileUser, SetProfileUsers] = useState({
@@ -173,6 +176,26 @@ const SettingProfile = ({
     }
   };
 
+  const HandleCreateEducation = async () => {
+    try {
+      // Gửi API với dữ liệu đã cập nhật
+      let res = await HanldeAPICreateEductionkUser(
+        id,
+        school,
+        degree,
+        fieldOfStudy,
+        startDate1,
+        endDate1,
+        current
+      );
+
+      if (res && res.status === 200) {
+        setOpen10(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div>
       <Modal
@@ -307,7 +330,7 @@ const SettingProfile = ({
               <DatePicker
                 defaultValue={startDate ? dayjs(startDate, "DD-MM-YYYY") : null}
                 format="DD-MM-YYYY"
-                onChange={onChange}
+                onChange={onChangeEndDate}
                 className="w-full"
               />
             </div>
@@ -339,9 +362,86 @@ const SettingProfile = ({
                 </div>
               );
             })}
-          <span className="flex items-center gap-2 cursor-pointer mt-2">
+          <span
+            className="flex items-center gap-2 cursor-pointer mt-2"
+            onClick={() => setOpen10(true)}
+          >
             <CiCirclePlus className="text-xl" /> Thêm trường học
           </span>
+
+          <Modal
+            title={<p className="text-center">Thêm trường học</p>}
+            centered
+            loading={loading}
+            open={open10}
+            onOk={() => setOpen10(false)}
+            onCancel={() => setOpen10(false)}
+            footer={
+              <div className="mt-4">
+                <Button key="cancel" onClick={() => setIsWork(false)}>
+                  Hủy
+                </Button>
+                ,
+                <Button
+                  key="ok"
+                  type="primary"
+                  loading={loading}
+                  onClick={() => HandleCreateEducation()}
+                >
+                  Lưu
+                </Button>
+                ,
+              </div>
+            }
+          >
+            <label>Tên trường học:</label>
+            <TextArea
+              showCount
+              maxLength={100}
+              onChange={(e) => setSchool(e.target.value)}
+              placeholder=""
+              value={school || ""}
+            />
+            <label className="mt-4">Bằng cấp:</label>
+            <TextArea
+              showCount
+              maxLength={100}
+              onChange={(e) => setDegrees(e.target.value)}
+              placeholder=""
+              value={degree || ""}
+              className=""
+            />
+
+            <label className="mt-4">Ngành học:</label>
+            <TextArea
+              showCount
+              maxLength={100}
+              onChange={(e) => setFieldOfStudy(e.target.value)}
+              placeholder=""
+              value={fieldOfStudy || ""}
+              className=""
+            />
+            <label>Ngày bắt đầu</label>
+            <div>
+              <DatePicker
+                defaultValue={
+                  startDate1 ? dayjs(startDate1, "DD-MM-YYYY") : null
+                }
+                format="DD-MM-YYYY"
+                onChange={onChange}
+                className="w-full"
+              />
+            </div>
+            <label>Ngày kết thúc</label>
+            <div>
+              <DatePicker
+                defaultValue={endDate1 ? dayjs(endDate1, "DD-MM-YYYY") : null}
+                format="DD-MM-YYYY"
+                onChange={onChangeEndDate}
+                className="w-full"
+              />
+            </div>
+          </Modal>
         </div>
 
         <div className="mt-2">
