@@ -13,7 +13,9 @@ const SchemaMessage = new Schema(
       ref: "Users", // Ensure this matches the model name
       required: true,
     },
+
     content: { type: String, required: true },
+    image: [{ type: String }],
     seen: { type: Boolean, default: false },
   },
   { timestamps: true }

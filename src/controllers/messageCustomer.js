@@ -6,12 +6,40 @@ const {
   GetseenAllMess,
 } = require("./../services/messCRUD");
 
+const { uploadFileToCloudinary } = require("./../services/Cloudinary");
+
 const postMessages = async (req, res) => {
   let { senderId, receiverId, content, seen } = req.body;
   console.log(senderId, receiverId, content, seen);
 
+  let imageUrls = [];
+
+  if (req.files && req.files.image) {
+    try {
+      const files = Array.isArray(req.files.image)
+        ? req.files.image
+        : [req.files.image]; // Đảm bảo files là một mảng
+
+      // Upload từng ảnh và lưu URL
+      for (const file of files) {
+        const resultImage = await uploadFileToCloudinary(file); // Upload ảnh
+        imageUrls.push(resultImage.secure_url); // Lưu URL vào mảng
+      }
+    } catch (uploadError) {
+      console.error("Error uploading images:", uploadError.message);
+      return res
+        .status(500)
+        .json({ success: false, message: "Error uploading images" });
+    }
+  }
   try {
-    let result = await postMessAPi(senderId, receiverId, content, seen);
+    let result = await postMessAPi(
+      senderId,
+      receiverId,
+      content,
+      imageUrls,
+      seen
+    );
     console.log("Kết quả:", result);
 
     return res

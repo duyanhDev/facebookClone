@@ -21,6 +21,7 @@ const {
   createEducationAPI,
   DeleteWorkId,
   DeleteEducationkId,
+  UpdateEducation,
 } = require("./../controllers/userCustommer");
 const {
   postMessages,
@@ -42,6 +43,7 @@ const {
   postLikeUser,
   getLikesForPost,
   getPostIdUsers,
+  getPostAuthorId,
 } = require("./../controllers/Post");
 
 const {
@@ -77,6 +79,7 @@ routerAPI.post("/create-word/:id", APICreateWorkUser);
 routerAPI.post("/create-education/:id", createEducationAPI);
 routerAPI.put("/delete-work/:id", DeleteWorkId);
 routerAPI.put("/delete-education/:id", DeleteEducationkId);
+routerAPI.post("/update-education", UpdateEducation);
 // tính năng thêm bạn bè
 routerAPI.post("/addfriend", postAddFriends);
 routerAPI.put("/addfriend/:userId/:friendId", putAddFriends);
@@ -172,6 +175,7 @@ routerAPI.get("/like/:postIds", getLikesForPost);
 routerAPI.post("/post", createNewPostUser);
 routerAPI.get("/post", getNewPostUsers);
 routerAPI.get("/post-user/:authorId", getPostIdUsers);
+routerAPI.get("/post-id/:id", getPostAuthorId);
 
 // comment
 routerAPI.get("/comment", getCommentsAPI);

@@ -50,7 +50,9 @@ const getMessagesBetweenUsers = async (senderId, receiverId) => {
     return null;
   }
 };
-const postMessAPi = async (senderId, receiverId, content) => {
+const postMessAPi = async (senderId, receiverId, content, imageUrls) => {
+  console.log("ảnh", imageUrls);
+
   try {
     // Nếu người gửi là chính họ thì seen: true, người nhận thì seen: false
     const seen = senderId === receiverId ? true : false;
@@ -60,6 +62,7 @@ const postMessAPi = async (senderId, receiverId, content) => {
       senderId,
       receiverId,
       content,
+      image: imageUrls,
       seen,
       createdAt: new Date(),
       updatedAt: new Date(),

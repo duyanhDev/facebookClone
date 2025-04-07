@@ -18,7 +18,7 @@ const Users = require("../model/users");
 
 const mongoose = require("mongoose");
 const { status } = require("nprogress");
-
+const moment = require("moment");
 // read user
 
 const getReadUserFB = async (req, res) => {
@@ -539,7 +539,14 @@ const APICreateWorkUser = async (req, res) => {
 const createEducationAPI = async (req, res) => {
   try {
     let { id } = req.params;
-    let { school, degree, fieldOfStudy, startDate, endDate } = req.body;
+
+    // Chuyển đổi sang đúng định dạng ISO 8601
+
+    let { school, degree, fieldOfStudy, startDate, endDate, current } =
+      req.body;
+
+    const startDateString = moment(startDate, "DD-MM-YYYY").toDate();
+    const endDateString = moment(endDate, "DD-MM-YYYY").toDate();
 
     const user = await Users.findById(id);
     if (!user) {
@@ -554,10 +561,11 @@ const createEducationAPI = async (req, res) => {
       school,
       degree,
       fieldOfStudy,
-      startDate,
-      endDate,
-      current: false,
+      startDateString,
+      endDateString,
+      current,
     };
+
     user.profile.education.push(newEducation);
 
     await user.save();
@@ -569,6 +577,47 @@ const createEducationAPI = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Lỗi server", error: error.message });
+  }
+};
+
+const UpdateEducation = async (req, res) => {
+  try {
+    const {
+      userId,
+      idSchool,
+      school,
+      degree,
+      fieldOfStudy,
+      startDate,
+      endDate,
+    } = req.body;
+
+    console.log(startDate, endDate);
+
+    const startDateString = moment(startDate, "DD-MM-YYYY").toDate();
+    const endDateString = moment(endDate, "DD-MM-YYYY").toDate();
+    const user = await Users.findOneAndUpdate(
+      { _id: userId, "profile.education._id": idSchool }, // Điều kiện tìm kiếm
+      {
+        $set: {
+          "profile.education.$.school": school,
+          "profile.education.$.degree": degree,
+          "profile.education.$.fieldOfStudy": fieldOfStudy,
+          "profile.education.$.startDate": startDateString,
+          "profile.education.$.endDate": endDateString,
+        },
+      },
+      { new: true } // Trả về dữ liệu mới sau khi cập nhật
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User or work entry not found" });
+    }
+
+    res.json({ message: "Update successful", status: 200, user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -633,4 +682,5 @@ module.exports = {
   createEducationAPI,
   DeleteWorkId,
   DeleteEducationkId,
+  UpdateEducation,
 };
