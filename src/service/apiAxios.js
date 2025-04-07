@@ -49,14 +49,28 @@ const getAllMessAPI = async (receiverId) => {
   );
 };
 // gửi tin nhắn
-const postMessages = async (senderId, receiverId, content) => {
+const postMessages = async (senderId, receiverId, content, image) => {
   const data = new FormData();
   data.append("senderId", senderId);
   data.append("receiverId", receiverId);
   data.append("content", content);
   data.append("seen", false);
 
-  return await axios.post("http://localhost:8001/v1/api/message", data);
+  // Kiểm tra nếu có hình ảnh được đính kèm, thêm vào FormData
+  if (image) {
+    data.append("image", image);
+  }
+
+  try {
+    const response = await axios.post(
+      "http://localhost:8001/v1/api/message",
+      data
+    );
+    return response.data; // Trả về dữ liệu từ response nếu thành công
+  } catch (error) {
+    console.error("Error sending message:", error);
+    throw error; // Ném lỗi nếu có sự cố trong quá trình gửi tin nhắn
+  }
 };
 
 const getSeenUser = async (receiverId) => {
@@ -450,6 +464,26 @@ const HanldeAPIDeleteEducation = async (id, educationId) => {
     educationId,
   });
 };
+
+const UpdateEducationAPI = async (
+  userId,
+  idSchool,
+  school,
+  degree,
+  fieldOfStudy,
+  startDate,
+  endDate
+) => {
+  return await axios.post("/v1/api/update-education", {
+    userId,
+    idSchool,
+    school,
+    degree,
+    fieldOfStudy,
+    startDate,
+    endDate,
+  });
+};
 export {
   getUser,
   getAddUser,
@@ -490,4 +524,5 @@ export {
   HanldeAPIDeleteWord,
   HanldeAPIDeleteEducation,
   getOnePostId,
+  UpdateEducationAPI,
 };

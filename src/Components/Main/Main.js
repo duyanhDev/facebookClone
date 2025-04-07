@@ -633,7 +633,7 @@ const Main = () => {
 
   return (
     <div className="slider-container">
-      <Slider
+      {/* <Slider
         {...settings}
         ref={sliderRef}
         className="w_slider flex gap-1 cursor-pointer"
@@ -701,7 +701,7 @@ const Main = () => {
         >
           &gt;
         </button>
-      )}
+      )} */}
       <div
         className={`content_status ${
           isDarkMode

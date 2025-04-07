@@ -33,6 +33,7 @@ function App() {
   const [friendsToShow, setFriendsToShow] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [AllFriends, SetAllFriends] = useState([]);
+  const [showLeftRight, setShowLeftRight] = useState(true); // State to control showing left and right sections
 
   // Socket.io event handlers
   useEffect(() => {
@@ -205,8 +206,19 @@ function App() {
     return () => clearTimeout(timer);
   }, [searchTerm, AllFriends]);
 
+  // Determine if the user is on profile or friends page
   const isProfilePage = matchPath("/profile/:id", location.pathname);
-  const isPhotoPage = matchPath("/photo/:id", location.pathname);
+  const isFriendsPage = matchPath("/friends", location.pathname);
+  const isFriendsRequest = matchPath("/friends/requests", location.pathname);
+  // Update showLeftRight state based on current page
+  useEffect(() => {
+    if (isProfilePage || isFriendsPage || isFriendsRequest) {
+      setShowLeftRight(false); // Hide left and right sections
+    } else {
+      setShowLeftRight(true); // Show left and right sections
+    }
+  }, [isProfilePage, isFriendsPage || isFriendsRequest]);
+
   return (
     <div className="App">
       <div
@@ -231,41 +243,38 @@ function App() {
       </div>
 
       <div className="content flex justify-between">
-        <div className={` left`}>
+        {showLeftRight && (
           <div className="left">
-            {!isProfilePage && (
-              <SliderLeft
-                username={username}
-                isDarkMode={isDarkMode}
-                friend={friend}
-                currentUserId={currentUserId}
-                isProfilePage={isProfilePage}
-                isPhotoPage={isPhotoPage}
-              />
-            )}
+            <SliderLeft
+              username={username}
+              isDarkMode={isDarkMode}
+              friend={friend}
+              currentUserId={currentUserId}
+              isProfilePage={isProfilePage}
+              isPhotoPage={false} // Assuming `isPhotoPage` is false here
+            />
           </div>
-        </div>
+        )}
 
         <div className="main w-auto m-auto flex justify-center items-center min-h-screen">
           <Outlet
             context={{ isDarkMode, fetchCountNotification, getNotifications }}
           />
         </div>
-        <div className={` right mt-4`}>
+
+        {showLeftRight && (
           <div className="right mt-4">
-            {!isProfilePage && (
-              <SiderRight
-                add={add}
-                friend={friend}
-                fetchSeenUserData={fetchSeenUserData}
-                status={status}
-                idFriend={idFriend}
-                fetchAddUserData={fetchAddUserData}
-                isDarkMode={isDarkMode}
-              />
-            )}
+            <SiderRight
+              add={add}
+              friend={friend}
+              fetchSeenUserData={fetchSeenUserData}
+              status={status}
+              idFriend={idFriend}
+              fetchAddUserData={fetchAddUserData}
+              isDarkMode={isDarkMode}
+            />
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

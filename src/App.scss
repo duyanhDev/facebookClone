@@ -49,10 +49,12 @@ body {
     .left {
       width: 360px;
       height: 100vh;
+      margin-top: -5px;
     }
     .right {
       width: 360px;
-      height: 100vh;
+      min-height: 100vh;
+      margin-top: -5px;
     }
 
     .content {
@@ -67,18 +69,17 @@ body {
   }
 
   @media (max-width: 800px) {
+    .App {
+      overflow: hidden;
+      .Header-content {
+        width: 50%;
+      }
+    }
     .left {
       display: none;
     }
     .right {
-    }
-  }
-  @media only screen and (min-width: 801px) and (max-width: 1024px) {
-    .left {
       display: none;
-    }
-    .right {
-      // display: none;
     }
   }
 }

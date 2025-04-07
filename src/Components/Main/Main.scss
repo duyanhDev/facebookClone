@@ -5,7 +5,7 @@
   margin: 0 auto; /* Để căn giữa container */
   top: 0;
   .w_slider {
-    width: 82% !important; /* Đảm bảo slider chiếm hết chiều rộng của container */
+    width: 82%; /* Đảm bảo slider chiếm hết chiều rộng của container */
     position: relative !important;
     right: -52px;
 
@@ -271,33 +271,6 @@
   //   }
   // }
 
-  @media (max-width: 575px) {
-    .slick-list {
-      position: relative;
-      right: -10%;
-    }
-    .content_status {
-      width: 70%;
-      //  max-width: none;
-      margin-right: -90px;
-    }
-  }
-  @media (min-width: 576px) and (max-width: 767px) {
-    .content_status {
-      margin-left: 70px;
-      max-width: none;
-    }
-  }
-  @media (min-width: 768px) and (max-width: 991px) {
-    .content_status {
-      width: 100% !important;
-      max-width: none;
-    }
-  }
-  .reaction-group {
-    margin-bottom: 10px;
-  }
-
   .reaction-container {
     position: relative;
     display: inline-block;
@@ -343,9 +316,8 @@
   word-wrap: break-word;
   color: #fff;
 }
-
-// @media (min-width: 1024px) {
-//   .image-container {
-//     grid-template-columns: repeat(3, 1fr); /* 3 cột khi màn hình >= 1024px */
-//   }
-// }
+@media (min-width: 300px) and (max-width: 915px) {
+  .slider-container {
+    width: 300px;
+  }
+}

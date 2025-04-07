@@ -153,7 +153,7 @@ const Header = ({
   }, []);
   return (
     <div className="Header flex w-full items-center">
-      <div className="w-80 flex items-center gap-5 -mt-2">
+      <div className="w-80  flex items-center gap-5 -mt-2">
         <div className="icon-fb">
           <img src={Logo} alt="duyanh" className="size-10 fb_logo mt-2 ml-5" />
         </div>

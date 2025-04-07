@@ -36,7 +36,7 @@ const SiderRight = ({
   const [check, setCheck] = useState(false);
 
   const handleClickChat = async (id) => {
-    setReceverid(id); // Still update the state for receiverId
+    setReceverid(id);
     setCheck(true);
     try {
       await pustSeenUser(id, currentUserId);
@@ -59,8 +59,7 @@ const SiderRight = ({
 
   const handleClickOutside = (event) => {
     if (modalRef.current && !modalRef.current.contains(event.target)) {
-      setActive(false); // Ẩn modal nếu click ra ngoài
-      // Ẩn modal thứ hai nếu đang hiển thị
+      setActive(false);
     }
   };
 
@@ -93,181 +92,111 @@ const SiderRight = ({
 
   return (
     <>
-      <div className="main-right">
-        <div className="mt-3 main_border">
-          <h1 className="size-7 font-bold whitespace-nowrap text-[#65676B]">
-            Được tài trợ
-          </h1>
-          <div className="marketing flex items-center gap-3">
-            <img className="w-44 h-32 image" src={avtar3} alt="lỗi ảnh" />
-            <div className="mr-5">
-              <h2>title</h2>
-            </div>
-          </div>
-          <div className="marketing flex items-center mt-4 gap-3">
-            <img className="w-44 h-32 image" src={avtar3} alt="lỗi ảnh" />
-            <div className="mr-5">
-              <h2>title</h2>
-            </div>
-          </div>
-        </div>
-        <div className="fanpage">
-          <div className="mt-2 flex justify-between items-center">
-            <h3 className="text-[#65686c] font-bold">
-              Trang và trang cá nhân của bạn
+      <div className="main-right w-80 h-screen fixed right-0 bg-white transition-colors duration-500 p-4 overflow-y-auto">
+        {/* Được tài trợ */}
+
+        {/* Lời mời kết bạn */}
+        <div className="add_friend mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">
+              Lời mời kết bạn
             </h3>
-            <span>
-              <IoEllipsisHorizontal
-                className="size-6"
-                onClick={() => handleCick()}
-              />
+            <span className="text-blue-500 cursor-pointer hover:underline">
+              Xem tất cả
             </span>
           </div>
-          <div className={active ? "model active" : "model"} ref={modalRef}>
-            <div
-              className="flex items-center gap-3 p-6 cursor-pointer"
-              onClick={() => handleHidenModel()}
-            >
-              <IoResizeOutline />
-              <span>
-                {model ? "Mở rộng bảng điều khiển" : "Thu gọn bảng điều khiển"}
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-white/30 backdrop-blur-md border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <img
+              className="w-12 h-12 object-cover rounded-full shadow-sm transform hover:scale-110 transition-all duration-300"
+              src={avart}
+              alt="ảnh kết bạn bị lỗi"
+            />
+            <div className="flex-1">
+              <span className="text-gray-800 font-medium truncate">
+                {firstName}
               </span>
-            </div>
-            <div className="flex tems-center gap-3 p-6 cursor-pointer fanpage_top  -mt-9">
-              <img className="" src={icon1} alt="icon lỗi" />
-              <h3
-                className={`font-normal ${
-                  isDarkMode ? "text-[#fff]" : "text-[#333]"
-                }`}
-              >
-                Duy Anh{" "}
-              </h3>
-            </div>
-          </div>
-          <div className={model ? "none active_model" : "none"}>
-            <div className="mt-1 flex items-center gap-2 fanpage_top">
-              <img className="" src={icon1} alt="icon lỗi" />
-              <h3
-                className={`font-bold ${
-                  isDarkMode ? "text-[#fff]" : "text-[#333]"
-                }`}
-              >
-                Duy Anh{" "}
-              </h3>
-            </div>
-            <div className="mt-4 ml-4 flex items-center gap-2">
-              <IoReloadCircleSharp className="size-5 text-[#65686c]" />
-              <span className={`${isDarkMode ? "text-[#fff]" : "text-[#333]"}`}>
-                Chuyển sang trang
-              </span>
-            </div>
-            <div className="mt-4 ml-4 flex items-center gap-2">
-              <TbSpeakerphone className="size-5 text-[#65686c]" />
-              <span className={`${isDarkMode ? "text-[#fff]" : "text-[#333]"}`}>
-                Tạo bài viết quảng bá
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="add_friend mt-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[#65686c] font-bold ">Lời mời kết bạn</h3>
-            <span className="cursor-pointer">Xem tất cả</span>
-          </div>
-          <div className="flex items-center gap-2 mt-2 cursor-pointer">
-            <div className="flex items-center">
-              <img
-                className="img_avtart "
-                src={avart}
-                alt="ảnh kết bạn bị lỗi "
-              />
-              <div className="pt-3 -mt-5 ml-5">
-                <span>{firstName}</span>
-                <div className="pt-1 flex items-center ">
-                  <img className="img_friends" src={lin} alt="lỗi" />
-                  <span
-                    className={`ml-2 ${
-                      isDarkMode ? "text-[#fff]" : "text-[#333]"
-                    }`}
-                  >
-                    2 bạn chung
-                  </span>
-                </div>
+              <div className="flex items-center mt-1">
+                <img className="w-5 h-5 rounded-full" src={lin} alt="lỗi" />
+                <span className="ml-2 text-gray-600 text-sm">2 bạn chung</span>
               </div>
             </div>
           </div>
-          <div className="btn_adds flex space-x-2 ml-20 ">
+          <div className="btn_adds flex space-x-3 mt-3">
             <button
               type="button"
-              className="sm:w-40 min-w-0 text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+              className="flex-1 text-white bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 focus:ring-4 focus:outline-none focus:ring-blue-200 font-medium rounded-lg text-sm px-4 py-2 transition-all duration-300 shadow-md hover:shadow-lg"
               onClick={() => HadlePutFriend()}
             >
               Xác Nhận
             </button>
             <button
               type="button"
-              className="sm:w-40 min-w-0 text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+              className="flex-1 text-gray-800 bg-gradient-to-r from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400 focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-4 py-2 transition-all duration-300 shadow-md hover:shadow-lg"
             >
               Xóa
             </button>
           </div>
         </div>
-        <div className="add_friend mt-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[#65686c] font-bold ">Sinh nhật</h3>
-            <span className="cursor-pointer">Xem tất cả</span>
+
+        {/* Sinh nhật */}
+        <div className="add_friend mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">
+              Sinh nhật
+            </h3>
+            <span className="text-blue-500 cursor-pointer hover:underline">
+              Xem tất cả
+            </span>
           </div>
-          <div className="flex items-center gap-2 mt-2 cursor-pointer">
-            <CiGift className="size-9 text-[#0866ff]" />
-            <h3 className={`${isDarkMode ? "text-[#fff]" : "text-[#333]"}`}>
-              Hôm nay là sinh của Duy Anh và 2 người khác.
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-white/30 backdrop-blur-md border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <CiGift className="size-8 text-blue-500 hover:rotate-12 transition-all duration-300" />
+            <h3 className="text-gray-800">
+              Hôm nay là sinh nhật của Duy Anh và 2 người khác.
             </h3>
           </div>
         </div>
 
-        <div className="add_friend mt-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[#65686c] font-bold ">Người liên hệ</h3>
-            <div className="flex items-center gap-4 mr-3">
-              <FaSearch />
-              <IoEllipsisHorizontal />
+        {/* Người liên hệ */}
+        <div className="add_friend">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500">
+              Người liên hệ
+            </h3>
+            <div className="flex items-center gap-4">
+              <FaSearch className="text-gray-600 cursor-pointer hover:text-blue-500 hover:scale-110 transition-all duration-300" />
+              <IoEllipsisHorizontal className="text-gray-600 cursor-pointer hover:text-blue-500 hover:rotate-90 transition-all duration-300" />
             </div>
           </div>
-
-          {friend &&
-            friend.length > 0 &&
-            friend.map((item) => {
-              return (
+          <div className="contacts-list max-h-80 overflow-y-auto space-y-2">
+            {friend && friend.length > 0 ? (
+              friend.map((item) => (
                 <div
-                  className="flex items-center gap-2 mt-2 cursor-pointer"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white/30 backdrop-blur-md border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
                   key={item._id}
+                  onClick={() => handleClickChat(item._id)}
                 >
-                  <div
-                    className="flex items-center gap-3"
-                    onClick={() => handleClickChat(item._id)}
-                  >
-                    <span className="span_green">
-                      {" "}
-                      <img
-                        className="best_friend"
-                        src={item.profile.avatar ? item.profile.avatar : avtart}
-                        alt="lỗi"
-                      />
-                    </span>
-                    <span
-                      className={`${
-                        isDarkMode ? "text-[#fff]" : "text-[#333]"
-                      }`}
-                    >
-                      {item.profile.name}
-                    </span>
-                  </div>
+                  <span className="relative">
+                    <img
+                      className="w-10 h-10 object-cover rounded-full shadow-sm transform hover:scale-110 transition-all duration-300"
+                      src={item.profile.avatar ? item.profile.avatar : avtart}
+                      alt="lỗi"
+                    />
+                    <span className="absolute bottom-0 right-0 w-5 h-5 bg-gradient-to-r from-green-400 to-green-600 rounded-full border-2 border-white shadow-sm"></span>
+                  </span>
+                  <span className="text-gray-800 font-medium truncate w-40">
+                    {item.profile.name}
+                  </span>
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              <p className="text-gray-600 text-sm p-3">
+                Không có người liên hệ.
+              </p>
+            )}
+          </div>
         </div>
       </div>
-      <div className="message ">
+      <div className="message">
         <Mess
           mess={mess}
           currentUserId={currentUserId}

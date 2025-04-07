@@ -1,110 +1,82 @@
 .main-right {
-  width: 360px;
-  height: calc(100vh - 50px);
-  position: fixed;
-  right: 0;
-  top: 50px;
-  overflow-y: auto; /* Hiển thị thanh cuộn khi cần */
-  -ms-overflow-style: none; /* Ẩn thanh cuộn trên IE và Edge */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #ffffff;
 
-  /* Giữ thanh cuộn với độ rộng nhất định nhưng ẩn bằng opacity */
   &::-webkit-scrollbar {
-    width: 5px; /* Giữ nguyên kích thước thanh cuộn nhỏ */
+    width: 6px;
   }
 
-  /* Ban đầu thanh cuộn sẽ trong suốt (ẩn) */
   &::-webkit-scrollbar-thumb {
-    background-color: transparent; /* Ban đầu ẩn thanh cuộn */
-    border-radius: 10px;
-  }
-
-  /* Khi hover vào .main-right, thanh cuộn sẽ hiện lên */
-  &:hover::-webkit-scrollbar-thumb {
-    background-color: #888; /* Hiển thị thanh cuộn khi hover */
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: #555; /* Thay đổi màu khi hover vào thanh cuộn */
+    background-color: #d1d5db;
+    border-radius: 3px;
   }
 
   &::-webkit-scrollbar-track {
-    background-color: #f1f1f1; /* Màu nền của track thanh cuộn */
-    border-radius: 10px;
+    background: #ffffff;
   }
-  .marketing {
-    .image {
-      border-radius: 5px;
-    }
+}
+
+.contacts-list {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #ffffff;
+
+  &::-webkit-scrollbar {
+    width: 6px;
   }
-  .model {
-    position: fixed;
-    z-index: 1;
-    width: 100%;
-    margin: auto;
-    background-color: aliceblue;
-    display: none;
-    border-radius: 5px;
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 3px;
   }
-  .none {
+
+  &::-webkit-scrollbar-track {
+    background: #ffffff;
+  }
+}
+
+.model {
+  display: none;
+  &.active {
     display: block;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
-  .active_model {
+}
+
+.none {
+  display: block;
+  &.active_model {
     display: none;
   }
-  .active {
-    display: block;
-  }
-  .fanpage {
-    border-bottom: 1px solid #65686c;
-    .fanpage_top {
-      img {
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-      }
-    }
-  }
-  .add_friend {
-    border-bottom: 1px solid #65686c;
-    .img_avtart {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 50%;
-      image-rendering: auto; /* Hoặc crisp-edges để nét hơn */
-    }
-    .img_friends {
-      width: 20px;
-      height: 20px;
-      object-fit: cover;
-      border-radius: 50%;
-      image-rendering: auto;
-    }
-  }
-  .span_green {
-    position: relative;
-    .best_friend {
-      width: 30px;
-      height: 30px;
-      object-fit: cover;
-      border-radius: 50%;
-      image-rendering: auto;
-    }
-    &::after {
-      content: "";
-      width: 8px;
-      height: 8px;
-      background-color: green;
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      border-radius: 50%;
-    }
-  }
-  @media (max-width: 800px) {
-    display: none;
-  }
-  @media only screen and (min-width: 801px) and (max-width: 1024px) {
-    display: none;
-  }
+}
+
+.img_avtart {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.img_friends {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.best_friend {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.span_green {
+  position: relative;
+  display: inline-block;
 }

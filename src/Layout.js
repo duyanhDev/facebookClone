@@ -14,6 +14,9 @@ import Profile from "./Components/Profile/Profile.js";
 import Stories from "./Components/stories/stories.js";
 import AdminUsers from "./Components/AdminUsers/AdminUsers.js";
 import PhotoPost from "./Components/PhotoPost/PhotoPost.js";
+import { FriendUser } from "./Components/FriendsUser/FriendsUser.js";
+import { FriendsList } from "./Components/FriendsList/FriendsList.js";
+import FriendRequests from "./Components/FriendRequests/FriendRequests.js";
 
 const Layout = () => {
   const { isAuthenticated, role } = useContext(AuthContext); // Combine useContext for both values
@@ -39,6 +42,10 @@ const Layout = () => {
         <Route path="watch" element={<SliderLeft />} />
         <Route path="profile/:id" element={<Profile />} />
         <Route path="photo/:id" element={<PhotoPost />} />
+        <Route path="friends" element={<FriendsList />}>
+          <Route index element={<FriendUser />} />
+          <Route path="requests" element={<FriendRequests />} />
+        </Route>
       </Route>
 
       <Route

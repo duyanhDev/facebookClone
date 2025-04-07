@@ -14,9 +14,9 @@ import avatar from "./../../asset/images/avatar.jpg";
 const Profile = () => {
   const [isIntroduce, setIsintroduce] = useState(false);
   const [TextIntroduce, setTextIntroduce] = useState("");
-
+  const idUser = localStorage.getItem("id");
   const [open, setOpen] = useState(false);
-  const [open10, setOpen10] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const showLoading = () => {
     setOpen(true);
@@ -33,6 +33,8 @@ const Profile = () => {
   const params = useParams();
 
   const [profile, setProfile] = useState([]);
+
+  console.log(profile._id);
 
   const listProfileUser = async () => {
     try {
@@ -164,17 +166,25 @@ const Profile = () => {
                     })}
                 </div>
               </div>
-
-              <div className="float-right flex-1 m-auto flex justify-end items-center gap-3">
-                <Button
-                  type="primary"
-                  className="font-bold"
-                  onClick={() => Navigate("/stories/create")}
-                >
-                  Thêm vào tin
-                </Button>
-                <Button className="font-bold">Chỉnh sửa trang cá nhân</Button>
-              </div>
+              {idUser === profile._id ? (
+                <div className="float-right flex-1 m-auto flex justify-end items-center gap-3">
+                  <Button
+                    type="primary"
+                    className="font-bold"
+                    onClick={() => Navigate("/stories/create")}
+                  >
+                    Thêm vào tin
+                  </Button>
+                  <Button className="font-bold">Chỉnh sửa trang cá nhân</Button>
+                </div>
+              ) : (
+                <div className="float-right flex-1 m-auto flex justify-end items-center gap-3">
+                  <Button type="primary" className="font-bold">
+                    BẠN BÈ
+                  </Button>
+                  <Button className="font-bold">NHẮN TIN</Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -182,7 +192,7 @@ const Profile = () => {
       <div className="flex justify-between m-auto main_stack gap-2">
         <div className="main_left_stack ">
           <div className="flex friend_follows bg-[#ffffff]">
-            <div className="p-4">
+            <div className="p-4 w-full">
               <h1 className="font-bold text-2xl">Giới thiệu</h1>
               <p className="pt-3  text-center">
                 {isIntroduce ? (
@@ -213,12 +223,14 @@ const Profile = () => {
                   </Button>
                 </div>
               ) : (
-                <Button
-                  className="w-full mt-2 font-medium bg-slate-300 mx-5"
-                  onClick={() => setIsintroduce((prve) => !prve)}
-                >
-                  Chỉnh sửa tiểu sử
-                </Button>
+                idUser === profile._id && (
+                  <Button
+                    className="w-full mt-2 font-medium bg-slate-300  ml-1"
+                    onClick={() => setIsintroduce((prve) => !prve)}
+                  >
+                    Chỉnh sửa tiểu sử
+                  </Button>
+                )
               )}
               {profile.profile &&
                 profile.profile.education.length > 0 &&
@@ -293,12 +305,14 @@ const Profile = () => {
                   Có <span className="font-bold">1.000.000 người theo dõi</span>
                 </span>
               </div>
-              <Button
-                className="w-full mt-2 font-medium bg-slate-300 text-center mx-5"
-                onClick={() => showLoading()}
-              >
-                Chỉnh sửa chi tiết
-              </Button>
+              {idUser === profile._id && (
+                <Button
+                  className="w-full mt-2 font-medium bg-slate-300 text-center ml-1"
+                  onClick={() => showLoading()}
+                >
+                  Chỉnh sửa chi tiết
+                </Button>
+              )}
             </div>
           </div>
 
@@ -373,8 +387,6 @@ const Profile = () => {
           loading={loading}
           profile={profile}
           listProfileUser={listProfileUser}
-          open10={open10}
-          setOpen10={setOpen10}
         />
       </div>
     </div>
